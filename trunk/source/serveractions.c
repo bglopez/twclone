@@ -407,6 +407,8 @@ processcommand (char *buffer, struct msgcommand *data)
 				if (((ships[curplayer->ship - 1]->flags & S_PORTED) != S_PORTED) 
 									 && (data->pcommand != p_land))
 				{
+					  ships[curplayer->ship - 1]->flags = 
+								 ships[curplayer->ship - 1]->flags | S_PORTED;
 					  if (curplayer->sector == 0)
         			  {
             			sendtosector (ships[curplayer->ship - 1]->location,
@@ -418,14 +420,12 @@ processcommand (char *buffer, struct msgcommand *data)
         			  }
                  if (curplayer->sector == 0)
                  {
-                    curplayer =
-                        delete (curplayer->name, player,
+                     delete (curplayer->name, player,
                                 sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
                  }
                  else
                  {
-                    curplayer =
-                        delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
+                     delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
                  }
 
 				}
@@ -446,18 +446,15 @@ processcommand (char *buffer, struct msgcommand *data)
         			 		{
             				sendtosector (ships[curplayer->ship - 1]->location,
                           curplayer->number, 4);
-								curplayer =
                         delete (curplayer->name, player,
                            sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
 					 		}
         			 		else
         			 		{
             				sendtosector (curplayer->sector, curplayer->number, 4);
-        			 			curplayer =
                         delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
 							}
 						}
-
 					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
 					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_STARDOCK;
 					 	strcpy(buffer, "OK: Landed on stardock");
@@ -488,6 +485,8 @@ processcommand (char *buffer, struct msgcommand *data)
 
                 break;
             case p_quit:
+					 //Now for a default message.
+					 strcpy(buffer, "BAD: Not at a port!");
 					 if ((ships[curplayer->ship -1]->flags & S_PORTED) == S_PORTED)
 					 {
 						ships[curplayer->ship - 1]->flags = 
