@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "planet.h"
+#include "parse.h"
 
 /*
  *	init_planets(filename, secarray)
@@ -9,29 +10,41 @@
  *	of planets in the universe when done
  */
 
-int
-init_planets (char *filename, struct sector *secarray[])
+int init_planets (char *filename, struct sector **secarray)
 {
   FILE *planetfile;
-  int i, p_num, p_sec, p_type, p_owner;
-  char *p_name, dummy;
-  int count;
+  int i, p_num, p_sec, p_type;
+  char *p_name, dummy[3], *p_owner, buffer[BUFF_SIZE];
+  int count=0;
+  
   p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
+  p_owner = (char *)malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
   for (i = 0; i < MAX_TOTAL_PLANETS; i++)
     planets[i] = NULL;
 
   planetfile = fopen (filename, "r");
-  while ((count =
-	  fscanf (planetfile, "%d:%d:%[^:]:%d:%d:%c", &p_num, &p_sec,
-		  p_name, &p_owner, &p_type, &dummy)) && count > 5)
+  if (planetfile == NULL)
+  {
+		fprintf(stderr, "init_planets: No %s file!", filename);
+		return(0);
+  }
+  while(1)
     {
+		buffer[0] = '\0';
+		fgets(buffer, BUFF_SIZE, planetfile);
+		if (strlen(buffer)==0)
+				  break;
+		p_num = popint(buffer, ":");
+		p_sec = popint(buffer, ":");
+		popstring(buffer, p_name, ":", MAX_NAME_LENGTH);
+		popstring(buffer, dummy, ":", MAX_NAME_LENGTH);
+		popstring(buffer, p_owner, ":", MAX_NAME_LENGTH);
+		p_type = popint(buffer, ":");
 
-      planets[p_num - 1] =
-	(struct planet *) malloc (sizeof (struct planet *));
+      planets[p_num - 1] = (struct planet *) malloc (sizeof (struct planet *));
       planets[p_num - 1]->num = p_num;
-      planets[p_num - 1]->name =
-	(char *) malloc (strlen (p_name) * sizeof (char));
+      planets[p_num - 1]->name = (char *) malloc (strlen (p_name) * sizeof (char));
       planets[p_num - 1]->sector = p_sec;
       planets[p_num - 1]->owner = p_owner;
       strcpy (planets[p_num - 1]->name, p_name);
@@ -39,6 +52,7 @@ init_planets (char *filename, struct sector *secarray[])
       insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
     }
   free (p_name);
+  free(p_owner);
   return (0);
 }
 
@@ -67,9 +81,9 @@ insert_planet (struct planet *p, struct sector *s, int playernumber)
   if (p_list != NULL)
     {
       while (p_list->listptr != NULL)
-	{
-	  p_list = p_list->listptr;
-	}
+		{
+	  		p_list = p_list->listptr;
+		}
       p_list->listptr = newp_list;
     }
   else
