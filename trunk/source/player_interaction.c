@@ -162,8 +162,266 @@ handle_player (void *threadinfo)
 	  data.command = ct_fedcomm;
 	  commandgood = 1;
 	}
+		else if (strncmp(inbuffer, "LAND", 4) == 0 && loggedin)
+		{
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			data.to = popint(inbuffer, ":");
+			data.command = ct_land;
+			commandgood = 1;
+		}
 
-      else if (strncmp (inbuffer, "SHIPINFO", 8) == 0 && loggedin)
+		else if (strncmp(inbuffer, "SCAN", 4) == 0 && loggedin)
+		{
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			data.command = ct_scan;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "BEACON", 6) == 0 && loggedin)
+		{
+			data.command = ct_beacon;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "TOW", 3) == 0 && loggedin)
+		{
+			data.command = ct_tow;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTNAV", 3) == 0 && loggedin)
+		{
+			data.command = ct_listnav;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "TRANSPORTER", 11) == 0 && loggedin)
+		{
+			data.command = ct_transporter;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "GENESIS", 7) == 0 && loggedin)
+		{
+			data.command = ct_genesis;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "JETTISON", 8) == 0 && loggedin)
+		{
+			data.command = ct_jettison;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "INTERDICT", 9) == 0 && loggedin)
+		{
+			data.command = ct_interdict;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "ATTACK", 6) == 0 && loggedin)
+		{
+			data.command = ct_attack;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "ETHERPROBE", 10) == 0 && loggedin)
+		{
+			data.command = ct_etherprobe;
+			commandgood = 1;	
+		}
+		else if (strncmp(inbuffer, "FIGHTERS", 8) == 0 && loggedin)
+		{
+			data.command = ct_fighters;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTFIGHTERS", 12) == 0 && loggedin)
+		{
+			data.command = ct_listfighters;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "MINES", 5) == 0 && loggedin)
+		{
+			data.command = ct_mines;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTMINES", 9) == 0 && loggedin)
+		{
+			data.command = ct_listmines;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "PORTUPGRADE", 11) == 0 && loggedin)
+		{
+			data.command = ct_portconstruction;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SETNAVS", 7) == 0 && loggedin)
+		{
+			data.command = ct_setnavs;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "STATUS", 6) == 0 && loggedin)
+		{
+			data.command = ct_gamestatus;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "HAIL", 4) == 0 && loggedin)
+		{
+			data.command = ct_hail;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SUBSPACE", 8) == 0 && loggedin)
+		{
+			data.command = ct_subspace;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTWARPS", 9) == 0 && loggedin)
+		{
+			data.command = ct_listwarps;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "CIM", 3) == 0 && loggedin)
+		{
+			data.command = ct_cim;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "AVOID", 5) == 0 && loggedin)
+		{
+			data.command = ct_avoid;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTAVOIDS", 10) == 0 && loggedin)
+		{
+			data.command = ct_listavoids;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SELFDESTRUCT", 12) == 0 && loggedin)
+		{
+			data.command = ct_selfdestruct;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTSETTINGS", 12) == 0 && loggedin)
+		{
+			data.command = ct_listsettings;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SETTINGS", 8) == 0 && loggedin)
+		{
+			data.command = ct_updatesettings;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "ANNOUNCE", 8) == 0 && loggedin)
+		{
+			data.command = ct_dailyannouncement;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "PHOTON", 6) == 0 && loggedin)
+		{
+			data.command = ct_firephoton;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "READMAIL", 8) == 0 && loggedin)
+		{
+			data.command = ct_readmail;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SENDMAIL", 8) == 0 && loggedin)
+		{
+			data.command = ct_sendmail;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "TIME", 4) == 0 && loggedin)
+		{
+			data.command = ct_shiptime;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "DISRUPTOR", 9) == 0 && loggedin)
+		{
+			data.command = ct_usedisruptor;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "DAILYLOG", 8) == 0 && loggedin)
+		{
+			data.command = ct_dailylog;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "ALIENRANKS", 10) == 0 && loggedin)
+		{
+			data.command = ct_alienranks;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTPLAYERS", 11) == 0 && loggedin)
+		{
+			data.command = ct_listplayers;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTPLANETS", 11) == 0 && loggedin)
+		{
+			data.command = ct_listplanets;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTSHIPS", 9) == 0 && loggedin)
+		{
+			data.command = ct_listships;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "LISTCORPS", 9) == 0 && loggedin)
+		{
+			data.command = ct_listcorps;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "JOINCORP", 8) == 0 && loggedin)
+		{
+			data.command = ct_joincorp;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "MAKECORP", 8) == 0 && loggedin)
+		{
+			data.command = ct_makecorp;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "CREDTRANS", 9) == 0 && loggedin)
+		{
+			data.command = ct_credittransfer;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "FIGTRANS", 8) == 0 && loggedin)
+		{
+			data.command = ct_fightertransfer;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "MINETRANS", 9) == 0 && loggedin)
+		{
+			data.command = ct_minetransfer;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SHIELDTRANS", 11) == 0 && loggedin)
+		{
+			data.command = ct_shieldtransfer;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "CORPQUIT", 8) == 0 && loggedin)
+		{
+			data.command = ct_quitcorp;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "CORPPLANETS", 11) == 0 && loggedin)
+		{
+			data.command = ct_listcorpplanets;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "ASSETS", 6) == 0 && loggedin)
+		{
+			data.command = ct_showassets;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "CORPMEMO", 8) == 0 && loggedin)
+		{
+			data.command = ct_corpmemo;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "DROPMEMBER", 10) == 0 && loggedin)
+		{
+			data.command = ct_dropmember;
+			commandgood = 1;
+		}
+      else if (strncmp(inbuffer, "CORPPASS", 8) == 0 && loggedin)
+		{
+			data.command = ct_corppassword;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "SHIPINFO", 8) == 0 && loggedin)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
 	  data.to = popint (inbuffer, ":");
@@ -182,7 +440,7 @@ handle_player (void *threadinfo)
 	  data.command = ct_portinfo;
 	  commandgood = 1;
 	}
-      else if (strncmp (inbuffer, "PORT", 4) == 0 && loggedin)
+      else if (strncmp (inbuffer, "PORT ", 5) == 0 && loggedin)
 	{
 	  printf ("Thread %d: Player attempting to port\n",
 		  (int) pthread_self ());
