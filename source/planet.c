@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "planet.h"
 
 /*
@@ -12,20 +13,19 @@ int
 init_planets (char *filename, struct sector *secarray[])
 {
   FILE *planetfile;
-  int i, p_num, p_sec, p_type;
-  char *p_name, *p_owner, p_ownertype, dummy;
+  int i, p_num, p_sec, p_type, p_owner;
+  char *p_name, dummy;
   int count;
   p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
-  p_owner = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
   for (i = 0; i < MAX_TOTAL_PLANETS; i++)
     planets[i] = NULL;
 
   planetfile = fopen (filename, "r");
   while ((count =
-	  fscanf (planetfile, "%d:%d:%[^:]:%c:%[^:]:%d:%c", &p_num, &p_sec,
-		  p_name, &p_ownertype, p_owner, &p_type, &dummy))
-	 && count > 6)
+	  fscanf (planetfile, "%d:%d:%[^:]:%d:%d:%c", &p_num, &p_sec,
+		  p_name, &p_owner, &p_type, &dummy))
+	 && count > 5)
     {
 
       planets[p_num - 1] =
@@ -33,14 +33,13 @@ init_planets (char *filename, struct sector *secarray[])
       planets[p_num - 1]->num = p_num;
       planets[p_num - 1]->name =
 	(char *) malloc (strlen (p_name) * sizeof (char));
-      planets[p_num - 1]->owner =
-	(char *) malloc (strlen (p_owner) * sizeof (char));
-      planets[p_num - 1]->name = p_name;
+		planets[p_num - 1]->sector = p_sec;
       planets[p_num - 1]->owner = p_owner;
-      planets[p_num - 1]->ownertype = p_ownertype;
+      strcpy(planets[p_num - 1]->name, p_name);
       planets[p_num - 1]->type = p_type;
       insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
     }
+  free(p_name);
 	return(0);
 }
 

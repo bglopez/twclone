@@ -165,11 +165,12 @@ struct planet
 {
   int num;
   char *name;
+  int sector;   //What sector its in!
   enum planettype type;
   planetClass *pClass;
-  char *owner;
-  char ownertype;
-  char *corp; /* Don't think this is needed since owner should be corp # or player # */
+  int owner;
+  /*char ownertype; */
+  /*char *corp; /* Don't think this is needed since owner should be corp # or player # */
   struct citadel *ctd;
   int fuelColonist; /* Amount of people assigned (All go to fuel by default) */
   int organicsColonist; /* Amount of people assigned */
