@@ -209,7 +209,7 @@ int main (int argc, char *argv[])
         senderid = getdata (msgidin, &data, 0);
     }
     saveallports ();
-	 saveshipinfo();
+	 saveshiptypeinfo();
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
     //when we're done, clean up the msg queues

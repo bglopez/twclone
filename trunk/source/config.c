@@ -87,5 +87,18 @@ init_config (char *filename)
   configdata->startingholds = popint (buffer, ":");
   configdata->processinterval = popint (buffer, ":");
   configdata->autosave = popint (buffer, ":");
+  //This is for later use.
+  /*
+  configdata->MAX_PLAYERS = popint(buffer, ":");
+  configdata->MAX_SHIPS = popint(buffer, ":");
+  configdata->MAX_PORTS = popint(buffer, ":");
+  configdata->MAX_PLANETS = popint(buffer, ":");
+  configdata->MAX_TOTAL_PLANETS = popint(buffer, ":");
+  configdata->MAX_SAFE_PLANETS = popint(buffer, ":");
+  configdata->MAX_CITADEL_LEVEL = popint(buffer, ":");
+  configdata->NUMBER_OF_PLANET_TYPES = popint(buffer, ":");
+  configdata->MAX_SHIP_NAME_LENGTH = popint(buffer, ":");
+  configdata->SHIP_TYPE_COUNT = popint(buffer, ":");*/
+
   return (1);
 }

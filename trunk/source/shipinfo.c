@@ -5,7 +5,7 @@
 
 struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 
-void saveshipinfo()
+void saveshiptypeinfo()
 {
 	FILE *shipfile;
 	char *stufftosave=(char *)malloc(sizeof(char)*BUFF_SIZE);
