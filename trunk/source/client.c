@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.35 $
- * Last Modified: $Date: 2003-11-13 05:08:54 $
+ * $Revision: 1.36 $
+ * Last Modified: $Date: 2003-11-13 17:39:31 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.35 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-13 05:08:54 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.36 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-13 17:39:31 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -219,8 +219,7 @@ main (int argc, char *argv[])
                         	break;
 						  		case 's':
 						  		case 'S':
-									printf("Landing at Stardock current disabled! But you can do upgrades!");
-									do_ship_upgrade(sockid, curplayer);
+									do_stardock_menu(sockid, curplayer);
 									break;
 								default:
 									break;
@@ -1072,6 +1071,181 @@ void newfree(void *item)
 	if (item != NULL)
 		free(item);
 }
+
+void print_stardock_help()
+{
+	printf("\n%s+=====================================+ ", KGRN);
+	printf("\n%s|      Obvious Places to go are%s:%s      |",KGRN, KLTYLW, KGRN);
+	printf("\n%s|                                     |",KGRN);
+	printf("\n%s| %s<%sC%s> %sThe CinePlex Videon Theatres%s    |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sG%s> %sThe 2nd National Galactic Bank%s  |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sH%s> %sThe Stellar Hardware Emporium%s   |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sL%s> %sThe Libram Universitatus%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sP%s> %sThe Federal Space Police HQ%s     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sS%s> %sThe Federation Shipyards%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sT%s> %sThe Lost Trader's Tavern%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s|                                     |",KGRN);
+	printf("\n%s| %s<%s!%s> %sStardock Help%s                   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sReturn to your ship and leave%s   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+=====================================+",KGRN);
+	return;
+}
+
+void print_shipyard_help()
+{
+	printf("\n%s+===================================+",KGRN);
+	printf("\n%s|     The Federation Shipyards%s:%s     |",KGRN, KLTYLW,KGRN);
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%sB%s> %sBuy a new ship%s                |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sS%s> %sSell extra Ships%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sE%s> %sExamine Ship specs%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sP%s> %sBuy Class 0 Items%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sR%s> %sChange Ship Registration%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%s!%s> %sShipyards Help%s                |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sLeave the Shipyards%s           |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+===================================+",KGRN);
+	return;
+}
+
+void print_bank_help()
+{
+	printf("\n%s+=========================+",KGRN);
+	printf("\n%s|   The Galactic Bank%s:%s    |",KGRN,KLTYLW,KGRN);
+	printf("\n%s|                         |",KGRN);
+	printf("\n%s| %s<%sD%s> %sMake a Deposit%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sE%s> %sExamine Balance%s     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sT%s> %sTransfer Funds%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sW%s> %sWithdraw Funds%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s|                         |",KGRN);
+	printf("\n%s| %s<%sQ%s> %sLeave the Bank%s      |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+=========================+",KGRN);
+	return;
+}
+
+void do_stardock_menu(int sockid, struct player *curplayer)
+{
+	char *buff = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char command;
+	int done=0;
+
+	strcpy(buff, "PORT LAND:");
+	sendinfo(sockid, buff);
+	recvinfo(sockid, buff);
+	while (!done)
+	{
+		printf("\n%s<%sStarDock%s> Where to? (%s?=Help%s) "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case 's':
+			case 'S':
+				do_shipyard_menu(sockid, curplayer);
+				break;
+			case 'g':
+			case 'G':
+				do_bank_menu(sockid, curplayer);
+				break;
+			case '?':
+				print_stardock_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+	strcpy(buff, "PORT QUIT:");
+	sendinfo(sockid, buff);
+	recvinfo(sockid, buff);
+	free(buff);
+	return;
+}
+
+void do_shipyard_menu(int sockid, struct player *curplayer)
+{
+	char command;
+	int done=0;
+
+	while (!done)
+	{
+		printf("\n%s<%sShipyards%s> Your option %s(?)%s ? "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case 's':
+			case 'S':
+				//Sell a ship!
+				break;
+			case 'b':
+			case 'B':
+				//Buy a new ship!
+				break;
+			case 'p':
+			case 'P':
+				do_ship_upgrade(sockid, curplayer);
+				break;
+			case '?':
+				print_shipyard_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+}
+
+void do_bank_menu(int sockid, struct player *curplayer)
+{
+	enum prompts ptype;
+	char command;
+	int done=0;
+
+	while (!done)
+	{
+		printf("\n%s<%sGalactic Bank%s> So, how can I help you Citizen? %s(?)%s ? "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case 'd':
+			case 'D':
+				//Do deposit!
+				break;
+			case 'e':
+			case 'E':
+				//Do balance!
+				break;
+			case 'w':
+			case 'W':
+				//Do withdraw!
+				break;
+			case '?':
+				print_bank_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+}
+
 void do_ship_upgrade(int sockid, struct player *curplayer)
 {
 	char *buffer = (char *)malloc(BUFF_SIZE);
@@ -1672,7 +1846,7 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
             printf ("\n%sEngage the Autopilot? %s(Y/N/Single step/Express) %s",
                     KMAG, KYLW, KMAG);
             break;
-        case quit:
+		  case quit:
             printf ("\n%sConfirmed? (Y/N)? ", KMAG);
             break;
         case pt_port:
