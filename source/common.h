@@ -61,8 +61,6 @@ int sendinfo(int sockid, char *buffer);
 int recvinfo(int sockid, char *buffer);
 int acceptnewconnection(int sockid);
 int saveall();
-int saveplayer(char *filename);
-int saveship(char *filename);
 int saveplanet(char *filename);
 int savesector(char *filename);
 

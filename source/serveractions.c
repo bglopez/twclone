@@ -218,16 +218,20 @@ void processcommand(char *buffer, struct msgcommand *data)
     case ct_logout:
       fprintf(stderr, "processcommand: Got a logout command\n");
       if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
-	{	
-	  //fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
-	  strcpy(buffer, "BAD");
+		{	
+	  	//fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
+	  	strcpy(buffer, "BAD");
 	  return;
-	}
+		}
 		if (intransit(data))
 		{
 			strcpy(buffer, "BAD: Can't quit while moving!");
 			return;
 		}
+		fprintf(stderr, "\nprocesscommand Player number is '%d', '%d'", curplayer->number,
+				curplayer->ship);
+		saveplayer(curplayer->number, "./players.data");
+		saveship(curplayer->ship, "./ships.data");
       strcpy(buffer, "OK");
       curplayer->loggedin = 0;
       break;
@@ -543,6 +547,96 @@ void findautoroute(int from, int to, char *buffer)
 /*
   end of the autopilot stuff (but probably not the end of junk ;)
 */
+
+void saveplayer(int pnumb, char *filename)
+{
+	char *intptr=(char *)malloc(10);
+	char *buffer=(char *)malloc(BUFF_SIZE);
+	char *stufftosave=(char *)malloc(BUFF_SIZE);
+	FILE *playerfile;
+	fpos_t *playerplace;
+	
+	strcpy(buffer, "\0");
+	strcpy(intptr, "\0");
+	strcpy(stufftosave, "\0");
+	
+	sprintf(intptr,"%d", pnumb-1);
+	sprintf(stufftosave, "%d:", pnumb);
+  	addstring(stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
+	addstring(stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
+	addint(stufftosave, players[pnumb-1]->sector, ':', BUFF_SIZE);
+  	addint(stufftosave, players[pnumb - 1]->ship, ':', BUFF_SIZE);
+  	addint(stufftosave, players[pnumb - 1]->experience, ':', BUFF_SIZE);
+  	addint(stufftosave, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
+  	addint(stufftosave, players[pnumb - 1]->turns, ':', BUFF_SIZE);
+  	addint(stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	strcat(stufftosave, "\n\0");
+	fprintf(stderr, "\nsaveplayer: Stuff is '%s'", stufftosave);
+ 
+	playerfile = fopen(filename, "r+");
+	while(1)
+	{
+		strcpy(buffer, "\0");
+		fgets(buffer, BUFF_SIZE, playerfile);
+		if (strlen(buffer) == 0)
+				  break;
+		if (strncmp(buffer, intptr, strlen(intptr))==0)
+				  fgetpos(playerfile, playerplace);
+		fprintf(stderr, "\nsaveplayer: Got to '%s'", buffer);
+	}
+	fsetpos(playerfile, playerplace);
+	fprintf(playerfile, "%s", stufftosave);
+	fclose(playerfile);
+	free(intptr);
+	free(buffer);
+	free(stufftosave);
+}
+
+void saveship(int snumb, char *filename)
+{
+	char *intptr=(char *)malloc(10);
+	char *buffer=(char *)malloc(BUFF_SIZE);
+	char *stufftosave=(char *)malloc(BUFF_SIZE);
+	FILE *playerfile;
+	fpos_t *playerplace;
+
+	strcpy(buffer, "\0");
+	strcpy(intptr, "\0");
+	strcpy(stufftosave, "\0");
+	
+	sprintf(intptr,"%d", snumb - 1);
+	sprintf(stufftosave, "%d:", snumb);
+  	addstring(stufftosave, ships[snumb - 1]->name, ':', BUFF_SIZE);
+	addint(stufftosave, ships[snumb - 1]->type, ':', BUFF_SIZE);
+	addint(stufftosave, ships[snumb - 1]->location, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->fighters, ':', BUFF_SIZE);
+ 	addint(stufftosave, ships[snumb - 1]->shields, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->holds, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->colonists, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->equipment, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->organics, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
+  	addint(stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
+	strcat(stufftosave, "\n\0");
+
+	playerfile = fopen(filename, "r+");
+	while(1)
+	{
+		strcpy(buffer, "\0");
+		fgets(buffer, BUFF_SIZE, playerfile);
+		if (strlen(buffer) == 0)
+				  break;
+		if (strncmp(buffer, intptr, strlen(intptr))==0)
+				  fgetpos(playerfile, playerplace);
+	}
+	fsetpos(playerfile, playerplace);
+	fprintf(playerfile, "%s",stufftosave);
+	fclose(playerfile);
+	free(intptr);
+	free(buffer);
+	free(stufftosave);
+
+}
 
 void buildplayerinfo(int playernum, char *buffer)
 {
