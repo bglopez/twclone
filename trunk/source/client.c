@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.10 $
- * Last Modified: $Date: 2002-06-10 09:39:54 $
+ * $Revision: 1.11 $
+ * Last Modified: $Date: 2002-06-12 04:17:55 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.10 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-10 09:39:54 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.11 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-12 04:17:55 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -712,9 +712,14 @@ getsectorinfo (int sockid, struct sector *cursector)
     }
   else
     {
-      strcpy (nebulae, KLTGRN);
+		strcpy (nebulae, KLTGRN);
       popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
       strncat (nebulae, tempbuf, length);
+		if (strncmp(tempbuf, "Uncharted Space", 15) == 0)
+		{
+			strcpy(nebulae, KBLU);
+			strcat(nebulae, "uncharted space");
+		}
     }
   if ((length = strcspn (buff + position, ":")) == 0)	//If no port
     {
