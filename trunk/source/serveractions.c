@@ -1081,9 +1081,9 @@ void saveplayer (int pnumb, char *filename)
 void
 saveship (int snumb, char *filename)
 {
-    char *intptr = (char *) malloc (10);
-    char *buffer = (char *) malloc (BUFF_SIZE);
-    char *stufftosave = (char *) malloc (BUFF_SIZE);
+    char *intptr = (char *) malloc (10*sizeof(char));
+    char *buffer = (char *) malloc (BUFF_SIZE*sizeof(char));
+    char *stufftosave = (char *) malloc (BUFF_SIZE*sizeof(char));
     FILE *playerfile;
     int loop = 0, len;
 
