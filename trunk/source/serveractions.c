@@ -1060,9 +1060,11 @@ buildportinfo (int portnumb, char *buffer)
 
 void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curship)
 {
-	const int price_holds=500;
-	const int price_shields=750;
-	const int price_fighters=100;
+	const int base_hold_price=249;
+	const int price_per_shield=131;
+	const int price_per_fighter=218;
+	const int hold_increment = 20;  //This is the price for how much each new hold
+												//gets incremented
 	//4 for holds, 5 for shields, 6 for fighters, 7 for all three
 	int product=0;
 	int amount=0;
@@ -1071,10 +1073,15 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 	int fighters=0;
 	int buying=0;
 	int total_price=0;
+	int total_holds = 0;  //This is the total number of holds they are going
+	//to have when finished purchasing. 
+	int price_holds = 0;  //Since the price for holds is complicated 
+	//This is the price of the holds the player is buying
 
 	product = popint(buffer, ":");
 	amount = popint(buffer, ":");
 	buying = popint(buffer, ":");
+	//If buying is 1 then they're buying. Otherwise they ain't buying
 
 	switch (product)
 	{
@@ -1127,16 +1134,29 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 					fighters = shiptypes[curship->type - 1].maxfighters - curship->fighters;
 				}
 			}
+			else if(buying==2)
+			{
+				holds = min(curplayer->credits/(base_hold_price + hold_increment*curship->holds), shiptypes[curship->type - 1].maxholds - curship->holds);
+				fighters = min(curplayer->credits/price_per_fighter, shiptypes[curship->type - 1].maxfighters - curship->fighters);
+				shields = min(curplayer->credits/price_per_shield, shiptypes[curship->type - 1].maxshields - curship->shields);
+			}
 			break;
 		default:
 			strcpy(buffer, "BAD: Invalid Product Selection");
 			buying = -1;
 			break;
 	}
+	//The price of X number of total holds is from the following forumla
+	//price(X) = base_hold_price*X + hold_increment*(((X-1)*X)/2)
+	//And after math the price that the player is going to play for (holds)
+	//more holds is as follows
+	price_holds = base_hold_price*holds + hold_increment*holds*curship->holds;
+
 	if (buying == 1)
 	{
-		total_price = price_holds*holds + price_shields*shields
-				  + price_fighters*fighters;
+		total_price = price_per_shield*shields + price_per_fighter*fighters
+				  + price_holds;
+				  
 		if (total_price > curplayer->credits)
 		{
 			strcpy(buffer, "BAD: Not enough credits");
@@ -1153,11 +1173,11 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 	if (buying != -1)
 	{
 	   strcpy(buffer, ":");
-		addint(buffer, price_holds*holds, ',', BUFF_SIZE);
+		addint(buffer, price_holds, ',', BUFF_SIZE);
 		addint(buffer, holds, ':', BUFF_SIZE);
-		addint(buffer, price_shields*shields, ',', BUFF_SIZE);
+		addint(buffer, price_per_shield*shields, ',', BUFF_SIZE);
 		addint(buffer, shields, ':', BUFF_SIZE);
-		addint(buffer, price_fighters*fighters, ',', BUFF_SIZE);
+		addint(buffer, price_per_fighter*fighters, ',', BUFF_SIZE);
 		addint(buffer, fighters, ':', BUFF_SIZE);
 	}
 }
@@ -1453,7 +1473,9 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
         }
     }
 
-    p_type = (int) (NUMBER_OF_PLANET_TYPES * rand () / RAND_MAX + 1.0);
+	 //This should really be a probability distribution with M being at the top
+	 // followed by L, O, K, H, U, C. But for now this will work
+	 p_type = randomnum(1,NUMBER_OF_PLANET_TYPES-1);
     strcpy (p_name, planetname);
     planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet *));
     planets[p_num-1]->num = p_num;

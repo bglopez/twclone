@@ -68,8 +68,36 @@ getmsg (int msgid, char *buffer, long mtype)
   return senderid;
 }
 
-void
-sendmsg (int msgid, char *buffer, long mtype)
+void clean_msgqueues(int msgidin, int msgidout, char *filename)
+{
+	FILE *msglock=NULL;
+	char buffer[BUFF_SIZE];
+	int oldmsg;
+	
+	msglock = fopen(filename, "r");
+	if (msglock != NULL)
+	{
+		do
+		{
+			buffer[0] = '\0';
+			fgets(buffer, BUFF_SIZE, msglock);
+			oldmsg = popint(buffer, ":");
+			if (oldmsg!=0)
+			{
+				sprintf(buffer, "%d", oldmsg);
+				printf("Please run 'ipcrm msg %d'\n", oldmsg);
+			}
+		}while(oldmsg!=0);
+		fclose(msglock);
+	}
+	msglock = fopen(filename, "w");
+	fprintf(msglock,"%d:\n", msgidin);
+	fprintf(msglock,"%d:\n", msgidout);
+	fclose(msglock);
+	return;
+}
+
+void sendmsg (int msgid, char *buffer, long mtype)
 {
   void *msg = malloc (sizeof (struct msgbuffer));
 
