@@ -60,7 +60,9 @@ int init_clientnetwork (char *hostname, int port);
 int sendinfo (int sockid, char *buffer);
 int recvinfo (int sockid, char *buffer);
 int acceptnewconnection (int sockid);
-
+int randomnum(int min, int max);
+int min(int a, int b);
+int max(int a, int b);
 enum porttype
 {
   p_trade,
