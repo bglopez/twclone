@@ -431,7 +431,7 @@ main (int argc, char **argv)
 	      { 
 		tempint = randomnum (21, (numSectors-1));
 	      }
-	    fprintf(planetfile, "%d:%d:%s:c:No Owner:1:\n", c, tempint,randomname (randomPlanetInfo));
+	    fprintf(planetfile, "%d:%d:%s:c:No Owner:0:\n", c, tempint,randomname (randomPlanetInfo));
 	    c++;
 	}
     }
