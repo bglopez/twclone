@@ -23,7 +23,7 @@ USER <user name>:<password>:
 this is the user that wants to play, and his password.  If this is 
 successful, the current sector's description will be returned.
 
-NEW <user name>:<password>:
+NEW <user name>:<password>:<ship name>:
 This is to make a new user.
 
 QUIT
@@ -51,7 +51,7 @@ server responses:
 -----------------
 
 DESCRIPTION response:
-:<current sector number>:<, adjacent sectors>:<beacon text>:<nebulae>:<port name>:<port type>:<players in sector delimited by ,>:<fighters in sector>:<mode of such fighters>:<, planets in sector>:<armid mines in sector>:<owner of armid mines>:<limpid mines in sector>:<, empty ships in sector>:<, aliens in sector>:<, feds in sector>:
+:<current sector number>:<, adjacent sectors>:<beacon text>:<nebulae>:<port name>:<port type>:<players in sector delimited by ,>:<fighters in sector>:<mode of such fighters>:<number of planet>,<name>,<type>:<armid mines in sector>:<owner of armid mines>:<limpid mines in sector>:<, empty ships in sector>:<, aliens in sector>:<, feds in sector>:
 
 <#> response
 if the move was made, a description of the new sector is returned
