@@ -232,8 +232,7 @@ init_playerinfo (char *filename)
 
       if (players[playernum - 1] != NULL)
 	{
-	  fprintf (stderr,
-		   "init_playinfo: duplicate player numbers, exiting...\n");
+	  fprintf (stderr, "init_playinfo: duplicate player numbers, exiting...\n");
 	  exit (-1);
 	}
       players[playernum - 1] = curplayer;
@@ -241,11 +240,9 @@ init_playerinfo (char *filename)
       if (insertitem (curplayer, player,
 		      sectors[(curplayer->sector == 0) ?
 			      ships[curplayer->ship - 1]->location - 1 :
-			      (curplayer->sector - 1)]->playerlist,
-		      1) == NULL)
+			      (curplayer->sector - 1)]->playerlist, 1) == NULL)
 	{
-	  fprintf (stderr,
-		   "init_playerinfo: unable to add player '%s'to playerlist in sector %d!\n",
+	  fprintf (stderr, "init_playerinfo: unable to add player '%s'to playerlist in sector %d!\n",
 		   name,
 		   (curplayer->sector ==
 		    0) ? ships[curplayer->ship -

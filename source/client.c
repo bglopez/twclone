@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.13 $
- * Last Modified: $Date: 2002-06-14 15:58:24 $
+ * $Revision: 1.14 $
+ * Last Modified: $Date: 2002-06-20 06:37:17 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.13 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-14 15:58:24 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.14 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-20 06:37:17 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -154,10 +154,12 @@ main (int argc, char *argv[])
       sector = getsectorinfo (sockid, cursector);
       printsector (cursector);
       for (; loop;)
-	{
-	  ptype = command;	//Main command type of prompt
-	  goofey = prompttype (ptype, sector, sockid);
-	  if (isdigit (*(goofey + 0)) != 0)
+		{
+	  	ptype = command;	//Main command type of prompt
+		if (goofey != NULL)
+			free(goofey);
+	  	goofey = prompttype (ptype, sector, sockid);
+	  	if (isdigit (*(goofey + 0)) != 0)
 	    {
 	      sector = movesector (goofey, sockid, sector, cursector);
 	    }
@@ -713,17 +715,18 @@ getsectorinfo (int sockid, struct sector *cursector)
   cursector->number = popint (buffer + position, ":");
   popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
   length = strlen (tempbuf);
+  cursector->planets = NULL;
   for (counter = 0; counter <= MAX_WARPS_PER_SECTOR; counter++)
     {
       if ((len = strcspn (tempbuf + pos, ",")) == 0)
-	{			//I banish thee foul errors
-	  return cursector->number;	//from this here function!
-	}			//Eeek! It backfired!
+		{										//I banish thee foul errors
+	  		return cursector->number;	//from this here function!
+		}										//Eeek! It backfired!
       cursector->warps[counter] = popint (tempbuf + pos, ",");
       if (strlen (tempbuf) == 0)
-	counter = MAX_WARPS_PER_SECTOR + 1;
+			counter = MAX_WARPS_PER_SECTOR + 1;
     }
-  if ((length = strcspn (buff + position, ":")) == 0)
+  	if ((length = strcspn (buff + position, ":")) == 0)
     {				//Because popstring acts wierd
       strcpy (beacon, "\0");	//If there isn't anything there.
       position++;
@@ -854,10 +857,14 @@ printsector (struct sector *cursector)
 	      KMAG, KLTCYN, cursector->ports->type, KMAG,
 	      porttypes[cursector->ports->type], KMAG);
       if (cursector->ports->type == 9)
-	printf ("%s(Stardock)%s", KYLW, KNRM);
+			printf ("%s(Stardock)%s", KYLW, KNRM);
       free (cursector->ports->name);
       free (cursector->ports);
     }
+  if (cursector->planets != NULL)
+  {
+		printf("\n%sPlanets %s:%s (%sM%s) Terra", KMAG, KLTYLW, KGRN, KLTYLW, KGRN);
+  }
   if (cursector->players != NULL)
     {
       printf ("\n%sTraders %s: ", KYLW, KLTYLW);
@@ -1178,7 +1185,7 @@ movesector (char *holder, int sockid, int current, struct sector *cursector)
   for (i = 0; i <= (sizeof (MAXWARPS) + 2); i++)
     {
       if (isdigit (*(holder + i) == 0))
-	*(holder + i) = '\0';
+			*(holder + i) = '\0';
     }
   sector = strtoul (holder, NULL, 10);
   holder = NULL;
@@ -1425,7 +1432,7 @@ prompttype (enum prompts type, int sector, int sockid)
 	  fflush (stdout);
 	}
     }
-  input = tempstr;
+  input = malloc(10*sizeof(char));
   read (0, input, 10);		//Get 10 characters from stdin! 
   return input;
 }

@@ -293,15 +293,16 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
       if (curplayer->sector == 0)
-	sendtosector (ships[curplayer->ship - 1]->location, curplayer->number,
-		      -2);
+		{
+			sendtosector(ships[curplayer->ship - 1]->location, curplayer->number, -2);
+		}
       else
-	sendtosector (curplayer->sector, curplayer->number, -2);
-      fprintf (stderr, "\nprocesscommand Player number is '%d', '%d'",
-	       curplayer->number, curplayer->ship);
-      saveplayer (curplayer->number, "./players.data");
-      saveship (curplayer->ship, "./ships.data");
-      strcpy (buffer, "OK");
+		{
+			sendtosector(curplayer->sector, curplayer->number, -2);
+		}
+      saveplayer(curplayer->number, "./players.data");
+      saveship(curplayer->ship, "./ships.data");
+      strcpy(buffer, "OK");
       curplayer->loggedin = 0;
       break;
     case ct_portinfo:
@@ -473,16 +474,15 @@ builddescription (int sector, char *buffer, int playernum)
   if (sectors[sector - 1]->portptr != NULL)
     {
       if (sectors[sector - 1]->portptr->invisible == 0)
-	{
-	  addstring (buffer, sectors[sector - 1]->portptr->name, ':',
-		     BUFF_SIZE);
-	  addint (buffer, sectors[sector - 1]->portptr->type, ':', BUFF_SIZE);
-	}
+		{
+	  		addstring (buffer, sectors[sector - 1]->portptr->name, ':', BUFF_SIZE);
+			addint (buffer, sectors[sector - 1]->portptr->type, ':', BUFF_SIZE);
+		}
       else
-	{
-	  addstring (buffer, "", ':', BUFF_SIZE);
-	  addstring (buffer, "", ':', BUFF_SIZE);
-	}
+		{
+	  		addstring (buffer, "", ':', BUFF_SIZE);
+	  		addstring (buffer, "", ':', BUFF_SIZE);
+		}
     }
   else
     {
@@ -495,21 +495,24 @@ builddescription (int sector, char *buffer, int playernum)
   else
     {
       do
-	{
-	  if (((struct player *) element->item)->number != playernum)
+		{
+	  	if (((struct player *) element->item)->number != playernum)
 	    {
 	      if (p != 0)
-		addint (buffer, p, ',', BUFF_SIZE);
+				addint (buffer, p, ',', BUFF_SIZE);
 	      p = ((struct player *) element->item)->number;
 	    }
-	  element = element->listptr;
-	}
+		element = element->listptr;
+		}
       while (element != NULL);
       if (p != 0)
-	addint (buffer, p, ':', BUFF_SIZE);
+			addint (buffer, p, ':', BUFF_SIZE);
       else
-	addstring (buffer, "", ':', BUFF_SIZE);
+			addstring (buffer, "", ':', BUFF_SIZE);
     }
+  addstring(buffer, "", ':', BUFF_SIZE);  /* # of fighters goes here */
+  addstring(buffer, "", ':', BUFF_SIZE);  /* Mode of fighters goes here */
+  /* Now comes planets! */
 
   return;
 }
@@ -665,21 +668,19 @@ findautoroute (int from, int to, char *buffer)
   end of the autopilot stuff (but probably not the end of junk ;)
 */
 
-void
-saveplayer (int pnumb, char *filename)
+void saveplayer (int pnumb, char *filename)
 {
   char *intptr = (char *) malloc (10);
   char *buffer = (char *) malloc (BUFF_SIZE);
   char *stufftosave = (char *) malloc (BUFF_SIZE);
   FILE *playerfile;
-  fpos_t *playerplace;
   int loop = 0, len = 0;
 
   strcpy (buffer, "\0");
   strcpy (intptr, "\0");
   strcpy (stufftosave, "\0");
 
-  sprintf (intptr, "%d", pnumb - 1);
+  sprintf (intptr, "%d:\0", pnumb - 1);
   sprintf (stufftosave, "%d:", pnumb);
   addstring (stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
   addstring (stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
@@ -701,14 +702,13 @@ saveplayer (int pnumb, char *filename)
     {
       fprintf (stderr, "\nsaveplayer: No playerfile! Saving to new one!");
       if ((pnumb - 1) != 0)
-	{
-	  fprintf (stderr,
-		   "\nsaveplayer: Player is not player 1 for new save file!");
-	  free (intptr);
-	  free (buffer);
-	  free (stufftosave);
-	  return;
-	}
+		{
+	  		fprintf (stderr, "\nsaveplayer: Player is not player 1 for new save file!");
+	  		free (intptr);
+	  		free (buffer);
+	  		free (stufftosave);
+	 	 	return;
+		}
       playerfile = fopen (filename, "w");
       fprintf (playerfile, "%s", stufftosave);
       fclose (playerfile);
@@ -717,21 +717,28 @@ saveplayer (int pnumb, char *filename)
       free (stufftosave);
       return;
     }
-  while (1)
+  if (pnumb == 1)
+  {
+		fprintf(playerfile, "%s", stufftosave);
+		fclose(playerfile);
+		free(intptr);
+		free(buffer);
+		free(stufftosave);
+		return;
+  }
+  while (strncmp(buffer, intptr, strlen(intptr)) != 0)
     {
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-	break;
-      if (strncmp (buffer, intptr, strlen (intptr)) == 0)
-	fgetpos (playerfile, playerplace);
+			return;
     }
-  fsetpos (playerfile, playerplace);
-  fprintf (playerfile, "%s", stufftosave);
-  fclose (playerfile);
-  free (intptr);
-  free (buffer);
-  free (stufftosave);
+  fprintf(playerfile, "%s", stufftosave);
+  fflush(playerfile);
+  fclose(playerfile);
+  free(intptr);
+  free(buffer);
+  free(stufftosave);
 }
 
 void
@@ -741,14 +748,13 @@ saveship (int snumb, char *filename)
   char *buffer = (char *) malloc (BUFF_SIZE);
   char *stufftosave = (char *) malloc (BUFF_SIZE);
   FILE *playerfile;
-  fpos_t *playerplace;
   int loop = 0, len;
 
   strcpy (buffer, "\0");
   strcpy (intptr, "\0");
   strcpy (stufftosave, "\0");
 
-  sprintf (intptr, "%d", snumb - 1);
+  sprintf (intptr, "%d:\0", snumb - 1);
   sprintf (stufftosave, "%d:", snumb);
   addstring (stufftosave, ships[snumb - 1]->name, ':', BUFF_SIZE);
   addint (stufftosave, ships[snumb - 1]->type, ':', BUFF_SIZE);
@@ -763,19 +769,19 @@ saveship (int snumb, char *filename)
   addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
   len = strlen (stufftosave);
   for (loop = 1; loop <= 99 - len; loop++)	//This puts a buffer of space in the save
-    strcat (stufftosave, " ");	//file so things don't get overwritten
-  strcat (stufftosave, "\n");	//when saving.
+    strcat(stufftosave, " ");	//file so things don't get overwritten
+  strcat(stufftosave, "\n");	//when saving.
 
   playerfile = fopen (filename, "r+");
   if (playerfile == NULL)
     {
       fprintf (stderr, "\nsaveship: No ship file! Saving to new one!");
       if ((snumb - 1) != 0)
-	{
-	  fprintf (stderr, "\nsaveship: Ship is not #1 for new save file!");
-	  exit (-1);
-	}
-      playerfile = fopen (filename, "w");
+		{
+	  		fprintf (stderr, "\nsaveship: Ship is not #1 for new save file!");
+	  		exit (-1);
+		}
+		playerfile = fopen (filename, "w");
       fprintf (playerfile, "%s", stufftosave);
       fclose (playerfile);
       free (intptr);
@@ -783,22 +789,27 @@ saveship (int snumb, char *filename)
       free (stufftosave);
       return;
     }
-
-  while (1)
+  if (snumb == 1)
+  {
+		fprintf(playerfile, "%s", stufftosave);
+		fclose(playerfile);
+		free(intptr);
+		free(buffer);
+		free(stufftosave);
+		return;
+  }
+  while (strncmp(buffer, intptr, strlen(intptr)) != 0)
     {
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-	break;
-      if (strncmp (buffer, intptr, strlen (intptr)) == 0)
-	fgetpos (playerfile, playerplace);
+			return;
     }
-  fsetpos (playerfile, playerplace);
-  fprintf (playerfile, "%s", stufftosave);
-  fclose (playerfile);
-  free (intptr);
-  free (buffer);
-  free (stufftosave);
+  fprintf(playerfile, "%s", stufftosave);
+  fclose(playerfile);
+  free(intptr);
+  free(buffer);
+  free(stufftosave);
 
 }
 

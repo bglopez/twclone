@@ -121,7 +121,9 @@ struct port
 
 struct planet
 {
-  char *name;
+	int number;
+	char *name;
+	struct planet *next;
 };
 
 int getintstuff();
