@@ -139,7 +139,8 @@ main (int argc, char **argv)
   char *randomPlanetInfo;
   int ferringhiSector;
 
-  char *usageinfo = "Usage: bigbang [options]\n    Options:-t < integer >\n    indicate the max length of tunnels and dead ends.(default /minimum 6)\n    - s < integer >\n    indicate the max number of sectors.(default /minimum 500)\n    - p < integer >\n    indicate the max number of ports which MUST be at least 10 LESS than the\n    number of sectors.(default /minimum 190)\n    - o < integer >\n    indicate the percentage chance that a final jump will be a one -\n    way.(default /minimum 3)\n    - d < integer >\n    indicate the percentage chance that a tunnel will be a dead end.\n    (default /minimum 30)\n    - g < integer > generate a number of random planets.(default 0) \n ";
+  char *usageinfo =
+    "Usage: bigbang [options]\n    Options:-t < integer >\n    indicate the max length of tunnels and dead ends.(default /minimum 6)\n    - s < integer >\n    indicate the max number of sectors.(default /minimum 500)\n    - p < integer >\n    indicate the max number of ports which MUST be at least 10 LESS than the\n    number of sectors.(default /minimum 190)\n    - o < integer >\n    indicate the percentage chance that a final jump will be a one -\n    way.(default /minimum 3)\n    - d < integer >\n    indicate the percentage chance that a tunnel will be a dead end.\n    (default /minimum 30)\n    - g < integer > generate a number of random planets.(default 0) \n ";
   /* This has to be taken out because of the knockon affect it was having with the rest of the program.
      -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
    */
@@ -647,8 +648,7 @@ sectorsort (struct sector *base[configdata->maxwarps], int elements)
     }
 }
 
-void
-makeports ()
+void makeports()
 {
   struct port *curport;
   int type = 0;
@@ -664,14 +664,41 @@ makeports ()
       curport = (struct port *) malloc (sizeof (struct port));
       curport->number = loop + 1;
       tmpname = randomname (tmpname);
-      curport->name = (char *) malloc (sizeof (struct port));
+      curport->name = (char *) malloc (sizeof(char)*80);
       strcpy (name, "\0");
-      sprintf (name, "%s", tmpname);
-      strcpy (curport->name, name);
-      curport->maxproduct[0] = randomnum (2800, 3000);
-      curport->maxproduct[1] = randomnum (2800, 3000);
-      curport->maxproduct[2] = randomnum (2800, 3000);
-      type = randomnum (1, 8);
+		
+		if (loop==0)
+		{
+			strcpy(curport->name, "Sol");
+			curport->type = 0;
+		}
+		else if (loop==1)
+		{
+			strcpy(curport->name, "Alpha Centauri");
+			curport->type = 0;
+		}
+		else if (loop==2)
+		{
+			strcpy(curport->name, "Rylos");
+			curport->type = 0;
+		}
+		else if (loop==3)
+		{
+			strcpy(curport->name, "Stargate Alpha 1");
+			curport->type = 9;
+      	curport->maxproduct[0] = randomnum (2800, 3000);
+      	curport->maxproduct[1] = randomnum (2800, 3000);
+      	curport->maxproduct[2] = randomnum (2800, 3000);
+		}
+		else
+		{
+      	sprintf (name, "%s", tmpname);
+      	strcpy (curport->name, name);
+      	curport->maxproduct[0] = randomnum (2800, 3000);
+      	curport->maxproduct[1] = randomnum (2800, 3000);
+      	curport->maxproduct[2] = randomnum (2800, 3000);
+      	type = randomnum (1, 8);
+		}
       curport->type = type;
       curport->product[0] = 0;
       curport->product[1] = 0;
@@ -681,41 +708,49 @@ makeports ()
 
 
       switch (type)
-	{
-	case 1:
-	  curport->product[2] = curport->maxproduct[2];
-	  break;
-	case 2:
-	  curport->product[1] = curport->maxproduct[1];
-	  break;
-	case 3:
-	  curport->product[1] = curport->maxproduct[1];
-	  curport->product[2] = curport->maxproduct[2];
-	  break;
-	case 4:
-	  curport->product[0] = curport->maxproduct[0];
-	  break;
-	case 5:
-	  curport->product[0] = curport->maxproduct[0];
-	  curport->product[2] = curport->maxproduct[2];
-	  break;
-	case 6:
-	  curport->product[0] = curport->maxproduct[0];
-	  curport->product[1] = curport->maxproduct[1];
-	  break;
-	case 7:
-	  curport->product[0] = curport->maxproduct[0];
-	  curport->product[1] = curport->maxproduct[1];
-	  curport->product[2] = curport->maxproduct[2];
-	  break;
-	}
+		{
+			case 1:
+	  			curport->product[2] = curport->maxproduct[2];
+	  			break;
+			case 2:
+				curport->product[1] = curport->maxproduct[1];
+	  			break;
+			case 3:
+				curport->product[1] = curport->maxproduct[1];
+	  			curport->product[2] = curport->maxproduct[2];
+	  			break;
+			case 4:
+	  			curport->product[0] = curport->maxproduct[0];
+	  			break;
+			case 5:
+	  			curport->product[0] = curport->maxproduct[0];
+	  			curport->product[2] = curport->maxproduct[2];
+	  			break;
+			case 6:
+	  			curport->product[0] = curport->maxproduct[0];
+	  			curport->product[1] = curport->maxproduct[1];
+				break;
+			case 7:
+				curport->product[0] = curport->maxproduct[0];
+				curport->product[1] = curport->maxproduct[1];
+				curport->product[2] = curport->maxproduct[2];
+				break;
+			default:
+	  			break;
+			}
       portlist[loop] = curport;
       curport = NULL;
 
       /*  Now for assigning the port to a sector */
-      sector = randomnum (0, numSectors - 1);
-      while (sectorlist[sector]->portptr != NULL)
-	sector = randomnum (0, NUMSECTORS - 1);
-      portlist[loop]->location = sector + 1;
+		if (loop!=0)
+		{
+      	sector = randomnum (0, numSectors - 1);
+      	while (sectorlist[sector]->portptr != NULL)
+				sector = randomnum (0, NUMSECTORS - 1);
+      	portlist[loop]->location = sector + 1;
+		}
+		else
+			portlist[loop]->location = 1;
+		sectorlist[sector]->portptr = portlist[loop];
     }
 }
