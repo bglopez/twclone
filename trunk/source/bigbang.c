@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "universe.h"
 
 int compsec(const void *cmp1, const void *cmp2);
+int randjump(int maxjumplen);
 
 int main(void) 
 {	//These are the set-in-stone FedSpace links
@@ -37,7 +38,8 @@ int main(void)
 	const int sector8[2]={2,7};
 	const int sector9[2]={2,10};
 	const int sector10[2]={2,9};
-	const int MAXTUNLEN = 5; //This is the max length of tunnels and dead ends.
+
+	const int MAXTUNLEN = 4; //This is the max length of tunnels and dead ends.
 	
 	int numsectors = 500, x, y, z, randint, tempsec, secnumpostion = 0;
 	int arraysize, jumpsize, finalsec, randsec, jumpfrom, tempjump, jumpsizemax;	int usedsecptr = 0, randsecptr = numsectors - 11, secptrnum[numsectors];
@@ -134,7 +136,7 @@ int main(void)
 	for(x=0;x<sixjumpsize;x++)
 	{	for(y=secptrnum[randsectornum[x]];y<MAX_WARPS_PER_SECTOR;y++)
 		{	randint = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (5)));
-			jumpsize = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (MAXTUNLEN)));
+			jumpsize = randjump(MAXTUNLEN);
 			jumpfrom=randsectornum[x];
 			tempjump=jumpfrom;
 			for(z=0;z<jumpsize;z++)
@@ -158,7 +160,7 @@ int main(void)
 				} while(finalsec == jumpfrom);
 				sectorlist[tempjump]->sectorptr[secptrnum[tempjump]] = sectorlist[finalsec];
 				secptrnum[tempjump]++;
-				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 16 && secptrnum[finalsec]<6)
+				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 23 && secptrnum[finalsec]<6)
 				{	sectorlist[finalsec]->sectorptr[secptrnum[finalsec]] = sectorlist[tempjump];
 					secptrnum[finalsec]++;
 				}
@@ -173,11 +175,11 @@ int main(void)
 
 	printf("\nSetting up rest of universe...using up leftover sector numbers...\n");	
 	while(randsecptr>=0)  //finishes up creating other sector links...
-	{	randint = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (5)));
-		jumpsizemax=6;
-		if(randsecptr<6)
-			jumpsizemax = randsecptr;
-		jumpsize = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (jumpsizemax)));
+	{	randint = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (7)));
+		jumpsizemax=MAXTUNLEN;
+		if(randsecptr+1<MAXTUNLEN)
+			jumpsizemax = randsecptr + 1;
+		jumpsize = randjump(jumpsizemax);
 		x = ((int)((double)rand() / ((double) RAND_MAX + 1) * (usedsecptr)));
 		if(secptrnum[x]<6)
 		{	jumpfrom=usedsector[x];
@@ -195,14 +197,14 @@ int main(void)
 				secptrnum[randsec]++;
 				jumpfrom=randsec;
 			}
-			if(randint<4)
+			if(randint<6)
 			{	do
 				{	finalsec = ((int)((double)rand() / ((double) RAND_MAX + 1) * (finalsec)));
 					finalsec = usedsector[finalsec];
-				} while(finalsec == usedsector[x]);
+				} while(finalsec == usedsector[x] && secptrnum[finalsec]>5);
 				sectorlist[jumpfrom]->sectorptr[secptrnum[jumpfrom]] = sectorlist[finalsec];
 				secptrnum[jumpfrom]++;
-				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 16 && secptrnum[finalsec]<6)
+				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 23 && secptrnum[finalsec]<6)
 				{	sectorlist[finalsec]->sectorptr[secptrnum[finalsec]] = sectorlist[jumpfrom];
 					secptrnum[finalsec]++;
 				}
@@ -252,3 +254,21 @@ int compsec(const void *cmp1, const void *cmp2)
 	return 0;
 }
 
+int randjump(int maxjumplen)
+{	if(maxjumplen > 2)
+	{	int	temprandnum = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (2+2+1+maxjumplen)));
+
+		if(temprandnum >= 1 && temprandnum <= 3)	return 1;
+		if(temprandnum >= 4 && temprandnum <= 6)	return 2;
+		if(temprandnum == 7 || temprandnum == 8)	return 3;
+		if(temprandnum == 9)						return 4;
+		if(temprandnum == 10)						return 5;
+		if(temprandnum == 11)						return 6;
+		if(temprandnum == 12)						return 7;
+		if(temprandnum == 13)						return 8;
+		if(temprandnum == 14)						return 9;
+		if(temprandnum == 15)				 		return 10;
+		return 1;
+	}
+	return maxjumplen;
+}
