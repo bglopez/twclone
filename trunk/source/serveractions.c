@@ -3506,6 +3506,9 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 		}
 			fprintf(stderr,"Inserting captured ship!\n");
 			insertitem(oldship, ship, sectors[oldlocation-1]->shiplist,1);
+			defense_lost *= 0.5;
+			attack_lost *=0.5;
+			oldship->fighters -= defense_lost;
 			fprintf(stderr, "Finished!\n");
 	}
 	else if (ships[to->ship-1]->shields >= defense_lost)
@@ -3519,16 +3522,24 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 		defense_lost -= ships[to->ship-1]->shields;
 		shields_lost = ships[to->ship-1]->shields;
 		ships[to->ship-1]->fighters -= defense_lost;
-		ships[from->ship-1]->fighters -= attack_lost;
 	}
 
+	ships[from->ship-1]->fighters -= attack_lost;
 	saveship(to->ship, "./ships.data");
+	saveplayer(to->number, "./players.data");
 	if (captured)
 	{
 		saveship(oldship->number, "./ships.data");
 	}
 	strcpy(buffer,"\0");
-	addint(buffer, shields_lost, ':', BUFF_SIZE);
+	if (shields_lost == 0)
+	{
+		addint(buffer, 0, ':', BUFF_SIZE);
+	}
+	else
+	{
+		addint(buffer, 1, ':', BUFF_SIZE);
+	}
 	addint(buffer, defense_lost, ':', BUFF_SIZE);
 	addint(buffer, attack_lost, ':', BUFF_SIZE);
 	addint(buffer, captured, ':' , BUFF_SIZE);
