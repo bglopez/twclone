@@ -14,6 +14,6 @@ void buildnewplayer(struct player *curplayer, char *shipname);
 int move_player(struct player* p, struct msgcommand *data, char *buffer);
 void buildportinfo(int portnumb, char *buffer);
 int intransit(struct msgcommand *data);
-void addmessage(struct realtimemessage *basemessage, char *message);
+void addmessage(struct player *curplayer, char *message);
 void sendtosector(int sector, int playernum, int direction);
 #endif

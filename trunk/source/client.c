@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.5 $
- * Last Modified: $Date: 2002-04-24 22:00:35 $
+ * $Revision: 1.6 $
+ * Last Modified: $Date: 2002-04-26 03:40:11 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.5 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-04-24 22:00:35 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.6 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-04-26 03:40:11 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -991,6 +991,7 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
    char tempsec[5]="\0";
    int warps[25]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
    char *intptr = (char *)malloc(4);
+	char *duplicate = NULL; 
    int foobar;
    struct pollfd checkin[1];
 
@@ -1032,13 +1033,20 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
 	{
 		sendinfo(sockid, "UPDATE");
 		recvinfo(sockid, buff);
+		duplicate = strdup(buff);
+		if (strncmp(duplicate, "OK: Still in Transit", 20)!=0)
+			getmessages(duplicate);
+		free(duplicate);
    	while(strncmp(buff, "OK", 2)==0)
    	{
-      	//la la la do nothing.. for now...
-      	//Check out the real time thread here via polling.
 			usleep(500000);  //Wait half a second
 			sendinfo(sockid, "UPDATE");
 			recvinfo(sockid, buff);
+			duplicate = strdup(buff);
+			if (strncmp(duplicate, "OK: Still in Transit", 20)!=0)
+				getmessages(duplicate);
+			free(duplicate);
+
       	fflush(stdout);
    	}
 	}
@@ -1112,6 +1120,10 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
 				recvinfo(sockid, buff);
 				sendinfo(sockid, "UPDATE");
 				recvinfo(sockid, buff);
+				duplicate = strdup(buff);
+				if (strncmp(duplicate, "OK: Still in Transit", 20)!=0)
+					getmessages(duplicate);
+				free(duplicate);
 	    while(strncmp(buff, "OK", 2)==0)
 	    {
 		//la la la do nothing.. for now...	    
@@ -1119,6 +1131,10 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
 			usleep(500000);
 			sendinfo(sockid, "UPDATE");
 			recvinfo(sockid, buff);
+			duplicate = strdup(buff);
+			if (strncmp(duplicate, "OK: Still in Transit", 20)!=0)
+				getmessages(duplicate);
+			free(duplicate);
 			fflush(stdout);
 	    }
             //recvinfo(sockid, buff);
@@ -1156,6 +1172,9 @@ char *prompttype(enum prompts type, int sector, int sockid)
   int test=0;
   char *input=NULL;
   char tempstr[10]="\0";
+  char *duplicate=NULL;
+  char *buffer= (char *)malloc(BUFF_SIZE);
+  
   int forever=1;
   struct pollfd check[1];
 
@@ -1209,10 +1228,21 @@ char *prompttype(enum prompts type, int sector, int sockid)
   
     while((poll(check, 1, 1)!=1))  //Dont forget to put infinite in
     {
-      // Check the real time thread here!
+		// Check the real time stuff here!
       // And then print out real time stuff!!!
-      // And if real time stuff don't forget infinite = 0!
-      forever = 0;   //Once we have a complete input get outta here
+		sendinfo(sockid, "UPDATE");
+		recvinfo(sockid, buffer);
+		duplicate = strdup(buffer);
+		if (strncmp(duplicate, "OK", 2)==0)
+		{
+			printf("\n");
+			getmessages(duplicate);
+			free(duplicate);
+			forever=1;
+			break;
+		}
+		forever = 0;
+		//free(duplicate);
       fflush(stdout);
     }
   }
@@ -1338,6 +1368,25 @@ int getyes(char *answer)
 return 0;
 }
 
+   /* This function deals with real time messages
+	 * Currently Only dealing with moving
+	 */
+void getmessages(char *buffer)
+{
+	char temp[10];
+	char name[50];
+	int direction=0;
+
+	popstring(buffer, temp, ":", 50);
+	popstring(buffer, name, ":", 50);
+	direction = popint(buffer, ":");
+
+	if (direction == 1)
+		printf("\n%s%s%s warps into the sector.\n", KLTCYN, name, KGRN);
+	else if (direction == -1)
+		printf("\n%s%s%s warps out of the sector.\n", KLTCYN, name, KGRN);
+	
+}
 int init_nowait_io()
 {
   tcgetattr(0, &orig);
