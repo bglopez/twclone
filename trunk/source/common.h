@@ -77,6 +77,7 @@ enum porttype
   p_sellship,
   p_deposit,
   p_withdraw,
+  p_balance,
   p_buyhardware
 };
 #endif

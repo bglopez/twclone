@@ -19,6 +19,7 @@ void buildportinfo (int portnumb, char *buffer);
 int intransit (struct msgcommand *data);
 void fedcommlink (int playernum, char *message);
 void bank_deposit(char *buffer, struct player *curplayer);
+void bank_balance(char *buffer, struct player *curplayer);
 void bank_withdrawl(char *buffer, struct player *curplayer);
 void whosonline (char *buffer);
 void sendtoallonline (char *message);

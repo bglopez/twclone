@@ -182,9 +182,11 @@ handle_player (void *threadinfo)
 				data.pcommand = p_deposit;
 			else if (strncmp(temp, "WITHDRAW", strlen("WITHDRAW")) == 0)
 				data.pcommand = p_withdraw;
+			else if (strncmp(temp, "BALANCE", strlen("BALANCE")) == 0)
+				data.pcommand = p_balance;
 			else if (strncmp(temp, "BUYHARDWARE", strlen("BUYHARDWARE")) == 0)
 				data.pcommand = p_buyhardware;
-			strcpy(data.buffer, temp);
+			strcpy(data.buffer, inbuffer);
 			data.command = ct_stardock;
 			commandgood = 1;
 		}
