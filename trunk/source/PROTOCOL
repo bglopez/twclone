@@ -99,7 +99,13 @@ UPDATE response:
 If the player is in the middle of moving And there are no messages
 	OK: Still in transit
 If there are messages
-	OK:<message type stuff>
+	OK:<player>:<type of message>:<message>
+	Type of messages
+	0 Means fed comm message
+	-1/1 Means warp out/in
+	-2/2 Means game exit/enter
+	-3/3 Means port leave/land
+	-4/4 Means stardock leave/land
 If there are no messages and they are not moving
 	Same as from DESCRIPTION
 	
