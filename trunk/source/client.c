@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.57 $
- * Last Modified: $Date: 2004-12-09 15:43:11 $
+ * $Revision: 1.58 $
+ * Last Modified: $Date: 2004-12-10 04:32:54 $
  */
 
 /* Normal Libary Includes */
@@ -40,8 +40,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.57 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-12-09 15:43:11 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.58 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-12-10 04:32:54 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -263,9 +263,9 @@ int main (int argc, char *argv[])
 						  		case 's':
 						  		case 'S':
 									if (cursector->ports->type == 9)
-										do_stardock_menu(sockid, curplayer);
+										do_stardock_menu(sockid, curplayer, 0);
 									else if (cursector->ports->type == 10)
-										do_node_menu(sockid, curplayer);
+										do_stardock_menu(sockid, curplayer, 1);
 									break;
 								default:
 									break;
@@ -1504,7 +1504,7 @@ void print_bank_help()
 	return;
 }
 
-void do_stardock_menu(int sockid, struct player *curplayer)
+void do_stardock_menu(int sockid, struct player *curplayer, int node)
 {
 	char *buff = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	char command;
@@ -1515,8 +1515,16 @@ void do_stardock_menu(int sockid, struct player *curplayer)
 	recvinfo(sockid, buff);
 	while (!done)
 	{
-		printf("\n%s<%sStarDock%s> Where to? (%s?=Help%s) "
+		if (!node)
+		{
+			printf("\n%s<%sStarDock%s> Where to? (%s?=Help%s) "
 					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		}
+		else
+		{
+			printf("\n%s<%sNode Station%s> Where to? (%s?=Help%s) "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		}
 		scanf("%c", &command);
 		junkline();
 		switch(command)
@@ -1537,56 +1545,19 @@ void do_stardock_menu(int sockid, struct player *curplayer)
 			case 'G':
 				do_bank_menu(sockid, curplayer);
 				break;
-			case '?':
-				print_stardock_help();
-				break;
-			default:
-				printf("\nThat option is not supported yet!");
-				break;
-		}
-	}
-	strcpy(buff, "PORT QUIT:");
-	sendinfo(sockid, buff);
-	recvinfo(sockid, buff);
-	free(buff);
-	return;
-}
-
-void do_node_menu(int sockid, struct player *curplayer)
-{
-	char *buff = (char *)malloc(sizeof(char)*BUFF_SIZE);
-	char command;
-	int done=0;
-
-	strcpy(buff, "PORT LAND:");
-	sendinfo(sockid, buff);
-	recvinfo(sockid, buff);
-	while (!done)
-	{
-		printf("\n%s<%sNode Station%s> Where to? (%s?=Help%s) "
-					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
-		scanf("%c", &command);
-		junkline();
-		switch(command)
-		{
-			case 'q':
-			case 'Q':
-				done = 1;
-				break;
-			case 's':
-			case 'S':
-				do_shipyard_menu(sockid, curplayer);
-				break;
-			case 'g':
-			case 'G':
-				do_bank_menu(sockid, curplayer);
-				break;
 			case 'n':
 			case 'N':
-				do_noderelay_menu(sockid, curplayer);
+				if (node)
+				{
+					do_noderelay_menu(sockid, curplayer);
+				}
 				break;	
 			case '?':
-				print_node_help();
+				if (!node)
+					print_stardock_help();
+				else
+					print_node_help();
+				
 				break;
 			default:
 				printf("\nThat option is not supported yet!");
