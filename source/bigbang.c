@@ -17,232 +17,235 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+//This is the max length of tunnels and dead ends.
+#define MAXTUNLEN			6
+
+//Variables that will eventually be inputted by the user when this program
+//is initally run.
+#define NUMSECTORS			500
+
+//Percentage of sectors that will have the maximum number of warps in them 
+#define MAXJUMPPERCENT		3
+
+//Percentage chance that a final jump will be a one-way
+#define ONEWAYJUMPPERCENT	3
+
+//Percentage chance that a tunnel will be a dead end
+#define DEADENDPERCENT		30
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include "config.h"
 #include "universe.h"
+
+//These are the set-in-stone FedSpace links
+//Don't even think about touching these...
+const int fedspace[10][6]={ {2,3,4,5,6,7},
+							{1,3,7,8,9,10},
+							{1,2,4,0,0,0},
+							{1,3,5,0,0,0},
+							{1,4,6,0,0,0},
+							{1,5,7,0,0,0},
+							{1,2,6,8,0,0},
+							{2,7,0,0,0,0},
+							{2,10,0,0,0,0},
+							{2,9,0,0,0,0} };
+struct sector **sectorlist;
+struct config *configdata;
+int randsectornum[NUMSECTORS-10];
 
 int compsec(const void *cmp1, const void *cmp2);
 int randjump(int maxjumplen);
+int randomnum(int min, int max);
+void secjump(int from, int to);
+int freewarp(int sector);
+int warpsfull(int sector);
+int numwarps(int sector);
 
 int main(void) 
-{	//These are the set-in-stone FedSpace links
-	const int sector1[6]={2,3,4,5,6,7};
-	const int sector2[6]={1,3,7,8,9,10};
-	const int sector3[3]={1,2,4};
-	const int sector4[3]={1,3,5};
-	const int sector5[3]={1,4,6};
-	const int sector6[3]={1,5,7};
-	const int sector7[4]={1,2,6,8};
-	const int sector8[2]={2,7};
-	const int sector9[2]={2,10};
-	const int sector10[2]={2,9};
+{	int x, y, z, tempint, randint, tosector, fromsector, startsec, secptrcpy, jumpsize;
+	int maxjumpsize = (int) (NUMSECTORS * ((double) MAXJUMPPERCENT / 100));
+	int usedsecptr = NUMSECTORS - 11;
+	char *fileline, *tempstr;
+	FILE *file;
+	struct sector *secptr;
 
-	const int MAXTUNLEN = 4; //This is the max length of tunnels and dead ends.
-	
-	int numsectors = 500, x, y, z, randint, tempsec, secnumpostion = 0;
-	int arraysize, jumpsize, finalsec, randsec, jumpfrom, tempjump, jumpsizemax;	int usedsecptr = 0, randsecptr = numsectors - 11, secptrnum[numsectors];
-	int randsectornum[numsectors-10], usedsector[numsectors-10];
-	int sixjumpsize = (int) numsectors * .05;
-	FILE *filetowrite;
-	char *tempwrite, *tempwrite2;
-	struct sector **sectorlist, *sectorpointer, *sortptr[6];
-
-	printf("\nCreating sector array...\n");
-	sectorlist = malloc(numsectors * sizeof(struct sector *));
-	for(x = 0; x < numsectors; x++)
-		sectorlist[x] = malloc(sizeof(struct sector));
-
-	//Fills in the randsectornum array with numbers 10 to (numsectors - 1)
-	for(x=0;x<numsectors-10;x++)
-		randsectornum[x]=x+10;
-	
 	//Seed our randomizer
 	srand((unsigned long) time(NULL));
 	
-	//Initalize sectorlist with data
-	for(x=0;x<numsectors;x++)
-	{	sectorlist[x]->number = x+1;
-		secptrnum[x]=0;
-	}
+	//Reading config.data file for config data (Duh...)
+	printf("\nReading in config.data...");
+	init_config("config.data");
+	printf("done.\n");
 	
-	printf("\nCreating Fedspace...\n");
-	//Sets up Fed Space
-	for(x=0;x<6;x++)
-	{	sectorlist[0]->sectorptr[x]=sectorlist[sector1[x]-1];
-		secptrnum[0]++;
-	}
-	for(x=0;x<6;x++)
-	{	sectorlist[1]->sectorptr[x]=sectorlist[sector2[x]-1];
-		secptrnum[1]++;
-	}
-	for(x=0;x<3;x++)
-	{	sectorlist[2]->sectorptr[x]=sectorlist[sector3[x]-1];
-		secptrnum[2]++;
-	}
-	for(x=0;x<3;x++)
-	{	sectorlist[3]->sectorptr[x]=sectorlist[sector4[x]-1];
-		secptrnum[3]++;
-	}
-	for(x=0;x<3;x++)
-	{	sectorlist[4]->sectorptr[x]=sectorlist[sector5[x]-1];
-		secptrnum[4]++;
-	}
-	for(x=0;x<3;x++)
-	{	sectorlist[5]->sectorptr[x]=sectorlist[sector6[x]-1];
-		secptrnum[5]++;
-	}
-	for(x=0;x<4;x++)
-	{	sectorlist[6]->sectorptr[x]=sectorlist[sector7[x]-1];
-		secptrnum[6]++;
-	}
-	for(x=0;x<2;x++)
-	{	sectorlist[7]->sectorptr[x]=sectorlist[sector8[x]-1];
-		secptrnum[7]++;
-	}
-	for(x=0;x<2;x++)
-	{	sectorlist[8]->sectorptr[x]=sectorlist[sector9[x]-1];
-		secptrnum[8]++;
-	}
-	for(x=0;x<2;x++)
-	{	sectorlist[9]->sectorptr[x]=sectorlist[sector10[x]-1];
-		secptrnum[9]++;
-	}
-	
-	printf("\nRandomly picking sector numbers...\n");
+	printf("Creating sector array...");
+	sectorlist = malloc(NUMSECTORS * sizeof(struct sector *));
+	for(x = 0; x < NUMSECTORS; x++)
+		sectorlist[x] = malloc(sizeof(struct sector));
+	printf("done.\n");
+
+	//Fills in the randsectornum array with numbers 10 to (numsectors - 1)
+	for(x=0;x<NUMSECTORS-10;x++)
+		randsectornum[x]=x+10;
+
+	printf("Randomly picking sector numbers...");
 	//Randomly creates sector numbers to use:
-	for(x=numsectors-11;x>0;x--)
-	{	randint = (int)((double)rand() / ((double) RAND_MAX + 1) * (x + 1));
-		tempsec = randsectornum[randint];
+	for(x=NUMSECTORS-11;x>0;x--)
+	{	randint = randomnum(0,x);
+		tempint = randsectornum[randint];
 		randsectornum[randint] = randsectornum[x];
-		randsectornum[x] = tempsec;
+		randsectornum[x] = tempint;
 	}
+	printf("done.\n");
 	
-	printf("\nSetting up FedSpace to 6J jumps...\n");
+	//Initalize sectorlist with data
+	for(x=0;x<NUMSECTORS;x++)
+		sectorlist[x]->number = x+1;
+	
+	printf("Creating Fedspace...");
+	//Sets up Fed Space
+	for(x=0;x<10;x++)
+	{	for(y=0;y<6;y++)
+			if(fedspace[x][y]!=0)
+				sectorlist[x]->sectorptr[y]=sectorlist[(fedspace[x][y])-1];
+		sectorlist[x]->beacontext = "The Federation -- Do Not Dump!";
+		sectorlist[x]->nebulae = "The Federation";
+	}
+	printf("done.\n");
+			
+	printf("Setting up links from FedSpace out to other sectors...");
 	//Sets up 13 jumps from Fed Space to 6jump sectors 
 	for(x=0;x<=13;x++)
-	{	do
-		{	randint = 3 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (1 + 10 - 3)));
-		} while(secptrnum[randint] >= 6);
-		sectorlist[randint]->sectorptr[secptrnum[randint]] = sectorlist[randsectornum[x]];
-		sectorlist[randsectornum[x]]->sectorptr[secptrnum[randsectornum[x]]] = sectorlist[randint];
-		secptrnum[randint]++;
-		secptrnum[randsectornum[x]]++;
-	}
-
-	printf("\nSetting up rest of 6J jumps...\n");
-	//Sets up rest of links for the 6jump sectors (the meat and potatoes)
-	for(x=0;x<sixjumpsize;x++)
-	{	for(y=secptrnum[randsectornum[x]];y<MAX_WARPS_PER_SECTOR;y++)
-		{	randint = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (5)));
-			jumpsize = randjump(MAXTUNLEN);
-			jumpfrom=randsectornum[x];
-			tempjump=jumpfrom;
-			for(z=0;z<jumpsize;z++)
-			{	tempsec = sixjumpsize + ((int)((double)rand() / ((double) RAND_MAX + 1) * (1 + randsecptr - sixjumpsize)));
-				randsec = randsectornum[tempsec];
-				usedsector[usedsecptr] = randsectornum[tempsec];
-				usedsecptr++;
-				randsectornum[tempsec] = randsectornum[randsecptr];
-				randsecptr--;
-				
-				sectorlist[tempjump]->sectorptr[secptrnum[tempjump]] = sectorlist[randsec];
-				sectorlist[randsec]->sectorptr[secptrnum[randsec]] = sectorlist[tempjump];
-				secptrnum[tempjump]++;
-				secptrnum[randsec]++;
-				tempjump=randsec;
-			}
-			if(randint<4)
-			{	do
-				{	tempsec = ((int)((double)rand() / ((double) RAND_MAX + 1) * (sixjumpsize)));
-					finalsec = randsectornum[tempsec];
-				} while(finalsec == jumpfrom);
-				sectorlist[tempjump]->sectorptr[secptrnum[tempjump]] = sectorlist[finalsec];
-				secptrnum[tempjump]++;
-				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 23 && secptrnum[finalsec]<6)
-				{	sectorlist[finalsec]->sectorptr[secptrnum[finalsec]] = sectorlist[tempjump];
-					secptrnum[finalsec]++;
-				}
-			}
-		}
-	}
+	{	randint=randomnum(1,5);
+		do
+		{	fromsector = randomnum(2,9);
+		} while(warpsfull(fromsector));
+		jumpsize = randjump(3);
 	
-	for(x=0;x<sixjumpsize;x++)
-	{	randsectornum[x] = randsectornum[randsecptr];
-		randsecptr--;
+		for(y=0;y<jumpsize;y++)
+		{	tempint = randomnum(maxjumpsize,usedsecptr);
+			tosector = randsectornum[tempint];
+			randsectornum[tempint] = randsectornum[usedsecptr];
+			randsectornum[usedsecptr] = tosector;
+			usedsecptr--;
+			secjump(fromsector,tosector);
+			secjump(tosector,fromsector);
+			fromsector = tosector;
+		}
+		if(randint<4)
+		{	secjump(fromsector,x);
+			secjump(x,fromsector);
+		}
 	}
+	printf("done.\n");
 
-	printf("\nSetting up rest of universe...using up leftover sector numbers...\n");	
-	while(randsecptr>=0)  //finishes up creating other sector links...
-	{	randint = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (7)));
-		jumpsizemax=MAXTUNLEN;
-		if(randsecptr+1<MAXTUNLEN)
-			jumpsizemax = randsecptr + 1;
-		jumpsize = randjump(jumpsizemax);
-		x = ((int)((double)rand() / ((double) RAND_MAX + 1) * (usedsecptr)));
-		if(secptrnum[x]<6)
-		{	jumpfrom=usedsector[x];
+	printf("Setting up the max warp sectors...");
+	//Sets up rest of links for the maxwarp sectors (the meat and potatoes)
+	for(x=0;x<maxjumpsize;x++)
+	{	for(y=freewarp(x);y<configdata->maxwarps;y++)
+		{	randint = randomnum(1,100);
+			jumpsize = randjump(MAXTUNLEN);
+			startsec = randsectornum[x];
+			fromsector = startsec;
 			for(z=0;z<jumpsize;z++)
-			{	tempsec = ((int)((double)rand() / ((double) RAND_MAX + 1) * (randsecptr + 1)));
-				randsec = randsectornum[tempsec];
-				usedsector[usedsecptr] = randsectornum[tempsec];
-				usedsecptr++;
-				randsectornum[tempsec] = randsectornum[randsecptr];
-				randsecptr--;
-			
-				sectorlist[jumpfrom]->sectorptr[secptrnum[jumpfrom]] = sectorlist[randsec];
-				sectorlist[randsec]->sectorptr[secptrnum[randsec]] = sectorlist[jumpfrom];
-				secptrnum[jumpfrom]++;
-				secptrnum[randsec]++;
-				jumpfrom=randsec;
+			{	tempint = randomnum(maxjumpsize,usedsecptr);
+				tosector = randsectornum[tempint];
+				randsectornum[tempint] = randsectornum[usedsecptr];
+				randsectornum[usedsecptr] = tosector;
+				usedsecptr--;
+				
+				secjump(fromsector,tosector);
+				secjump(tosector,fromsector);
+				fromsector = tosector;
 			}
-			if(randint<6)
+			if(randint <= (100 - DEADENDPERCENT))
 			{	do
-				{	finalsec = ((int)((double)rand() / ((double) RAND_MAX + 1) * (finalsec)));
-					finalsec = usedsector[finalsec];
-				} while(finalsec == usedsector[x] && secptrnum[finalsec]>5);
-				sectorlist[jumpfrom]->sectorptr[secptrnum[jumpfrom]] = sectorlist[finalsec];
-				secptrnum[jumpfrom]++;
-				if((1+(int)((double)rand()/((double) RAND_MAX + 1) * 24)) < 23 && secptrnum[finalsec]<6)
-				{	sectorlist[finalsec]->sectorptr[secptrnum[finalsec]] = sectorlist[jumpfrom];
-					secptrnum[finalsec]++;
-				}
+				{	tosector = randsectornum[randomnum(0,maxjumpsize-1)];
+				} while(tosector == startsec);
+				secjump(fromsector,tosector);
+				if(randomnum(1,100) <= (100 - ONEWAYJUMPPERCENT) && !warpsfull(tosector))
+					secjump(tosector,fromsector);
 			}
 		}
 	}
+	printf("done.\n");
+	
+	for(x=0;x<maxjumpsize;x++)
+	{	tempint = randsectornum[x];
+		randsectornum[x] = randsectornum[usedsecptr];
+		randsectornum[usedsecptr]=tempint;
+		usedsecptr--;
+	}
 
-	for(x=0;x<numsectors;x++)
-		sectorlist[x]->sectorptr[secptrnum[x]] = NULL;
+	printf("Using up leftover sector numbers...");	
+	while(usedsecptr>=0)  //finishes up creating other sector links...
+	{	randint = randomnum(1,100);
+		tempint = MAXTUNLEN;
+		if(usedsecptr+1<MAXTUNLEN)
+			tempint = usedsecptr + 1;
+		jumpsize = randjump(tempint);
+		startsec = randsectornum[randomnum(usedsecptr+1,NUMSECTORS-11)];
+		if(freewarp(startsec))
+		{	fromsector = startsec;
+			secptrcpy = usedsecptr;
+			for(z=0;z<jumpsize;z++)
+			{	tempint = randomnum(0,usedsecptr);
+				tosector = randsectornum[tempint];
+				randsectornum[tempint] = randsectornum[usedsecptr];
+				randsectornum[usedsecptr] = tosector;
+				usedsecptr--;
+				
+				secjump(fromsector,tosector);
+				secjump(tosector,fromsector);
+				fromsector = tosector;
+			}
+			if(randint <= (100 - DEADENDPERCENT))
+			{	do
+				{	tosector = randsectornum[randomnum(0,secptrcpy)];
+				} while(tosector == startsec || warpsfull(tosector));
+				secjump(fromsector,tosector);
+				if(randomnum(1,100) <= (100 - ONEWAYJUMPPERCENT))
+					secjump(tosector,fromsector);
+			}
+		}
+	}
+	printf("done.\n");
 
-	//Sorts warp pointer array from smallest to largest
-	for(x=0;x<6;x++)
-		sortptr[x] = malloc(sizeof(struct sector *));
-	for(x=0;x<numsectors;x++)
-	{	for(y=0;y<secptrnum[x];y++)
-			sortptr[y]=sectorlist[x]->sectorptr[y];
-		qsort(sectorlist[x]->sectorptr, secptrnum[x], sizeof(struct sector *), compsec);
+	//Sorts each sector's warps into numeric order
+	for(x=0;x<NUMSECTORS;x++)
+	{	qsort(sectorlist[x]->sectorptr, numwarps(x), sizeof(struct sector *), compsec);
 	}
 						
 	//Writing data to universe.data file
-	printf("\nSaving universe to file...\n");	
-	filetowrite = fopen("universe.data", "w");
-	tempwrite = malloc(256*sizeof(char));
-	tempwrite2 = malloc(10*sizeof(char));
-	for(x=0;x<numsectors;x++)
-	{	sprintf(tempwrite, "%d", (x+1)) ;
-		strcat(tempwrite,":");
-		for(y=0;y<secptrnum[x];y++)
-		{	sectorpointer = sectorlist[x]->sectorptr[y];
-			sprintf(tempwrite2, "%d", sectorpointer->number);
-			strcat(tempwrite,tempwrite2);
-			if(y+1 != secptrnum[x])
-				tempwrite = strcat(tempwrite, ",");
+	printf("Saving universe to file...");	
+	file = fopen("universe.data", "w");
+	fileline = malloc(1024*sizeof(char));
+	tempstr = malloc(10*sizeof(char));
+	for(x=0;x<NUMSECTORS;x++)
+	{	sprintf(fileline, "%d", (x+1)) ;
+		fileline = strcat(fileline,":");
+		for(y=0;y<numwarps(x);y++)
+		{	secptr = sectorlist[x]->sectorptr[y];
+			sprintf(tempstr, "%d", secptr->number);
+			fileline = strcat(fileline,tempstr);
+			if(y+1 != numwarps(x))
+				fileline = strcat(fileline, ",");
 		}
-		tempwrite = strcat(tempwrite, ":::\n");
-		fprintf(filetowrite,tempwrite);
+		fileline = strcat(fileline, ":");
+		if(sectorlist[x]->beacontext != NULL)
+			fileline = strcat(fileline, sectorlist[x]->beacontext);
+		fileline = strcat(fileline, ":");
+		if(sectorlist[x]->nebulae != NULL)
+			fileline = strcat(fileline, sectorlist[x]->nebulae);
+		fileline = strcat(fileline, ":\n");
+		fprintf(file,fileline);
 	}
-	fclose(filetowrite);
+	fclose(file);
+	printf("done.\nUniverse sucessfully created!\n\n");
+	
+	return 0;
 }
 
 int compsec(const void *cmp1, const void *cmp2)
@@ -256,8 +259,10 @@ int compsec(const void *cmp1, const void *cmp2)
 
 int randjump(int maxjumplen)
 {	if(maxjumplen > 2)
-	{	int	temprandnum = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (2+2+1+maxjumplen)));
+	{	int temprandnum = randomnum(0,2+2+1+maxjumplen);
+		//int	temprandnum = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (2+2+1+maxjumplen)));
 
+		if(temprandnum == 0)						return 0;
 		if(temprandnum >= 1 && temprandnum <= 3)	return 1;
 		if(temprandnum >= 4 && temprandnum <= 6)	return 2;
 		if(temprandnum == 7 || temprandnum == 8)	return 3;
@@ -271,4 +276,35 @@ int randjump(int maxjumplen)
 		return 1;
 	}
 	return maxjumplen;
+}
+
+int randomnum(int min, int max)
+{	return (min + ((int)((double)rand() / ((double) RAND_MAX + 1) * (1 + max - min))));
+}
+
+void secjump(int from, int to)
+{	int y = freewarp(from);
+	if(y != -1)
+		sectorlist[from]->sectorptr[y] = sectorlist[to];
+}
+
+int freewarp(int sector)
+{	int x;
+	for(x=0;x<configdata->maxwarps;x++)
+		if(sectorlist[sector]->sectorptr[x] == NULL)
+			return x;
+	return -1;
+}
+
+int warpsfull(int sector)
+{	if(freewarp(sector) == -1)
+		return 1;
+	return 0;
+}
+
+int numwarps(int sector)
+{	int x = freewarp(sector);
+	if(x == -1)
+		return configdata->maxwarps;
+	return x;
 }
