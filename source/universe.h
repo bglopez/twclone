@@ -156,7 +156,7 @@ struct citadel
 {
   int level;
   float upgradePercent; /* how far along your upgrade is */ 
-  int shields; /* number of planetary shields */
+  int planetaryShields; /* number of planetary shields */
   int qCannonSector; /* Value percent to shoot sector with Q-Cannon */
   int qCannonAtmosphere; /* Value percent to shoot atmosphere with Q-Cannon */
   int militaryReactionLevel; /* like is says on the tin */
