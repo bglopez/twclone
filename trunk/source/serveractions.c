@@ -450,16 +450,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
 
-      /* Insert planet and assign player as the owner */
-      //<<<<<<< serveractions.c
-      /* planet,sector,owner */
       buildnewplanet (curplayer, data->buffer, (int) ships[curplayer->ship - 1]->location );
-      //insert_planet(struct planet *p, struct sector *s, curplayer);
-      //=======
-      /* planet,sector,owner */
-      buildnewplanet (curplayer, data->buffer, (int) curplayer->sector);
-      //insert_planet(struct planet *p, struct sector *s, curplayer);
-      //>>>>>>> 1.24
       break;
     default:
       //fprintf(stderr, "processcommand: Got a bogus command\n");
@@ -1258,21 +1249,41 @@ trading (struct player *curplayer, struct port *curport, char *buffer,
 void
 buildnewplanet (struct player *curplayer, char *planetname, int sector )
 {
-  /* extern struct planet *planets[MAX_TOTAL_PLANETS]; */
+  int i, p_num, p_sec, p_type;
+  char *p_name, *p_owner;
+  char p_ownertype = 'p', dummy;
+  p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
+  p_owner = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
-  int i;			//A counter
   for (i = 0; i <= MAX_TOTAL_PLANETS; i++)
     {
       if (planets[i] == NULL)
-	break;
+	{
+	  p_num = i;
+	  break;
+	}
     }
 
-  fprintf(stderr, "Sector passed: %d\n", sector );
-  fprintf(stderr, "%s\n", curplayer->name );
-  curplayer->sector = sector;
-  fprintf(stderr, "%d\n", curplayer->sector );
-  insert_planet(planets[i+1], curplayer->sector , curplayer->number);
+  p_type = (int) (NUMBER_OF_PLANET_TYPES * rand () / RAND_MAX + 1.0);
+  strcpy (p_name, planetname);
+  planets[p_num] = (struct planet *) malloc (sizeof (struct planet *));
+  planets[p_num]->num = p_num;
+  planets[p_num]->name = (char *) malloc (strlen (p_name) * sizeof (char));
+  planets[p_num]->owner =  (char *) malloc (strlen (p_owner) * sizeof (char));
+  planets[p_num]->name = p_name;
+  planets[p_num]->owner = curplayer->name;
+  planets[p_num]->ownertype = p_ownertype;
+  planets[p_num]->type = p_type;
 
+  /* The above is wrong! The planet init reads the player number as a
+  ** planet type. Need to modify the bigbang to to insert a planet type at
+  ** in place of number, and then use the "dummy" value to be the owner number
+  **
+  ** Still for the moment it works and inserts a planet.
+  */
+
+  curplayer->sector = sector;
+  insert_planet(planets[p_num], sectors[curplayer->sector] , curplayer->number);
 }
 /*****************************************/
 
