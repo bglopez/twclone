@@ -62,7 +62,7 @@ void *background_maint(void *threadinfo)
 		if (lastday == -1)
 			lastday = timenow->tm_yday;
    	if ((curtime - starttime)% configdata->autosave * 60) //Autosave
-     		saveall();
+     		;//saveall();
    	if ((timenow->tm_hour == lastregen+1) || ((timenow->tm_hour == 0) && (lastregen==23)))
 		{
 			lastregen=timenow->tm_hour;
