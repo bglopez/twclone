@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.20 $
- * Last Modified: $Date: 2002-11-03 07:38:48 $
+ * $Revision: 1.21 $
+ * Last Modified: $Date: 2002-11-03 07:49:46 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.20 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:38:48 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.21 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:49:46 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -192,6 +192,11 @@ main (int argc, char *argv[])
 		case 'p':
 		case 'P':
 		  ptype = pt_port;
+		  if (cursector->ports->type == 0)
+		  {
+			printf("Porting at Class 0 Ports currently unavailable");
+			break;
+		  }
 		  mickey = prompttype (ptype, 0, sockid);
 		  switch (*(mickey + 0))
 		  {
@@ -266,7 +271,7 @@ printwelcome ()
   printf ("\n");
   printf ("\nTWClone Hompage: %shttp://twclone.sourceforge.net%s", KLTCYN,
 	  KGRN);
-  printf ("\nCurrent Release: 0.10");
+  printf ("\nCurrent Release: 0.11");
   printf ("\n");
 }
 
@@ -1472,7 +1477,7 @@ prompttype (enum prompts type, int sector, int sockid)
 	  printf ("%s ", KNRM);	//Gets rid of any extra colors.
 	  break;
 	case autopilot:
-	  printf ("%sEngage the Autopilot? %s(Y/N/Single step/Express) %s",
+	  printf ("\n%sEngage the Autopilot? %s(Y/N/Single step/Express) %s",
 		  KMAG, KYLW, KMAG);
 	  break;
 	case quit:
