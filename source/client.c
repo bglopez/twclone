@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.36 $
- * Last Modified: $Date: 2003-11-13 17:39:31 $
+ * $Revision: 1.37 $
+ * Last Modified: $Date: 2003-11-14 17:08:16 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.36 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-13 17:39:31 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.37 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-14 17:08:16 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1211,6 +1211,9 @@ void do_bank_menu(int sockid, struct player *curplayer)
 	enum prompts ptype;
 	char command;
 	int done=0;
+	int transaction;
+	char *buffer=(char *)malloc(sizeof(char)*BUFF_SIZE);
+	int balance=0;
 
 	while (!done)
 	{
@@ -1218,6 +1221,11 @@ void do_bank_menu(int sockid, struct player *curplayer)
 					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
 		scanf("%c", &command);
 		junkline();
+		strcpy(buffer, "STARDOCK BALANCE:");
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		balance = popint(buffer, ":");
+		getmyinfo(sockid, curplayer);
 		switch(command)
 		{
 			case 'q':
@@ -1226,15 +1234,47 @@ void do_bank_menu(int sockid, struct player *curplayer)
 				break;
 			case 'd':
 			case 'D':
-				//Do deposit!
+				printf("\n%sYou have %s%d%s credits in your account.",KGRN,KLTYLW, balance,KGRN);
+				printf("\n%sHow many credits do you want to deposit? %s(%d)%s ",KMAG,KLTYLW,curplayer->credits,KMAG);
+				scanf("%ld", &transaction);
+				junkline();
+				strcpy(buffer, "STARDOCK DEPOSIT:");
+				addint(buffer, transaction, ':', BUFF_SIZE);
+				sendinfo(sockid, buffer);
+				recvinfo(sockid, buffer);
+				if (strncmp(buffer, "OK", 2)==0)
+				{
+					printf("\n%s%d%s credits have been deposited in your account.",KLTYLW, transaction, KGRN);
+				}
+				else
+				{
+					printf("\n%sYou don't have that many credits!",KGRN);
+				}
 				break;
 			case 'e':
 			case 'E':
+				printf("\n%sYou have %s%d%s credits in your account.",KGRN,KLTYLW,balance,KGRN);
 				//Do balance!
 				break;
 			case 'w':
 			case 'W':
 				//Do withdraw!
+				printf("\n%sYou have %s%d%s credits in your account.",KGRN,KLTYLW,balance,KGRN);
+				printf("\n%sHow many credits do you want to withdraw? %s(%d)%s ",KMAG,KLTYLW,balance,KMAG);
+				scanf("%ld", &transaction);
+				junkline();
+				strcpy(buffer, "STARDOCK WITHDRAW:");
+				addint(buffer, transaction,':', BUFF_SIZE);
+				sendinfo(sockid, buffer);
+				recvinfo(sockid, buffer);
+				if (strncmp(buffer, "OK", 2)==0)
+				{
+					printf("\n%s%d%s credits have been withdrawn from your account.",KLTYLW, transaction, KGRN);
+				}
+				else
+				{
+					printf("\n%sYou don't have that many credits in your account!", KGRN);
+				}
 				break;
 			case '?':
 				print_bank_help();
@@ -1243,6 +1283,7 @@ void do_bank_menu(int sockid, struct player *curplayer)
 				printf("\nThat option is not supported yet!");
 				break;
 		}
+		printf("\n");
 	}
 }
 
@@ -1376,7 +1417,6 @@ void doporting (int sockid, struct player *curplayer)
     int xpgained = 0;
     char pnames[3][20] = {"\x1B[1;36mFuel Ore","\x1B[1;36mOrganics","\x1B[1;36mEquipment"};
     int playerproduct[3];
-	 int cur_holds= 0 ;    //Number of holds player has of product
     int testholds = 0;		//Number of holds player can afford according
     //To the test price
 
@@ -1401,8 +1441,10 @@ void doporting (int sockid, struct player *curplayer)
     type = popint (buffer, ":");
     *buffer = '\0';
 
-    for (counter = 0; counter <= 2; counter++)
-    {
+	 if (type!=0)
+	 {
+    	for (counter = 0; counter <= 2; counter++)
+    	{
         if (portconversion[type][counter] == 'B')
         {
             strcpy (status[counter], "Buying");
@@ -1412,7 +1454,8 @@ void doporting (int sockid, struct player *curplayer)
             strcpy (status[counter], "Selling");
         percentage[counter] =
             100.0 * ((float) product[counter] / (float) maxproduct[counter]);
-    }
+    	}
+	 }
 
     printf ("\n%s%s<Port>%s", KBBLU, KFWHT, KNRM);
     printf ("\n");
@@ -1466,14 +1509,8 @@ void doporting (int sockid, struct player *curplayer)
             printf ("\n%sHow many holds of %s%s do you want to sell [%s%d%s]? ",
                     KMAG, pnames[counter], KMAG, KLTYLW, testholds, KMAG);
             scanf ("%d", &holds);
-				if (counter==0)
-					cur_holds = curplayer->pship->ore;
-				else if (counter == 1)
-					cur_holds = curplayer->pship->organics;
-				else if (counter == 2)
-					cur_holds = curplayer->pship->equipment;
 					
-            if (holds > 0 && cur_holds == holds)
+            if (holds > 0 && playerproduct[counter] == holds)
             {
                 printf ("\n%sAgreed, %s%d%s units.", KLTCYN, KLTYLW, holds,
                         KLTCYN);
@@ -1880,9 +1917,10 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
                 getmessages (duplicate);
                 free (duplicate);
                 forever = 1;
-                break;
+					 break;
             }
-            forever = 0;
+				else
+            	forever = 0;
             //free(duplicate);
             fflush (stdout);
         }
