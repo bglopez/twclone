@@ -752,7 +752,6 @@ void processcommand (char *buffer, struct msgcommand *data)
             return;
         }
 		  //Check other flags here
-
         buildnewplanet (curplayer, data->buffer,
                         (int) ships[curplayer->ship - 1]->location);
         break;
@@ -843,7 +842,7 @@ void builddescription (int sector, char *buffer, int playernum)
     {
         do
         {
-            if (p != 0)
+				if (p != 0)
             {
                 addint (buffer, p, ',', BUFF_SIZE);
                 addstring (buffer, pname, ',', BUFF_SIZE);
@@ -851,38 +850,8 @@ void builddescription (int sector, char *buffer, int playernum)
             }
             p = ((struct planet *) element->item)->num;
             strcpy (pname, ((struct planet *) element->item)->name);
-            curtype = ((struct planet *) element->item)->type;
-            strcpy (ptype, "M");
-            switch (curtype)
-            {
-            case TERRA:
-                strcpy (ptype, "M");
-                break;
-            case M:
-                strcpy (ptype, "M");
-                break;
-            case L:
-                strcpy (ptype, "L");
-                break;
-            case O:
-                strcpy (ptype, "O");
-                break;
-            case K:
-                strcpy (ptype, "K");
-                break;
-            case H:
-                strcpy (ptype, "H");
-                break;
-            case U:
-                strcpy (ptype, "U");
-                break;
-            case C:
-                strcpy (ptype, "C");
-                break;
-            default:
-                break;
-            }
-            element = element->listptr;
+				strcpy(ptype, ((struct planet *)element->item)->pClass->typeClass);
+				element = element->listptr;
         }
         while (element != NULL);
         if (p != 0)
@@ -1338,7 +1307,7 @@ void totalplanetinfo(int pnumb, char *buffer)
 	addstring(buffer, planets[pnumb - 1]->name, ':', BUFF_SIZE);
 	addint(buffer, planets[pnumb - 1]->num, ':', BUFF_SIZE);
 	addint(buffer, planets[pnumb - 1]->sector, ':', BUFF_SIZE);
-	//class type
+	addstring(buffer, planets[pnumb -1]->pClass->typeClass, ':', BUFF_SIZE);
 	addstring(buffer, planets[pnumb - 1]->pClass->typeName, ':', BUFF_SIZE);
 	addint(buffer, planets[pnumb - 1]->owner, ':', BUFF_SIZE);
 	addstring(buffer, planets[pnumb - 1]->creator, ':', BUFF_SIZE);
@@ -1369,15 +1338,28 @@ void totalplanetinfo(int pnumb, char *buffer)
 void buildplayerinfo (int playernum, char *buffer)
 {
     buffer[0] = '\0';
-    if (players[playernum - 1] == NULL)
+	 if ((playernum <= 0) || (playernum > configdata->max_players))
+	 {
+		if (playernum <= 0)
+		{
+			if (playernum == -1)
+				addstring(buffer, "Federation", ':', BUFF_SIZE);
+			else if (playernum == -2)
+				addstring(buffer, "Ferringhi", ':', BUFF_SIZE);
+		}
+	 }
+	 else if (players[playernum - 1] == NULL)
     {
         strcpy (buffer, "BAD");
         return;
     }
+	 else
+	 {
     addstring (buffer, players[playernum - 1]->name, ':', BUFF_SIZE);
     addint (buffer, players[playernum - 1]->experience, ':', BUFF_SIZE);
     addint (buffer, players[playernum - 1]->alignment, ':', BUFF_SIZE);
     addint (buffer, players[playernum - 1]->ship, ':', BUFF_SIZE);
+	 }
 
     return;
 }
@@ -2115,9 +2097,9 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
 	 //This should really be a probability distribution with M being at the top
 	 // followed by L, O, K, H, U, C. But for now this will work
 	 p_type = randomnum(1,configdata->number_of_planet_types-1);
-    planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet *));
+    planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet));
     planets[p_num-1]->num = p_num;
-    planets[p_num-1]->name = (char *) malloc (strlen (p_name) * sizeof (char));
+    planets[p_num-1]->name = (char *)malloc((MAX_NAME_LENGTH+1)*sizeof(char));
     strcpy(planets[p_num-1]->name, planetname);
     planets[p_num-1]->owner = curplayer->number;
 	 planets[p_num-1]->sector = sector;

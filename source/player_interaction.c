@@ -82,8 +82,7 @@ makeplayerthreads (void *threadinfo)
   for the players.
 */
 
-void *
-handle_player (void *threadinfo)
+void *handle_player (void *threadinfo)
 {
   int sector, sockid = ((struct connectinfo *) threadinfo)->sockid,
     msgidout = ((struct connectinfo *) threadinfo)->msgidout,
