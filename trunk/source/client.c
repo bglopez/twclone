@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.3 $
- * Last Modified: $Date: 2001-06-16 20:36:27 $
+ * $Revision: 1.4 $
+ * Last Modified: $Date: 2002-04-10 18:05:51 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.3 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2001-06-16 20:36:27 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.4 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-04-10 18:05:51 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1057,24 +1057,24 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
       {
          if ((length=strcspn(temp + pos, ",")) == 0)
          {
- 	    free(buff);
-	    free(temp);
-	    free(intptr);
-	    buff = NULL;
-	    temp = NULL;
-	    intptr = NULL;
+ 	    		free(buff);
+	    		free(temp);
+	    		free(intptr);
+	    		buff = NULL;
+	    		temp = NULL;
+	    		intptr = NULL;
             return -1;
          }
          strncpy(tempsec, temp + pos, length);
-	 tempsec[length] = '\0';
+	 		tempsec[length] = '\0';
          warps[counter] = strtoul(tempsec, NULL, 10);
          pos = pos + length +1;
          if (pos >= len)
-	 {
-	    foo = counter;
+			{
+	    		foo = counter;
             counter = 26;
-	 }
-     }
+			}
+		}
      
      printf("\n%sThat Warp lane is not adjacent.%s", KGRN, KNRM);
      printf("\n\n%sComputed.%s", KBLU, KNRM);
