@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** 1) Modified Planet struct to hold more information about colonist.
 **
 ** 2) Modified all comments from // to C comments in case a users complier isn't C99 
-**    complilant. (like some older Sun or HP compilers)
+**    compliant. (like some older Sun or HP compilers)
 **
 ** 3) Added additional planetType struct.
 ** 
@@ -37,6 +37,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define UNIVERSE_H
 
 #include "common.h"
+
+#define NUMBER_OF_PLANET_TYPES 8
+#define MAX_CIDADEL_LEVEL 7
 
 struct port
 { 
@@ -113,7 +116,7 @@ struct ship
 
 enum planettype
 {
-  terra, /* 
+  TERRA, /* 
 	 ** Special case since terra has almost 
 	 ** limitless supply of colonists. 
 	 */
@@ -135,25 +138,35 @@ enum planettype
   U, /* Gaseous 
      ** f=N/A,o=N/A,e=N/A
      */
-  I  /* Glacial/Ice (Not the offical designator) */
+  C  /* Glacial/Ice  */
 };
 
-struct planetType 
+struct planetType_struct 
 {
-  int typenum;
-  int maxColonist;
-  float fuelProduction;   /* amount producted * amount of colonists assigned */
-  float organicsProduction;   /* amount producted * amount of colonists assigned */
-  float equipmentProduction;   /* amount producted * amount of colonists assigned */
-  float fighterProduction;   /* amount producted * amount of total colonists */
-  float breeding; /* Percentage of population growth due to breeding. */
+  char *typeDescription;
+  char *typeName;
+  int citadelUpgradeTime[MAX_CIDADEL_LEVEL];
+  int citadelUpgradeOre[MAX_CIDADEL_LEVEL];
+  int citadelUpgradeOrganics[MAX_CIDADEL_LEVEL];
+  int citadelUpgradeEquipment[MAX_CIDADEL_LEVEL];
+  int citadelUpgradeColonist[MAX_CIDADEL_LEVEL];
+  int maxColonist[2]; /* max colonist in ore,organics,equp */
+  int fighters;
+  int fuelProduction;   
+  int organicsProduction;  
+  int equipmentProduction;  
+  int fighterProduction;   
+  float breeding;
 };
+
+typedef struct planetType_struct planetClass;
 
 struct planet
 {
   int num;
   char *name;
   enum planettype type;
+  planetClass *pClass;
   char *owner;
   char ownertype;
   char *corp; /* Don't think this is needed since owner should be corp # or player # */
@@ -213,6 +226,7 @@ int verify_sector_links(struct sector *test);
 void init_playerinfo(char *filename);
 void init_shipinfo(char *filename);
 void init_portinfo(char *filename);
+void init_planetClassification(void);
 #endif
 
 
