@@ -26,9 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "common.h"
 #include "player_interaction.h"
 #include "sysop_interaction.h"
+extern int WARP_WAIT;
 
-void *
-getsysopcommands (void *threadinfo)
+void *getsysopcommands (void *threadinfo)
 {
   int msgidin = ((struct connectinfo *) threadinfo)->msgidin;
   struct msgcommand data;
@@ -42,10 +42,18 @@ getsysopcommands (void *threadinfo)
       fgets (buffer, BUFF_SIZE, stdin);
       buffer[strcspn (buffer, "\n")] = '\0';
       if (strcmp (buffer, "QUIT") == 0)
-	{
-	  data.command = ct_quit;
-	  senddata (msgidin, &data, pthread_self ());
-	}
+		{
+	  		data.command = ct_quit;
+			senddata (msgidin, &data, pthread_self ());
+		}
+		if (strcmp(buffer, "WARP_WAIT") == 0)
+		{
+			WARP_WAIT = 1;
+		}
+		if (strcmp(buffer, "NOWARP_WAIT") == 0)
+		{
+			WARP_WAIT = 0;
+		}
     }
   return NULL;
 }
