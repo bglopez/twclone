@@ -434,6 +434,61 @@ processcommand (char *buffer, struct msgcommand *data)
             return;
         }
         break;
+	 case ct_stardock:
+			if ((curplayer = (struct player *) find (data->name, player, symbols,
+              HASH_LENGTH)) == NULL)
+        	{
+            strcpy (buffer, "BAD\n");
+            return;
+        	}
+ 			if (intransit (data))
+        	{
+            strcpy (buffer, "BAD: Can't port while moving!\n");
+            return;
+        	}
+        	if (curplayer->sector == 0)
+        	{
+            if (sectors[ships[curplayer->ship - 1]->location - 1]->portptr !=
+                    NULL)
+                curport =
+                    sectors[ships[curplayer->ship - 1]->location - 1]->portptr;
+            else
+                curport = NULL;
+        	}
+        	else
+        	{
+            if (sectors[curplayer->sector - 1]->portptr != NULL)
+                curport = sectors[curplayer->sector - 1]->portptr;
+            else
+                curport = NULL;
+        	}
+        	if (curport != NULL)
+        	{
+            strcpy (buffer, data->buffer);
+            switch (data->pcommand)
+            {
+					case p_deposit:
+						bank_deposit(buffer, curplayer);
+						break;
+					case p_withdraw:
+						bank_withdrawl(buffer, curplayer);
+						break;
+					case p_buyship:
+						break;
+					case p_sellship:
+						break;
+					case p_buyhardware:
+						break;
+            	default:
+                	break;
+            }
+        	}
+        	else
+        	{
+            strcpy (buffer, "BAD: No Port in this sector!");
+            return;
+        	}
+        	break;
     case ct_info:
         if ((curplayer =
                     (struct player *) find (data->name, player, symbols,
@@ -616,6 +671,41 @@ builddescription (int sector, char *buffer, int playernum)
     return;
 }
 
+void bank_deposit(char *buffer, struct player *curplayer)
+{
+	int request=0;
+
+	request= popint(buffer, ":");
+
+	if (request > curplayer->credits)
+	{
+		strcpy(buffer, "BAD: Not enough credits on player.");
+		return;
+	}
+	else
+	{
+		curplayer->credits = curplayer->credits - request;
+		curplayer->bank_balance = curplayer->bank_balance + request;
+	}
+	return;
+}
+
+void bank_withdrawl(char *buffer, struct player *curplayer)
+{
+	int request=0;
+
+	if (curplayer->bank_balance < request)
+	{
+		strcpy(buffer, "BAD: Not enough credits in account.");
+		return;
+	}
+	else
+	{
+		curplayer->bank_balance = curplayer->bank_balance - request;
+		curplayer->credits = curplayer->credits + request;
+	}
+	return;
+}
 void
 whosonline (char *buffer)
 {
@@ -789,9 +879,10 @@ saveplayer (int pnumb, char *filename)
     addint (stufftosave, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
     addint (stufftosave, players[pnumb - 1]->turns, ':', BUFF_SIZE);
     addint (stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	 addint(stufftosave, players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
     len = strlen (stufftosave);
 
-    for (loop = 1; loop <= 99 - len; loop++)
+    for (loop = 1; loop <= 199 - len; loop++)
         strcat (stufftosave, " ");
     strcat (stufftosave, "\n");
 
@@ -868,7 +959,7 @@ saveship (int snumb, char *filename)
     addint (stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
     len = strlen (stufftosave);
-    for (loop = 1; loop <= 99 - len; loop++)	//This puts a buffer of space in the save
+    for (loop = 1; loop <= 199 - len; loop++)	//This puts a buffer of space in the save
         strcat (stufftosave, " ");	//file so things don't get overwritten
     strcat (stufftosave, "\n");	//when saving.
 
@@ -945,7 +1036,7 @@ saveallports ()
         addint (stufftosave, ports[portnumb - 1]->invisible, ':', BUFF_SIZE);
 
         len = strlen (stufftosave);
-        for (loop = 1; loop <= 99 - len; loop++)	//This puts a buffer of space in the save
+        for (loop = 1; loop <= 199 - len; loop++)	//This puts a buffer of space in the save
             strcat (stufftosave, " ");	//file so things don't get overwritten
         strcat (stufftosave, "\n");	//when saving.
         //fprintf(stderr, "\nsaveallports: Saving port '%s'", stufftosave);
@@ -1536,6 +1627,7 @@ buildnewplayer (struct player *curplayer, char *shipname)
     curplayer->alignment = 0;
     curplayer->turns = configdata->turnsperday;
     curplayer->credits = configdata->startingcredits;
+	 curplayer->bank_balance = 0;
     curplayer->lastprice = 0;
     curplayer->firstprice = 0;
     curplayer->ported = 0;

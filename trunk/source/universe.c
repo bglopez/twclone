@@ -210,13 +210,14 @@ init_playerinfo (char *filename)
             exit (-1);
         }
 
-        curplayer->sector = popint (buffer, ":");
-        curplayer->ship = popint (buffer, ":");
+        curplayer->sector = popint(buffer, ":");
+        curplayer->ship = popint(buffer, ":");
         curplayer->number = playernum;
-        curplayer->experience = popint (buffer, ":");
-        curplayer->alignment = popint (buffer, ":");
-        curplayer->turns = popint (buffer, ":");
-        curplayer->credits = popint (buffer, ":");
+        curplayer->experience = popint(buffer, ":");
+        curplayer->alignment = popint(buffer, ":");
+        curplayer->turns = popint(buffer, ":");
+        curplayer->credits = popint(buffer, ":");
+		  curplayer->bank_balance = popint(buffer, ":");
         curplayer->name = (char *) malloc (strlen (name) + 1);
         curplayer->passwd = (char *) malloc (strlen (passwd) + 1);
         strncpy (curplayer->name, name, strlen (name) + 1);
