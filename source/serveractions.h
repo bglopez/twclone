@@ -38,5 +38,8 @@ void sendtosector (int sector, int playernum, int direction, int planetnum);
 void saveplayer (int pnumb, char *filename);
 void saveship (int snumb, char *filename);
 void saveallports (char *filename);
+int innode(int sector);
+void listnodes(char *buffer, struct port *curport);
+void nodetravel(char *buffer, struct player *curplayer);
 
 #endif

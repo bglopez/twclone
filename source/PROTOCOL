@@ -37,12 +37,20 @@ If price you offer is a -1 that counts as a test price. And doesn't initiate
 For upgrading 0 is you're not buying and want to know how much each item is
 				  1 is you are buying 
 				  2 is how many you can buy.
+Also PORT QUIT:
+	Leave the port/stardock/node
 
 STARDOCK <BALANCE,DEPOSIT,WITHDRAW>:
 Do stardock commands:
 For BALANCE add nothing.
 for DEPOSIT "STARDOCK DEPOSIT:<amt depsoited>:"
 for WITDRAW "STARDOCK WITHDRAW:<amt to withdraw>:"
+
+NODE <LISTNODES,TRAVEL,(etc)>:
+Do Node commands:
+	Also does stardock commands.
+	For LISTNODES add nothing.
+	For TRAVEL "NODE TRAVEL:<node traveling to>:
 
 LAND <Planet number>:
 Lands on the planet number given.

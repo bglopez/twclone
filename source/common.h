@@ -80,6 +80,8 @@ enum porttype
   p_deposit,
   p_withdraw,
   p_balance,
-  p_buyhardware
+  p_buyhardware,
+  pn_listnodes,
+  pn_travel
 };
 #endif

@@ -41,11 +41,11 @@ char evil_ranks[23][50] = { "Civilian", "Nuisance 3rd Class",
   "Heinous Overlord", "Prime Evil"
 };
 
-char porttypes[10][25] = { "\x1B[1;36mSpecial", "\x1B[0;32mBB\x1B[0;1;36mS",
+char porttypes[11][25] = { "\x1B[1;36mSpecial", "\x1B[0;32mBB\x1B[0;1;36mS",
   "\x1B[0;32mB\x1B[1;36mS\x1B[0;32mB", "\x1B[0;32mB\x1B[0;1;36mSS",
   "\x1B[1;36mS\x1B[0;32mBB", "\x1B[1;36mS\x1B[0;32mB\x1B[1;36mS",
   "\x1B[1;36mSS\x1B[0;32mB", "\x1B[1;36mSSS", "\x1B[0;32mBBB",
-  "\x1B[1;36mSpecial"
+  "\x1B[1;36mSpecial", "\x1B[1;36mSpecial"
 };
 
 
@@ -162,9 +162,12 @@ void getmyinfo (int sockid, struct player *curplayer);
 void printmyinfo (struct player *curplayer);
 void printhelp ();
 void print_stardock_help();
+void print_node_help();
 void print_shipyard_help();
 void print_bank_help();
 void do_stardock_menu(int sockid, struct player *curplayer);
+void do_node_menu(int sockid, struct player *curplayer);
+void do_noderelay_menu(int sockid, struct player *curplayer);
 int do_planet_select(int sockid, struct player *curplayer, struct sector *cursector);
 int do_planet_menu(int sockid, struct player *curplayer);
 void citadelupgrade(int sockid, struct planet *curplanet);

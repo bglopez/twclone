@@ -64,6 +64,7 @@ enum commandtype
   ct_fedcomm,
   ct_online,
   ct_stardock,
+  ct_node,
   ct_planet,
   ct_onplanet,
   ct_land,

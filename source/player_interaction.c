@@ -200,6 +200,35 @@ void *handle_player (void *threadinfo)
 			data.command = ct_stardock;
 			commandgood = 1;
 		}
+		else if (strncmp(inbuffer, "NODE", strlen("NODE")) == 0 && loggedin)
+		{
+			strcpy(data.name, name);
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			popstring(inbuffer, temp, ":", BUFF_SIZE);
+			if (strncmp(temp, "BUYSHIP", strlen("BUYSHIP")) == 0)
+				data.pcommand = p_buyship;
+			else if (strncmp(temp, "SELLSHIP", strlen("SELLSHIP")) == 0)
+				data.pcommand = p_sellship;
+			else if (strncmp(temp, "PRICESHIP", strlen("PRICESHIP")) == 0)
+				data.pcommand = p_priceship;
+			else if (strncmp(temp, "LISTSHIPS", strlen("PRICESHIP")) == 0)
+				data.pcommand = p_listships;
+			else if (strncmp(temp, "DEPOSIT", strlen("DEPOSIT")) == 0)
+				data.pcommand = p_deposit;
+			else if (strncmp(temp, "WITHDRAW", strlen("WITHDRAW")) == 0)
+				data.pcommand = p_withdraw;
+			else if (strncmp(temp, "BALANCE", strlen("BALANCE")) == 0)
+				data.pcommand = p_balance;
+			else if (strncmp(temp, "BUYHARDWARE", strlen("BUYHARDWARE")) == 0)
+				data.pcommand = p_buyhardware;
+			else if (strncmp(temp, "LISTNODES", strlen("LISTNODES")) == 0)
+				data.pcommand = pn_listnodes;
+			else if (strncmp(temp, "TRAVEL", strlen("TRAVEL")) == 0)
+				data.pcommand = pn_travel;
+			strcpy(data.buffer, inbuffer);
+			data.command = ct_node;
+			commandgood = 1;
+		}
       else if (strncmp (inbuffer, "LAND", strlen ("LAND")) == 0 && loggedin)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);

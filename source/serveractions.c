@@ -27,6 +27,7 @@ extern struct ship **ships;
 extern struct port **ports;
 extern struct planet **planets;
 extern struct config *configdata;
+extern struct node **nodes;
 
 extern int sectorcount;
 extern int WARP_WAIT; 
@@ -710,9 +711,32 @@ void processcommand (char *buffer, struct msgcommand *data)
 					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_STARDOCK;
 					 	strcpy(buffer, "OK: Landed on stardock");
 					 }
+					 else if (curport->type == 10)
+					 {
+						if ((ships[curplayer->ship - 1]->flags & S_NODE) 
+											 != S_NODE)
+						{
+							if (curplayer->sector == 0)
+        			 		{
+            				sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, 6,0);
+                        delete (curplayer->name, player,
+                           sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
+					 		}
+        			 		else
+        			 		{
+            				sendtosector (curplayer->sector, curplayer->number
+													 , 6,0);
+                        delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
+							}
+						}
+					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_NODE;
+					 	strcpy(buffer, "OK: Landed on a Node Station");
+					 }
 					 else
 					 {
-						strcpy(buffer, "BAD: Port is not a class 9");
+						strcpy(buffer, "BAD: Port is not a class 9 or 10");
 					 }
                 break;
             case p_negotiate:
@@ -765,6 +789,20 @@ void processcommand (char *buffer, struct msgcommand *data)
         			 		else
         			 		{
             			sendtosector (curplayer->sector, curplayer->number, -4,0);
+        			 		}
+					 	}
+						else if ((ships[curplayer->ship - 1]->flags & S_NODE) == S_NODE)
+					 	{
+						  ships[curplayer->ship - 1]->flags =
+						  ships[curplayer->ship - 1]->flags & (S_MAX ^ S_NODE);
+							if (curplayer->sector == 0)
+        			 		{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -6,0);
+					 		}
+        			 		else
+        			 		{
+            			sendtosector (curplayer->sector, curplayer->number, -6,0);
         			 		}
 					 	}
 					 	else
@@ -851,6 +889,79 @@ void processcommand (char *buffer, struct msgcommand *data)
 					case p_buyhardware:
 						break;
             	default:
+                	break;
+            }
+        	}
+        	else
+        	{
+            strcpy (buffer, "BAD: No Port in this sector!");
+            return;
+        	}
+        	break;
+	 case ct_node:
+			if ((curplayer = (struct player *) find (data->name, player, symbols,
+              HASH_LENGTH)) == NULL)
+        	{
+            strcpy (buffer, "BAD\n");
+            return;
+        	}
+ 			if (intransit (data))
+        	{
+            strcpy (buffer, "BAD: Can't Do stardock stuff while moving!\n");
+            return;
+        	}
+        	if (curplayer->sector == 0)
+        	{
+            if (sectors[ships[curplayer->ship - 1]->location - 1]->portptr !=
+                    NULL)
+                curport =
+                    sectors[ships[curplayer->ship - 1]->location - 1]->portptr;
+            else
+                curport = NULL;
+        	}
+        	else
+        	{
+            if (sectors[curplayer->sector - 1]->portptr != NULL)
+                curport = sectors[curplayer->sector - 1]->portptr;
+            else
+                curport = NULL;
+        	}
+        	if (curport != NULL)
+        	{
+            strcpy (buffer, data->buffer);
+            switch (data->pcommand)
+            {
+					case p_balance:
+					   bank_balance(buffer, curplayer);
+						break;
+					case p_deposit:
+						bank_deposit(buffer, curplayer);
+						break;
+					case p_withdraw:
+						bank_withdrawl(buffer, curplayer);
+						break;
+					case p_buyship:
+						buyship(buffer, curplayer);
+						break;
+					case p_sellship:
+						sellship(buffer, curplayer);
+						break;
+					case p_priceship:
+						priceship(buffer, curplayer);
+						break;
+					case p_listships:
+						listships(buffer);
+						break;
+					case p_buyhardware:
+						break;
+					case pn_listnodes:
+						listnodes(buffer, curport);
+						break;
+					case pn_travel:
+						nodetravel(buffer, curplayer);
+						break;
+            	default:
+						strcpy(buffer, "BAD: Unknown NODE command");
                 	break;
             }
         	}
@@ -1137,7 +1248,21 @@ void findautoroute (int from, int to, char *buffer)
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                        };
     char temp[50];
+	 int nodefrom = innode(from);
+	 int nodeto = innode(to);
 
+	 if (nodefrom != nodeto)
+	 {
+		if (configdata->numnodes != 1)
+		{
+			findautoroute(from, nodes[nodefrom-1]->portptr->location, buffer);
+		}
+		else
+		{
+			strcpy(buffer, "BAD: Something wrong serverside!");
+		}
+		return;
+	 }
     for (i = 0; i <= sectorcount; i++)
     {
         length[i] = 65536;
@@ -1154,7 +1279,9 @@ void findautoroute (int from, int to, char *buffer)
         {
             if ((length[counter] < length[shortest])
                     && (unmarked[counter] == 1))
+				{
                 shortest = counter;
+				}
         }
         if (shortest == 0)
         {
@@ -2891,4 +3018,73 @@ void sendtosector (int sector, int playernum, int direction, int planetnum)
     }
 
 
+}
+
+int innode(int sector)
+{
+    int counter;
+    int nodemin;
+    int nodemax;
+
+    if (configdata->numnodes == 1)
+    {
+        return 1;
+    }
+    for (counter=1; counter <= configdata->numnodes; counter++)
+    {
+		  nodemin = nodes[counter - 1]->min;
+		  nodemax = nodes[counter - 1]->max;
+        if (sector >= nodemin && sector <= nodemax)
+        {
+            return(counter);
+        }
+    }
+	 return(-1);
+}
+
+void listnodes(char *buffer, struct port *curport)
+{
+	int curnode;
+	int counter;
+	
+	for (counter=0; counter < configdata->numnodes; counter++)
+	{
+		if (nodes[counter]->portptr != curport)
+		{
+			addstring(buffer, nodes[counter]->portptr->name, ',', BUFF_SIZE);
+			addint(buffer, nodes[counter]->number, ':', BUFF_SIZE);
+		}
+	}
+}
+
+void nodetravel(char *buffer, struct player *curplayer)
+{
+	int nodeto=0;
+
+	gettimeofday(&begin, 0);
+	nodeto = popint(buffer, ":");
+	if (curplayer->turns < 10)
+	{
+		strcpy(buffer, "BAD: Not enough turns!");
+		return;
+	}
+	if ((nodeto > configdata->numnodes) || (nodeto < 1))
+	{
+		strcpy(buffer, "BAD: Invalid Node!");
+		return;
+	}
+	if (curplayer->sector == 0)
+	{
+		ships[curplayer->ship - 1]->location = nodes[nodeto-1]->portptr->location;
+		
+	}
+	else
+	{
+		curplayer->sector = nodes[nodeto-1]->portptr->location;
+	}
+	curplayer->intransit = 1;
+	curplayer->movingto = nodes[nodeto-1]->portptr->location;
+	curplayer->beginmove = begin.tv_sec;
+	strcpy(buffer, "OK: Moving to a new node!");
+	return;
 }
