@@ -1,6 +1,7 @@
 /*
-Copyright (C) 2000 Jason C. Garcowski(jcg5@po.cwru.edu), 
-                   Ryan Glasnapp(rglasnap@nmt.edu)
+Copyright (C) 2004 Jason C. Garcowski(jcg5@po.cwru.edu), 
+                   Ryan Glasnapp(rglasnap@nmt.edu),
+		   Jonathan B. Dodson(jbdodson@gmail.com)
  
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -23,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.56 $
- * Last Modified: $Date: 2004-06-22 16:00:42 $
+ * $Revision: 1.57 $
+ * Last Modified: $Date: 2004-12-09 15:43:11 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +40,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.56 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-06-22 16:00:42 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.57 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-12-09 15:43:11 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -858,6 +859,91 @@ void psinfo (int sockid, int pnumb, struct player *p)
     return;
 }
 
+void sinfo (int sockid, int snumb, struct player *p)
+{
+    char *buffer = (char *) malloc (BUFF_SIZE);
+    char *temp = (char *) malloc (70);
+    int position = 1;
+    char *intptr = (char *) malloc (5);
+    struct ship *curship;
+	 int pnumb;
+    char name[50], type[50];
+    char pname[70], title[50];
+
+
+	 
+    *buffer = '\0';
+    *temp = '\0';
+    p->next = NULL;
+    p->pship = NULL;
+
+    if ((curship = (struct ship *) malloc (sizeof (struct ship))) != NULL)
+    {
+        curship->name = NULL;
+        curship->type = NULL;
+        curship->next = NULL;
+		  curship->number = snumb;
+        *buffer = '\0';
+        strcpy (buffer, "SHIPINFO ");
+        sprintf (intptr, "%d", snumb);
+        strcat (buffer, intptr);
+        strcat (buffer, ":");
+        sendinfo (sockid, buffer);
+        *(buffer + 0) = '\0';
+        position = 1;
+        recvinfo (sockid, buffer);
+        curship->ownedby = popint (buffer + position, ":");
+		  pnumb = curship->ownedby;
+        popstring (buffer + position, name, ":", 70);
+        popstring (buffer + position, type, ":", 70);
+        curship->fighters = popint (buffer + position, ":");
+        curship->shields = popint (buffer + position, ":");
+        if (curship->name == NULL)
+            curship->name = (char *) malloc (sizeof(char)*(strlen (name) + 1));
+        if (curship->type == NULL)
+            curship->type = (char *) malloc (sizeof(char)*(strlen (type) + 1));
+    		strcpy (buffer, "PLAYERINFO ");
+    		sprintf (intptr, "%d", pnumb);
+    		strcat (buffer, intptr);
+    		strcat (buffer, ":");
+    		sendinfo (sockid, buffer);
+    		*buffer = '\0';
+    		recvinfo (sockid, buffer);
+    		if (strncmp ("BAD", buffer, 3) == 0)
+    		{
+        		printf ("\nBAD Server response.");
+        		free (buffer);
+        		free (temp);
+        		free (p);
+		  		free(intptr);
+        		p = NULL;
+        		return;
+    		}
+    		popstring (buffer + position, pname, ":", 70);
+    		if (p->name == NULL)
+        		 p->name = (char *) malloc (sizeof(char)*(strlen (pname) + 1));
+    		strncpy (curship->name, name, strlen (name) + 1);
+    		strncpy (curship->type, type, strlen (type) + 1);
+    		strncpy (p->name, pname, strlen (pname) + 1);
+    		free (buffer);
+    		free (temp);
+	 		free(intptr);
+    		p->pship = curship;
+    		}
+    else
+    {
+        printf ("\nUnable to allocate memory for ship.");
+        free (buffer);
+        free (temp);
+        free (p);
+		  free(intptr);
+        free (curship);
+        p = NULL;
+        return;
+    }
+    return;
+}
+
 int getsectorinfo (int sockid, struct sector *cursector)
 {
     int length, position, len, pos;
@@ -1082,6 +1168,56 @@ int getsectorinfo (int sockid, struct sector *cursector)
             }
         }
     }
+
+	 position = position + 4; //Put misc mine stuff here
+	 if ((length = strcspn (buff + position, ":")) == 0)	//If no unmanned
+    {
+        cursector->unmanned = NULL;	//No unmanned!
+        position++;
+    }
+    else
+    {
+        len = pos = 0;
+        strcpy (tempbuf, "\0");
+        popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
+        strncpy (temp, tempbuf, strlen (tempbuf));
+        for (counter = 0; counter <= MAX_PLAYERS; counter++)
+        {
+            if ((curplayer = (struct player *) malloc (sizeof (struct player))) != NULL)
+            {
+                tempplayer = popint (temp, ",");
+                curplayer->name = NULL;
+                curplayer->title = NULL;
+                curplayer->next = NULL;
+                curplayer->pship = NULL;
+                sinfo (sockid, tempplayer, curplayer);
+                tempplayer = popint (tempbuf, ",");	//For wierd
+                if (strncmp (temp, tempbuf, 5) != 0)	//Data corruption
+                    strcpy (temp, tempbuf);	//errors
+                if (cursector->unmanned == NULL)
+                    cursector->unmanned = curplayer;
+                else
+					 {
+					   place=cursector->unmanned;
+						while(place->next!=NULL)
+						{
+							place=place->next;
+						}
+					 }
+					 if (place != NULL)
+                	place->next = curplayer;
+                curplayer = NULL;
+                if (strlen (temp) == 0)	//If we're beyond the length of
+                    counter = MAX_PLAYERS + 1;	//the string, then no more loop
+            }
+            else
+            {
+                printf ("\nUnable to allocate memory");
+                return (cursector->number);
+            }
+        }
+    }
+
     // To be continued.
     return cursector->number;
 }
@@ -1180,6 +1316,39 @@ int printsector (struct sector *cursector)
         }
     }
     cursector->players = NULL;
+
+    if (cursector->unmanned != NULL)
+    {
+        printf ("\n%sShips   %s: ", KYLW, KLTYLW);
+        first = cursector->unmanned;
+        place = first;
+        for (counter = 0; counter <= MAX_PLAYERS; counter++)
+        {
+            if (counter == 0)
+            {
+                printf (" %s%s %s[%sOwned by%s] %s%s,%s w/ %s%d%s ftrs%s,", KLTCYN, first->pship->name, 
+									 KMAG ,KRED ,KMAG ,first->name ,KLTYLW, KGRN, KLTYLW, first->pship->fighters, 
+									 KGRN, KLTYLW);
+            }
+            else
+            {
+                printf ("\n           %s%s %s[%sOwned by%s] %s%s,%s w/ %s%d%s ftrs%s,", KLTCYN, 
+							place->pship->name,KMAG ,KRED ,KMAG ,place->name ,KLTYLW, KGRN, KLTYLW, 
+							place->pship->fighters,KGRN, KLTYLW);
+            }
+            printf ("\n           %s (%s%s)%s",
+                    KGRN, place->pship->type, KGRN, KNRM);
+            if (place->next == NULL)
+                counter = MAX_PLAYERS + 1;
+            else
+                after = place->next;
+				fflush(stdout);
+            clearplayer (place);
+            place = after;
+        }
+    }
+    cursector->unmanned = NULL;
+
     //All other sector printing stuff goes before this!
 
     printf ("\n%sWarps to Sector(s) %s:%s  %d", KLTGRN, KLTYLW,
@@ -1267,6 +1436,59 @@ void print_shipyard_help()
 	return;
 }
 
+/*
+	the cineplex help function.  code taken from the other help functions and implemented by jdodson.
+	the list is currently all the movies the old tradewars used to display.
+	last updated 12/7/04 - jdodson - created the function.
+	
+*/
+void print_cineplex_help()
+{
+	printf("\n%s+===================================+",KGRN);
+	printf("\n%s|     Cineplex Videon Theatres%s:%s     |",KGRN, KLTYLW,KGRN);
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%s1%s> %sVulcan Thunder%s                |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%s2%s> %sFerrengi Nights%s               |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%s3%s> %sStar Trek%s                     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%s4%s> %sLil Neutron%s                   |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%s5%s> %sDebbie Does Rigel%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%s?%s> %sCineplex Help%s                 |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sLeave the Cineplex%s            |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+===================================+",KGRN);
+	return;
+}
+
+/*
+	the shipspecs help function.  code taken from the other help functions and implemented by jdodson.
+
+	last updated 12/7/04 - jdodson - created the function.
+	
+*/
+void print_shipspecs_help()
+{
+	printf("\n%s<%sA%s> %s***Escape Pod***",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sB%s> %sMerchant Cruiser",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sC%s> %sScout Marauder",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sD%s> %sMissile Frigate",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sE%s> %sBattleShip",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sF%s> %sCorporate FlagShip",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sG%s> %sColonial Transport",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sH%s> %sCargoTran",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sI%s> %sMerchant Freighter",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sJ%s> %sImperial StarShip",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sK%s> %sHavoc GunStar",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sL%s> %sStarMaster",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sM%s> %sConstellation",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sN%s> %sT'Khasi Orion",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sO%s> %sTholian Sentinel",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sP%s> %sTaurean Mule",KGRN,KMAG,KGRN,KMAG);
+	printf("\n%s<%sR%s> %sInterdictor Cruiser",KGRN,KMAG,KGRN,KMAG);
+
+	printf("\n");
+	return;
+}
+
 void print_bank_help()
 {
 	printf("\n%s+=========================+",KGRN);
@@ -1299,6 +1521,10 @@ void do_stardock_menu(int sockid, struct player *curplayer)
 		junkline();
 		switch(command)
 		{
+			case 'c':
+			case 'C':
+				do_cineplex_menu(sockid, curplayer);
+				break;
 			case 'q':
 			case 'Q':
 				done = 1;
@@ -1358,7 +1584,7 @@ void do_node_menu(int sockid, struct player *curplayer)
 			case 'n':
 			case 'N':
 				do_noderelay_menu(sockid, curplayer);
-				break;
+				break;	
 			case '?':
 				print_node_help();
 				break;
@@ -2149,6 +2375,10 @@ void do_shipyard_menu(int sockid, struct player *curplayer)
 		junkline();
 		switch(command)
 		{
+			case 'e':
+			case 'E':
+				do_examine_ship_specs(sockid, curplayer);
+				break;
 			case 'q':
 			case 'Q':
 				done = 1;
@@ -2166,6 +2396,620 @@ void do_shipyard_menu(int sockid, struct player *curplayer)
 				break;
 			case '?':
 				print_shipyard_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+}
+
+/*
+	do_examine_ship_specs.  this function lets the player look at the ship specs from the stardock.
+	
+	last updated 12/7/04 - jdodson - created the function
+	12/8/04 - jdodson - cleaned up the text, made it more readable.  cleaned up the code a bit.
+	
+*/
+void do_examine_ship_specs(int sockid, struct player *curplayer)
+{
+	char command;
+	int done=0;
+
+	int index=0;
+	char *buffer;
+	char *minibuff;
+	struct sp_shipinfo **shiptypes=NULL;
+	int ship_type_count=0;
+
+	buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	minibuff = (char *)malloc(sizeof(char)*512);
+	if (buffer==NULL || minibuff == NULL)
+	{
+		fprintf(stderr, "do_examine_ship_specs: Can't allocate mem for buffer!");
+	}
+	shiptypes = (struct sp_shipinfo **)
+			  malloc(sizeof(struct sp_shipinfo *)*ship_type_count);
+
+	done = 0;
+	index = 0;
+
+	strcpy(buffer, "LISTSHIPINFO:\0");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	ship_type_count = popint(buffer, ":");
+	shiptypes = (struct sp_shipinfo **)
+			  malloc(sizeof(struct sp_shipinfo *)*ship_type_count);
+
+	done = 0;
+	index = 0;
+	while(!done)
+	{
+		if (index >= ship_type_count)
+			done=1;
+		if (strlen(buffer)==0)
+			done=1;
+		else if (index < ship_type_count)
+		{
+			popstring(buffer, minibuff, ":", BUFF_SIZE);
+			shiptypes[index] = 
+				(struct sp_shipinfo *)malloc(sizeof(struct sp_shipinfo));
+			if (shiptypes[index] != NULL)
+			{
+			popstring(minibuff, shiptypes[index]->name, ",", BUFF_SIZE);
+			shiptypes[index]->basecost = popint(minibuff, ",");
+			shiptypes[index]->maxattack = popint(minibuff, ",");
+			shiptypes[index]->initialholds = popint(minibuff, ",");
+			shiptypes[index]->maxholds = popint(minibuff, ",");
+			shiptypes[index]->maxfighters = popint(minibuff, ",");
+			shiptypes[index]->turns = popint(minibuff, ",");
+			shiptypes[index]->mines = popint(minibuff, ",");
+			shiptypes[index]->genesis = popint(minibuff, ",");
+			shiptypes[index]->twarp = popint(minibuff, ",");
+			shiptypes[index]->transportrange = popint(minibuff, ",");
+			shiptypes[index]->maxshields = popint(minibuff, ",");
+			shiptypes[index]->offense = popint(minibuff, ",");
+			shiptypes[index]->defense = popint(minibuff, ",");
+			shiptypes[index]->beacons = popint(minibuff, ",");
+			shiptypes[index]->holo = popint(minibuff, ",");
+			shiptypes[index]->planet = popint(minibuff, ",");
+			shiptypes[index]->photons = popint(minibuff, ",");
+			index++;
+			}
+		}
+	}
+
+	done = 0;
+	index = 0;
+	while (!done)
+	{
+
+		printf("\n%s<%sExamine Specs%s> Your option %s(?)%s ? "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case 'a':
+			case 'A':
+				//show escape pod
+				printf("\n%sShip Category\t#0\t\t\tShip Class : *** Escape Pod ***", KGRN);
+
+				printf("\n%sBasic Hold Cost:\t500\t\tInitial Holds:\t\t1\tMaximum Shields:\t50", KGRN);
+				printf("\n%sMain Drive Cost:\t4,246\t\tMax Fighters:\t\t50\tOffensive Odds:\t\t0.8:1", KGRN);
+				printf("\n%sComputer Cost:\t\t4,700\t\tTurns Per Warp:\t\t6\tDefensive Odds:\t\t0.8:1", KGRN);
+				printf("\n%sShip Hull Cost:\t\t5,000\t\tMine Max:\t\t0\tBeacon Max:\t\t0", KGRN);
+				printf("\n%sShip Base Cost:\t\t14,446\t\tGenesis Max:\t\t0\tLong Range Scan:\tYes", KGRN);
+				printf("\n%sMax Figs Per Attack:\t10\t\tTransWarp Drive:\tNo\tPlanet Scanner:\t\tNo", KGRN);
+				printf("\n%sMaximum Holds:\t\t5\t\tTransport Range:\t0\tPhoton Missiles:\tNo", KGRN);
+
+				break;
+			case 'b':
+			case 'B':
+				//show the merchant cruiser
+				printf("\n%s    Merchant Cruiser", KGRN);
+				printf("\n%s  +------------------=                    Ship Category #1 ", KGRN);                   
+				printf("\n%s  |.   .   []  .  .  |   --------------------------------------------------", KGRN);
+				printf("\n%s  |     . [::].     .|     The  Merchant Cruiser  is the standard fare for", KGRN);         
+				printf("\n%s  |.  .   ]][[   .   |     earning a living in the universe.   These craft", KGRN);
+				printf("\n%s  |  .   [|][|].   . |     are moderately fast, well armored and have hard", KGRN);
+				printf("\n%s  | .  . ]|][|[      |     points  for  many different accessories.   Many", KGRN);
+				printf("\n%s  |.    [-{][}-]   ..|     cartels use the Merchant Cruiser as  their only", KGRN);
+				printf("\n%s  |    [~.{][}--]   .|     ship type.   The Merchant is the craft by which", KGRN);
+				printf("\n%s  | .  [-``][``-] .  |     combat specs are rated for a standard.", KGRN);
+				printf("\n%s  |.   [~~~~~~~~]  . |   --------------------------------------------------", KGRN);
+				printf("\n%s  }------------------{", KGRN);
+				printf("\n%s  |  . _#~~~~~~#_   .|", KGRN);
+				printf("\n%s  |.   ~.     . ~ .  |", KGRN);
+				printf("\n%s  =------------------=", KGRN);
+				printf("\n%s     Basic Hold Cost:   10,000   Initial Holds:     20 Maximum Shields:   400", KGRN);
+				printf("\n%s     Main Drive Cost:    1,000    Max Fighters:  2,500  Offensive Odds: 1.0:1", KGRN);
+				printf("\n%s       Computer Cost:   20,300  Turns Per Warp:      3  Defensive Odds: 1.0:1", KGRN);
+				printf("\n%s      Ship Hull Cost:   10,000        Mine Max:     50      Beacon Max:    50", KGRN);
+				printf("\n%s      Ship Base Cost:   41,300     Genesis Max:      5 Long Range Scan:   Yes", KGRN);
+				printf("\n%s Max Figs Per Attack:      750 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+				printf("\n%s       Maximum Holds:       75 Transport Range:      5 Photon Missiles:    No", KGRN);
+
+
+				break;
+			case 'c':
+			case 'C':
+				//show the scout marauder
+				printf("\n%s    Scout Marauder", KGRN);
+				printf("\n%s +------------------+                      Ship Category #2", KGRN);                  
+				printf("\n%s |.  ..  ____ .    .| --------------------------------------------------------", KGRN);
+				printf("\n%s | [~_  [##=-[  _~] |    The  Scout  Marauder  is  currently  the  fastest,", KGRN);         
+				printf("\n%s | [ [ [  vv .] ].] |    conventional drive ship  known  to  mankind.  This", KGRN);    
+				printf("\n%s | [{[ ]| .. |[ ]}] |    small speedster can easily  outdistance  even  the", KGRN);
+				printf("\n%s |. ][ ]|.**.|[ ][ .|    powerful Corellian Battleships. It is not equipped", KGRN);
+				printf("\n%s |. [ |||}**{||| | .|    for controlling many fighters or shields,  but  it", KGRN);
+				printf("\n%s |  [[ [|`**'|].]|  |    fights at 2 to 1 odds due  to  its  quickness  and", KGRN);
+				printf("\n%s |  [[ ·~~~~~~  ]]  |    small size.  This  craft  cannot  carry  mines  or", KGRN);
+				printf("\n%s |.   .     .  .  ..|    Genesis Torpedoes.   It  may  be  small,  but this", KGRN);
+				printf("\n%s }------------------{    ship's speed and range make up for much.", KGRN);
+				printf("\n%s | . .  .   .  .    | --------------------------------------------------------", KGRN);
+				printf("\n%s |.[._== ~~~~ ==_ ].|", KGRN);
+				printf("\n%s +------------------+", KGRN);
+				printf("\n%s     Basic Hold Cost:    5,000   Initial Holds:     10 Maximum Shields:   100", KGRN);
+				printf("\n%s     Main Drive Cost:    3,000    Max Fighters:    250  Offensive Odds: 2.0:1", KGRN);
+				printf("\n%s       Computer Cost:    5,200  Turns Per Warp:      2  Defensive Odds: 2.0:1", KGRN);
+				printf("\n%s      Ship Hull Cost:    2,750        Mine Max:      0      Beacon Max:    10", KGRN);
+				printf("\n%s      Ship Base Cost:   15,950     Genesis Max:      0 Long Range Scan:   Yes", KGRN);
+				printf("\n%s Max Figs Per Attack:      250 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+				printf("\n%s       Maximum Holds:       25 Transport Range:      0 Photon Missiles:    No", KGRN);
+				
+				break;
+
+			case 'd':
+			case 'D':
+printf("\n%s    Missile Frigate                     Ship Category #3", KGRN);
+printf("\n%s +------------------+  ----------------------------------------------------- ", KGRN);   
+printf("\n%s |.   .   []  .  .  |  The  Missile Frigate's are really nothing more than a", KGRN);
+printf("\n%s |     . [::].     .|  retro-fitted Merchant Cruiser. They maintain the same ", KGRN);        
+printf("\n%s |.  .   ]][[   .   |  speed  and  range of the Merchant but can carry twice", KGRN);   
+printf("\n%s |  .   [|][|].   . |  the firepower.  Commanding  a  Frigate means that you", KGRN);
+printf("\n%s | . ]. ]|][|[  [   |  cannot  take  advantage  of  much  of  the additional", KGRN);
+printf("\n%s |.  # [-{][}-] # ..|  starship   equipment   available,  but  their  combat", KGRN);
+printf("\n%s |   #~~.{][}-~~#  .|  advantages make up for that.   The Missile Frigate is", KGRN);
+printf("\n%s | . [--``][``--].  |  the primary ship outfitted to carry the deadly Photon", KGRN);
+printf("\n%s |.  .~~~~~~~~~~  . |  Missile.   These  weapons  of  disruption   can  turn", KGRN);
+printf("\n%s }------------------{  Ports, Planets or other Ships into  defenseless weak-", KGRN);
+printf("\n%s |  . _#~~~~~~#_   .|  lings in a flash.  When used in the hands of Pirates,", KGRN);
+printf("\n%s |.  # .     . .#.  |  the P-Missile can be deadly indeed!", KGRN);
+printf("\n%s +------------------+  -----------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:    6,000   Initial Holds:     12 Maximum Shields:   400", KGRN);
+printf("\n%s     Main Drive Cost:    1,000    Max Fighters:  5,000  Offensive Odds: 1.3:1", KGRN);
+printf("\n%s       Computer Cost:   82,800  Turns Per Warp:      3  Defensive Odds: 1.3:1", KGRN);
+printf("\n%s      Ship Hull Cost:   11,000        Mine Max:      5      Beacon Max:     5", KGRN);
+printf("\n%s      Ship Base Cost:  100,800     Genesis Max:      0 Long Range Scan:    No", KGRN);
+printf("\n%s Max Figs Per Attack:     2000 TransWarp Drive:     No  Planet Scanner:    No", KGRN);
+printf("\n%s       Maximum Holds:       60 Transport Range:      2 Photon Missiles:   Yes", KGRN);
+				break;
+
+			case 'e':
+			case 'E':
+printf("\n%s Corellian Battleship", KGRN);
+printf("\n%s +------------------+                    Ship Category #4", KGRN);                      
+printf("\n%s |_]__.-------- __[_| ------------------------------------------------------", KGRN);
+printf("\n%s |]]].' --==-- ` [[[|  The Corellian Battleship is a dangerous craft indeed! ", KGRN);       
+printf("\n%s |]|||%%%=##=%%%|||[  |  This  ship  packs  the  most punch of any ship in the", KGRN);    
+printf("\n%s |]]]`|  %  %  .'[[[   |  Federation.   Battleship's  can  carry four times the", KGRN);
+printf("\n%s |]]#_`---++---'_#[[|  fighters of a Merchant and deliver them with  a  much", KGRN);
+printf("\n%s |[]..~~~#||#~~~ .[ |  higher degree of effectiveness due  to their superior", KGRN);
+printf("\n%s |[]  ._~~`'~~_.  [.|  combat  computers.     The   shield   generators   on", KGRN);
+printf("\n%s |[ .  ].++++.[  .[ |  Battleships  are  capable  of  shielding  the  ship's", KGRN);
+printf("\n%s |.  . ]  . . [ .  .|  fighters as well.   This craft  is  one  of  the more", KGRN);
+printf("\n%s }------------------{  prestigious and powerful ships available today.", KGRN);
+printf("\n%s |..__.___~~___ __..| ------------------------------------------------------", KGRN);
+printf("\n%s |~'=~~~--__--~~~=`~|", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:    8,000   Initial Holds:     16 Maximum Shields:   750", KGRN);
+printf("\n%s     Main Drive Cost:    1,000    Max Fighters: 10,000  Offensive Odds: 1.6:1", KGRN);
+printf("\n%s       Computer Cost:   61,500  Turns Per Warp:      4  Defensive Odds: 1.6:1", KGRN);
+printf("\n%s      Ship Hull Cost:   18,000        Mine Max:     25      Beacon Max:    50", KGRN);
+printf("\n%s      Ship Base Cost:   88,500     Genesis Max:      1 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:     3000 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       80 Transport Range:      8 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'f':
+			case 'F':
+printf("\n%s  Corporate Flagship", KGRN);
+printf("\n%s +------------------+                     Ship Category #5", KGRN);                   
+printf("\n%s |   .   _==_ .   . |  ------------------------------------------------------", KGRN);
+printf("\n%s | .    []::[]   . .|   Few  words  can  actually  describe  the  sheer  awe", KGRN);        
+printf("\n%s |     . #][#.  .   |   associated with a Corporate Flagship. Only available", KGRN); 
+printf("\n%s | .      ][.      .|   to CEO's,  this  huge craft is the ultimate in power", KGRN);
+printf("\n%s |     ]. ][  [  .  |   and capability.   Not only can it carry up to 20,000", KGRN);
+printf("\n%s |   .]  [][] :[   .|   fighters at one time,  this  ship carries a powerful", KGRN);
+printf("\n%s | .  ] ##][ #:[ .  |   combination  of  options that will make any foe turn", KGRN);
+printf("\n%s |.   ] #....#:[  . |   tail and run.", KGRN);
+printf("\n%s | .. ]= ~##~ =[.  .|  ------------------------------------------------------", KGRN);
+printf("\n%s }------------------{", KGRN);
+printf("\n%s |.   ]  _==_ .[  ..|", KGRN);
+printf("\n%s |. . [#__..__#].  .|", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:   10,000   Initial Holds:     20 Maximum Shields: 1,500", KGRN);
+printf("\n%s     Main Drive Cost:    5,000    Max Fighters: 20,000  Offensive Odds: 1.2:1", KGRN);
+printf("\n%s       Computer Cost:  120,000  Turns Per Warp:      3  Defensive Odds: 1.2:1", KGRN);
+printf("\n%s      Ship Hull Cost:   28,500        Mine Max:    100      Beacon Max:   100", KGRN);
+printf("\n%s      Ship Base Cost:  163,500     Genesis Max:     10 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:     6000 TransWarp Drive:    Yes  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       85 Transport Range:     10 Photon Missiles:    No", KGRN);
+				break;
+			case 'g':
+			case 'G':
+printf("\n%s  Colonial Transport", KGRN);
+printf("\n%s +------------------+                     Ship Category #6", KGRN);                   
+printf("\n%s |.  ..  _::  .    .| --------------------------------------------------------", KGRN);
+printf("\n%s | [:: [======][::  |  The Colonial Transport is a massive structure that can", KGRN);        
+printf("\n%s | [==##==##==##==] |  only barely be called a ship. This huge craft is ideal", KGRN);  
+printf("\n%s | [==][==][==][==] |  for moving large amounts of products or colonists from", KGRN);
+printf("\n%s |.[==][==][==][==].|  from place to place.   Though it has a standard drive,", KGRN);
+printf("\n%s |.[==][==][==][==].|  this ship  is  rather  slow  due to the mass involved.", KGRN);
+printf("\n%s | [==##==##==##==] |  Also,  the combat computers are rather limited on this", KGRN);
+printf("\n%s | [I:][::][::][:I] |  craft due to the  excessive  needs  of  the navigation", KGRN);
+printf("\n%s |. [&. [&  [&  [&..|  computers. The Transport is not outfitted for carrying", KGRN);
+printf("\n%s }------------------{  or deploying mines.    Conflict brings the Transport's", KGRN);
+printf("\n%s | .              . |  major weakness to light. Due to the size of the craft,", KGRN);
+printf("\n%s |.[:=][:=##:=][:=].|  it is very hard to defend against fighters.", KGRN);
+printf("\n%s +------------------+ --------------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:   27,000   Initial Holds:     50 Maximum Shields:   500", KGRN);
+printf("\n%s     Main Drive Cost:    1,000    Max Fighters:    200  Offensive Odds: 0.6:1", KGRN);
+printf("\n%s       Computer Cost:   10,400  Turns Per Warp:      6  Defensive Odds: 0.6:1", KGRN);
+printf("\n%s      Ship Hull Cost:   25,200        Mine Max:      0      Beacon Max:    10", KGRN);
+printf("\n%s      Ship Base Cost:   63,600     Genesis Max:      5 Long Range Scan:    No", KGRN);
+printf("\n%s Max Figs Per Attack:      100 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:      250 Transport Range:      7 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'h':
+			case 'H':
+printf("\n%s       CargoTran", KGRN);
+printf("\n%s +------------------+                     Ship Category #7", KGRN);                     
+printf("\n%s |.  .   _==  .    .| --------------------------------------------------------", KGRN);
+printf("\n%s | .   .[:||:]  .   |  The CargoTran is a large ship indeed.    Though not as", KGRN);       
+printf("\n%s |.  .  .]::[. .  . |  fast as some of its related trading cousins, this ship", KGRN); 
+printf("\n%s |   . [~=..=~]  .  |  can move vast  amounts  of  goods.   It is typically a", KGRN);
+printf("\n%s | .   ].=||=.[ .   |  pacifist's ship as it does not carry much  in  the way", KGRN);
+printf("\n%s |  . [}{=||=}{]  . |  of offensive capabilities but it's very large array of", KGRN);
+printf("\n%s |   [|||=||=|||].  |  holds makes up for  all  of  that.    The large shield", KGRN);
+printf("\n%s | . [}'|=||=}'|]  .|  capacity of this craft makes it safe to wander hostile", KGRN);
+printf("\n%s |. .[}-{]`'[}-{] . |  territory as well.  This ship is considered by many to", KGRN);
+printf("\n%s }------------------{  be one of the top money-makers in the Universe.", KGRN);
+printf("\n%s |.    .       .  . | --------------------------------------------------------", KGRN);
+printf("\n%s | ..[|=[_~~ ]=|]  .|", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:   27,000   Initial Holds:     50 Maximum Shields: 1,000", KGRN);
+printf("\n%s     Main Drive Cost:    1,000    Max Fighters:    400  Offensive Odds: 0.8:1", KGRN);
+printf("\n%s       Computer Cost:   11,050  Turns Per Warp:      4  Defensive Odds: 0.8:1", KGRN);
+printf("\n%s      Ship Hull Cost:   12,900        Mine Max:      1      Beacon Max:    20", KGRN);
+printf("\n%s      Ship Base Cost:   51,950     Genesis Max:      2 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:      125 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:      125 Transport Range:      5 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'i':
+			case 'I':
+printf("\n%s  Merchant Freighter", KGRN);
+printf("\n%s +------------------+                     Ship Category #8 ", KGRN);                 
+printf("\n%s | . .  .[==]  . . .| --------------------------------------------------------", KGRN);
+printf("\n%s |  . . [.==.].   . |  The Merchant Freighter  is  the  ideal  ship for those ", KGRN);       
+printf("\n%s |.   .[+{==}+]  .  |  traders that do  not  want  to concern themselves with ", KGRN);  
+printf("\n%s |  . [-+{==}+-].   |  political matters.   It is not a very powerful ship in", KGRN);
+printf("\n%s | . [+-+{==}+-+]  .|  combat,  but  its  strengths are many.   This ship can", KGRN);
+printf("\n%s |.  [}-{|==|}-{] . |  carry  a  large  number  of  shields  and  manages  to", KGRN);
+printf("\n%s |  .[`-'|==|`-'].  |  outdistance most ships.   After all,  \"Those who fight", KGRN);
+printf("\n%s | .  ~&&~&%~%%~   .|  and run away, live to fight another day\"  still  holds", KGRN);
+printf("\n%s |.  . ~~.~~.~~ .  .|  very true in the universe as we know it today.", KGRN);
+printf("\n%s }------------------{ --------------------------------------------------------", KGRN);
+printf("\n%s |. .          .  . |", KGRN);
+printf("\n%s |.. [.__ ~~ __.]  .|", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:   15,000   Initial Holds:     30 Maximum Shields:   500", KGRN);
+printf("\n%s     Main Drive Cost:    2,000    Max Fighters:    300  Offensive Odds: 0.8:1", KGRN);
+printf("\n%s       Computer Cost:    9,600  Turns Per Warp:      2  Defensive Odds: 0.8:1", KGRN);
+printf("\n%s      Ship Hull Cost:    6,800        Mine Max:      2      Beacon Max:    20", KGRN);
+printf("\n%s      Ship Base Cost:   33,400     Genesis Max:      2 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:      100 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       65 Transport Range:      5 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'j':
+			case 'J':
+printf("\n%s  Imperial StarShip                     Ship Category #9", KGRN);
+printf("\n%s +------------------+ -------------------------------------------------------  ", KGRN);
+printf("\n%s | .  _.------._.  .|  The commercial version of a Federation StarShip is not", KGRN);
+printf("\n%s |. .[.'      `-] . |  available to just anyone. This craft is available only ", KGRN);       
+printf("\n%s |_].]|&&&==:::|[ [_|  only to those commissioned by the Federation to aid in ", KGRN);  
+printf("\n%s |][ [`'  vv  .'].][|  their  cause.   StarShips are the most closely guarded", KGRN);
+printf("\n%s |][ .~`--++--'~  ][|  technology  in  existence.   They  can  carry  massive", KGRN);
+printf("\n%s |]#. . #~||~#. . #[|  assault power,  and through the use of TransWarp Drive", KGRN);
+printf("\n%s |[#~~~--{`'}--~~~#]|  they can deliver this power virtually anywhere.", KGRN);
+printf("\n%s |[]  .~.++++.~ . []|", KGRN);
+printf("\n%s |[ .  .~[||]~.  . ]|  The Imperial StarShip is truly the  most powerful ship", KGRN);
+printf("\n%s }------------------{  that  a  private  individual  can  command.   For more", KGRN);
+printf("\n%s |[~~~~~_=__= ~~~~~]|  information about qualifying for a Federal Commission,", KGRN);
+printf("\n%s |. .~~~##~~##~~~. .|  contact a FedSpace Police Station near you.", KGRN);
+printf("\n%s +------------------+ ------------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:   23,000   Initial Holds:     40 Maximum Shields: 2,000", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters: 50,000  Offensive Odds: 1.5:1", KGRN);
+printf("\n%s       Computer Cost:  231,000  Turns Per Warp:      4  Defensive Odds: 1.5:1", KGRN);
+printf("\n%s      Ship Hull Cost:   65,000        Mine Max:    125      Beacon Max:   150", KGRN);
+printf("\n%s      Ship Base Cost:  329,000     Genesis Max:     10 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:    10000 TransWarp Drive:    Yes  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:      150 Transport Range:     15 Photon Missiles:   Yes", KGRN);
+
+				break;
+			case 'k':
+			case 'K':
+printf("\n%s    Havoc GunStar                        Ship Category #10", KGRN);
+printf("\n%s +------------------+  ---------------------------------------------------", KGRN);     
+printf("\n%s |.  .  .  ..      .|      The Havoc GunStar is a recently developed ship", KGRN);
+printf("\n%s | . ]  .      .[ . |     that owes its existance to new developments in", KGRN);            
+printf("\n%s |.  ] _~~~~~~_ [  .|     micro-miniaturization.  This mid-sized ship is", KGRN);       
+printf("\n%s |.  #[  ]~~[  ]# . |     the only one of its size to be able to house a", KGRN);
+printf("\n%s |  .[]  # ]#  []. .|     TransWarp drive.  Though it doesn't carry a", KGRN);
+printf("\n%s |.  []  | ]|  [].  |     large amount of holds to fuel the TransWarp, it", KGRN);
+printf("\n%s | .  #  `..'  #   .|     still has a decent T-Warp range and can arrive", KGRN);
+printf("\n%s |  · [   ||   ]  . |     at its destination packing a moderate fighting", KGRN);
+printf("\n%s |.  . ~~=~~=~~ .  .|     force in the bargain.  Watch for this ship to", KGRN);
+printf("\n%s }------------------{     become the favorite of the Mercenary legions in", KGRN);
+printf("\n%s |.    .     . .   .|     the Universe.", KGRN);
+printf("\n%s |  .[_~~~~~~~~_] . | ----------------------------------------------------", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:    6,000   Initial Holds:     12 Maximum Shields: 3,000", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters: 10,000  Offensive Odds: 1.2:1", KGRN);
+printf("\n%s       Computer Cost:   48,000  Turns Per Warp:      3  Defensive Odds: 1.2:1", KGRN);
+printf("\n%s      Ship Hull Cost:   15,000        Mine Max:      5      Beacon Max:     5", KGRN);
+printf("\n%s      Ship Base Cost:   79,000     Genesis Max:      1 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:     1000 TransWarp Drive:    Yes  Planet Scanner:    No", KGRN);
+printf("\n%s       Maximum Holds:       50 Transport Range:      6 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'l':
+			case 'L':
+
+printf("\n%s      StarMaster", KGRN);
+printf("\n%s +------------------+                     Ship Category #11", KGRN);                
+printf("\n%s |.      _==_   .  .| --------------------------------------------------------", KGRN);
+printf("\n%s |  .   [%:::].   . |  The StarMaster represents the latest  in technological", KGRN);       
+printf("\n%s |    . []::[]  .   |  advances for star travel,  meeting  the needs of those", KGRN); 
+printf("\n%s | .   [|=..=|]  .  |  who desire  a  ship  with great speed and medium cargo", KGRN);
+printf("\n%s |     ]|:||:|[     |  capacity.   Developed to counter the growing threat of", KGRN);
+printf("\n%s | .  [}{=||=}{]   .|  space piracy,  the  StarMaster  posesses  a formidable", KGRN);
+printf("\n%s |   .[||:||:||].   |  fire control and weapons system,  and  a  high  shield", KGRN);
+printf("\n%s |  .[}'|=||=|`{] . |  capacity. The price for this state-of-the-art craft is", KGRN);
+printf("\n%s |.  [}-{:`':}-{]. .|  not cheap, but discerning traders will  find  that the", KGRN);
+printf("\n%s }------------------{  investment will pay for itself in the long run.", KGRN);
+printf("\n%s |.    .        .  .|", KGRN);
+printf("\n%s | . [|=[__#_]=|] . |  Built exclusively by Markham Space Technologies.", KGRN);
+printf("\n%s +------------------+ --------------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:   10,000   Initial Holds:     20 Maximum Shields: 2,000", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters:  5,000  Offensive Odds: 1.4:1", KGRN);
+printf("\n%s       Computer Cost:   29,000  Turns Per Warp:      3  Defensive Odds: 1.4:1", KGRN);
+printf("\n%s      Ship Hull Cost:   12,300        Mine Max:     50      Beacon Max:    50", KGRN);
+printf("\n%s      Ship Base Cost:   61,300     Genesis Max:      5 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:     1000 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       73 Transport Range:      3 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'm':
+			case 'M':
+printf("\n%s    Constellation", KGRN);
+printf("\n%s .------------------¬                     Ship Category # 12", KGRN);                 
+printf("\n%s |   ·  __~~__ ·  · | --------------------------------------------------------", KGRN);
+printf("\n%s | ·   [.:==:.]    ·|  The Constellation  is  the  direct  offspring  of  the", KGRN);        
+printf("\n%s |·      [==]   . · |  Correlian BattleShip.   While not quite as powerful as", KGRN);   
+printf("\n%s |  ·  ·[¬==.]   ·  |  its distinguished parent,  the Constellation makes its", KGRN);
+printf("\n%s |    · ]|==|[·    ·|  own mark with greater speed and range.    Traders have", KGRN);
+printf("\n%s |  [  []|==|[ · ]· |  dubbed  it  the \"baby battleship\",  but  this \"infant\"", KGRN);
+printf("\n%s |· #[.-¬|==|.-¬]#  |  is  one  of  the  most powerful and maneuverable ships", KGRN);
+printf("\n%s | ·[|`-'|==|`-'|[ ·|  available in the universe today.", KGRN);
+printf("\n%s |. ·~~&%`--'&%~~·  | --------------------------------------------------------", KGRN);
+printf("\n%s }------------------{", KGRN);
+printf("\n%s |.·   __ ~~ __  · .|", KGRN);
+printf("\n%s |  [.~ ·     .~¬]  |", KGRN);
+printf("\n%s `------------------'", KGRN);
+printf("\n%s     Basic Hold Cost:   10,000   Initial Holds:     20 Maximum Shields:   750", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters:  5,000  Offensive Odds: 1.4:1", KGRN);
+printf("\n%s       Computer Cost:   39,500  Turns Per Warp:      3  Defensive Odds: 1.4:1", KGRN);
+printf("\n%s      Ship Hull Cost:   13,000        Mine Max:     25      Beacon Max:    50", KGRN);
+printf("\n%s      Ship Base Cost:   72,500     Genesis Max:      2 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:     2000 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       80 Transport Range:      6 Photon Missiles:    No", KGRN);
+
+				break;
+
+			case 'n':
+			case 'N':
+printf("\n%s    T'Khasi Orion", KGRN);
+printf("\n%s +------------------+                     Ship Category # 13", KGRN);                
+printf("\n%s |   .   _~~_  .  . | --------------------------------------------------------", KGRN);
+printf("\n%s | ·   · ][][      .|  The T'Khasi Orion is the perfect  ship for traders who", KGRN);       
+printf("\n%s |.  .   [::]   . . |  want the  speed and  cargo  capacity  of the  merchant", KGRN);   
+printf("\n%s |     .[.::.]   .  |  freighter but need  a  bit  more  firepower.  Offering", KGRN);
+printf("\n%s | [  . ]}--{[    ].|  substantially higher combat odds and fighter capacity,", KGRN);
+printf("\n%s |[# . []|==|[].  #]|  the T'Khasi Orion is an  excellent  intermediate ship.", KGRN);
+printf("\n%s |[#+-+-`{==}`-+-+#]| --------------------------------------------------------", KGRN);
+printf("\n%s | #`-`-+{==}+-`-`# |", KGRN);
+printf("\n%s |.~    ~`--'~   .~ |", KGRN);
+printf("\n%s }------------------{", KGRN);
+printf("\n%s |[#.____ ~~ ____ #]|", KGRN);
+printf("\n%s |.~] .   ~  ..  [~.|", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:   15,000   Initial Holds:     30 Maximum Shields:   750", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters:    750  Offensive Odds: 1.1:1", KGRN);
+printf("\n%s       Computer Cost:   10,500  Turns Per Warp:      2  Defensive Odds: 1.1:1", KGRN);
+printf("\n%s      Ship Hull Cost:    6,750        Mine Max:      5      Beacon Max:    20", KGRN);
+printf("\n%s      Ship Base Cost:   42,250     Genesis Max:      1 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:      250 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       60 Transport Range:      3 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'o':
+			case 'O':
+printf("\n%s   Tholian Sentinel", KGRN);
+printf("\n%s +------------------+                     Ship Category # 14 ", KGRN);                 
+printf("\n%s |.   .   _   .    .| --------------------------------------------------------", KGRN);
+printf("\n%s | .     #==#    .  |  Young corporations in need of planetary defense should", KGRN);        
+printf("\n%s |   .   [  ]     . |  consider the Sentinel.   With its new planetary combat", KGRN);  
+printf("\n%s |     . [||]  .    |  guidance system, this ship's normal combat odds of 1:1", KGRN);
+printf("\n%s | .     [||].   .  |  shoot  up  to  4:1  when defending a corporate planet.", KGRN);
+printf("\n%s |  ..  .#||#       |  When  an  enemy  ship  enters  a  sector  containing a", KGRN);
+printf("\n%s |      ##||# :.   .|  Sentinel set in defense  of  a  corporate  planet, the", KGRN);
+printf("\n%s |    ] ##II##:[  . |  hostile vessel must first destroy the Sentinel and all", KGRN);
+printf("\n%s |. . ]  ~~~~. [ .  |  of  its  fighters before  it  may land and attempt any", KGRN);
+printf("\n%s }------------------{  action toward the planet.   Remember: the Sentinel was", KGRN);
+printf("\n%s |  .   .       .   |  designed primarily for planetary defense,  if used for", KGRN);
+printf("\n%s |..  ]~~~==~~ [ . .|  offensive purposes its combat odds are 1:1.", KGRN);
+printf("\n%s +------------------+ --------------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:    5,000   Initial Holds:     10 Maximum Shields: 4,000", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters:  2,500  Offensive Odds: 1.0:1", KGRN);
+printf("\n%s       Computer Cost:   25,000  Turns Per Warp:      4  Defensive Odds: 1.0:1", KGRN);
+printf("\n%s      Ship Hull Cost:    7,500        Mine Max:     50      Beacon Max:    10", KGRN);
+printf("\n%s      Ship Base Cost:   47,500     Genesis Max:      1 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:      800 TransWarp Drive:     No  Planet Scanner:    No", KGRN);
+printf("\n%s       Maximum Holds:       50 Transport Range:      3 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'p':
+			case 'P':
+printf("\n%s     Taurean Mule", KGRN);
+printf("\n%s +------------------+                     Ship Category # 15", KGRN);                   
+printf("\n%s |. .    ___  .    .| --------------------------------------------------------", KGRN);
+printf("\n%s |    ..|=..=|. . . |  \"Big, slow and ugly...\",  seem  to  be  the words most", KGRN);         
+printf("\n%s |     [|:||:|      |  often overheard when someone  is  describing the Mule.", KGRN);   
+printf("\n%s | . }====||===={   |  Designed in direct competition with the CargoTran, the", KGRN);
+printf("\n%s |   | .|:||:| .|   |  Mule is somewhat faster and posesses  a  higher  cargo", KGRN);
+printf("\n%s | ..| [|:||:|] |. ·|  capacity, but it is even more vulnerable to piracy and", KGRN);
+printf("\n%s |  [}====||===={]  |  attack than its competitor.   However, this is still a", KGRN);
+printf("\n%s |  [|:..:||:..:|]. |  good ship for traders who have staked out \"safe\" trade", KGRN);
+printf("\n%s |. .}====`'===={. .|  lanes and do not have to worry about enemy attacks.", KGRN);
+printf("\n%s }------------------{ --------------------------------------------------------", KGRN);
+printf("\n%s |. [|=[[__#_]]=|] .|", KGRN);
+printf("\n%s | .    ~~##~~    . |", KGRN);
+printf("\n%s +------------------+", KGRN);
+printf("\n%s     Basic Hold Cost:   28,000   Initial Holds:     50 Maximum Shields:   600", KGRN);
+printf("\n%s     Main Drive Cost:   10,000    Max Fighters:    300  Offensive Odds: 0.5:1", KGRN);
+printf("\n%s       Computer Cost:   10,300  Turns Per Warp:      4  Defensive Odds: 0.5:1", KGRN);
+printf("\n%s      Ship Hull Cost:   15,300        Mine Max:      0      Beacon Max:    20", KGRN);
+printf("\n%s      Ship Base Cost:   63,600     Genesis Max:      1 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:      150 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:      150 Transport Range:      5 Photon Missiles:    No", KGRN);
+
+				break;
+			case 'r':
+			case 'R':
+printf("\n%s  Interdictor Cruiser                   Ship Category #16", KGRN);
+printf("\n%s +------------------+ -------------------------------------------------------", KGRN);  
+printf("\n%s |------------------|  A recently designed vessel, the Interdictor Cruiser is", KGRN);
+printf("\n%s | .--+--------+--. |  fast becoming the great Equalizer of the Universe.  It", KGRN);        
+printf("\n%s | | ]|&&&==:::|[ | |  is as  powerful as it is large  and packs a tremendous", KGRN); 
+printf("\n%s | [  `.  vv  .'  ] |  punch in modern combat.  Unfortunately it cannot use a", KGRN);
+printf("\n%s |][  ~`--++--'~  ][|  TransWarp drive due to its size and its speed is not a", KGRN);
+printf("\n%s |]&&   #~||~#   ::[|  great asset.  The  major  attraction of this vessel is", KGRN);
+printf("\n%s |]&&~~--{`'}--~~::[|  the  Interdictor Generator that  creates  such a large", KGRN);
+printf("\n%s |][   ~.++++¬~   ][|  gravity well that no other ship in its sector can warp", KGRN);
+printf("\n%s | `+--+'[||]`+--+' |  out!  When an Interdictor Cruiser arrives on the scene", KGRN);
+printf("\n%s }------------------{  you had  better give  up all thoughts of running away.", KGRN);
+printf("\n%s |##~~~~~=__=~~~~~##|  In addition  this ship is not an atmospheric craft and", KGRN);
+printf("\n%s |##&~~~##~~##~~~:  |  cannot land on any planets.", KGRN);
+printf("\n%s +------------------+ ------------------------------------------------------", KGRN);
+printf("\n%s     Basic Hold Cost:    5,000   Initial Holds:     10 Maximum Shields: 4,000", KGRN);
+printf("\n%s     Main Drive Cost:   50,000    Max Fighters:100,000  Offensive Odds: 1.2:1", KGRN);
+printf("\n%s       Computer Cost:  380,000  Turns Per Warp:     15  Defensive Odds: 1.2:1", KGRN);
+printf("\n%s      Ship Hull Cost:  104,000        Mine Max:    200      Beacon Max:   100", KGRN);
+printf("\n%s      Ship Base Cost:  539,000     Genesis Max:     20 Long Range Scan:   Yes", KGRN);
+printf("\n%s Max Figs Per Attack:    15000 TransWarp Drive:     No  Planet Scanner:   Yes", KGRN);
+printf("\n%s       Maximum Holds:       40 Transport Range:     20 Photon Missiles:    No", KGRN);
+;
+				break;
+
+			case '?':
+				print_shipspecs_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+	//Time for some cleanup;
+	free(buffer);
+	free(minibuff);
+	
+	for (index=0; index < ship_type_count; index++)
+	{
+		free(shiptypes[index]);
+	}
+	free(shiptypes);
+}
+
+/*
+	do_cineplex_menu.  code taken from the other do_X_menu functions and implemented by jdodson.
+	
+	last updated 12/7/04 - jdodson - created the function
+	
+*/
+void do_cineplex_menu(int sockid, struct player *curplayer)
+{
+	char command;
+	int done=0;
+
+	/*
+		display the attendriod
+	*/
+	printf("\n%sEager for some needed diversion,", KYLW);
+	printf("     %s#%s++++++++++++++++++++++++++%s#", KYLW, KMAG, KYLW);
+	printf("\n%syou enter CinePlex Videon, the", KYLW);
+	printf("       %s#%s+++++++%s\\%s#%s] \\  /   /%s+++++++%s#", KYLW, KMAG, KLTCYN, KLTYLW, KLTCYN, KMAG, KYLW);
+	printf("\n%sStarPort's new Holo-Theatre. While", KYLW);
+	printf("   %s#%s+++++++%s[%s#%s| %s=  = %s|%s#%s]%s+++++++%s#", KYLW, KMAG, KLTCYN, KLTYLW, KLTCYN, KRED, KLTCYN, KLTYLW, KLTCYN, KMAG, KYLW);
+	printf("\n%strying to decide which Holo to", KYLW);
+	printf("       %s#%s+++++++++%s\\------/%s+++++++++%s#", KYLW, KMAG, KLTCYN, KMAG, KYLW);
+	printf("\n%swatch, you are rudely interrupted", KYLW);
+	printf("    %s#%s+++++++++%s]%s=====%s[%s++++++++++%s#", KYLW, KMAG, KLTCYN, KLTYLW, KLTCYN, KMAG, KYLW);
+	printf("\n%sby the AttenDroid:", KYLW);
+	printf("                   %s#%s++++++++++++%s::%s++++++++++++%s#", KYLW, KMAG, KLTCYN, KMAG, KYLW);
+	printf("\n\t\t\t\t     %s#%s+++++%s#   *%stickets%s*  #%s+++++%s#", KYLW, KMAG, KLTCYN, KYLW, KLTCYN, KMAG, KYLW);
+	printf("\n\t\t\t\t     %s#%s++++++%s#--- ==== ---#%s++++++%s#", KYLW, KMAG, KLTCYN, KMAG, KYLW);
+
+	printf("\n\n\t\t\t\t     %sC'mon pal, either buy a ticket or\n\t\t\t\t     dematerialize[1-5]!", KLTYLW);
+
+	while (!done)
+	{
+
+		printf("\n\n\n%s<%sCineplex%s> Your option %s(?)%s ? "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case '1':
+				buymovieticket(sockid, curplayer);
+				break;
+			case '2':
+				buymovieticket(sockid, curplayer);
+				break;
+			case '3':
+				buymovieticket(sockid, curplayer);
+				break;
+			case '4':
+				buymovieticket(sockid, curplayer);
+				break;
+			case '5':
+				buymovieticket(sockid, curplayer);
+				break;
+			case '?':
+				print_cineplex_help();
 				break;
 			default:
 				printf("\nThat option is not supported yet!");
@@ -2385,6 +3229,63 @@ void buyship(int sockid, struct player *curplayer)
 	printf("\n%sYou have %s%d%s credits.", KGRN, KLTYLW, curplayer->credits, KGRN);
 	free(buffer);
 	free(input);
+	return;
+}
+
+/*
+	buymovieticket() this function is called when you want to purchase a movie ticket for
+	any other movies at the cineplex theaters.  all it does is display a movie screen
+	and decrements the expense of the watcher by a specified amount.
+
+	last updated - jdodson - 12/7/04
+*/
+void buymovieticket(int sockid, struct player *curplayer)
+{
+	//amount of money the movie costs
+	//lets set this to 150
+	int movieTicketPrice = 150;
+
+	//get updated player info
+	getmyinfo(sockid, curplayer);
+
+	//if the player has the amount or more
+	if(curplayer->credits >= movieTicketPrice)
+	{
+		//decrement the credits
+		//curplayer->credits = curplayer->credits - movieTicketPrice;
+
+
+		/*
+			display the "oh so movie like" graphics!  
+		*/
+		printf("\n%s:###______________________________________________________________________###:", KGRN);
+		printf("\n%s:####           .   .   .   .       .     .    .         .           .   ####:", KGRN);
+		printf("\n%s:####  .              .         .                  .             .       ####:", KGRN);
+		printf("\n%s:####        .                .                .      .                  ####:",KGRN);
+		printf("\n%s:####     .        .     .                       .          .            ####:",KGRN);
+		printf("\n%s:####                     .                         .  .           .     ####:",KGRN);
+		printf("\n%s:#### .      .       .       .               .           .     .         ####:",KGRN);
+		printf("\n%s:####             .     .                       .                    .   ####:",KGRN);
+		printf("\n%s:####     .              .       .               .    .      .    .      ####:",KGRN);
+		printf("\n%s:####   .         .   .      ..     ..      .   .  . .                   ####:",KGRN);
+		printf("\n%s:####                .                   .         .     .    .  .    .  ####:",KGRN);
+		printf("\n%s:####    _~_  .  ~~_    _~ .        .        .        _~#_  .   =#~#_=   ####:",KGRN);
+		printf("\n%s:#### .    [_       ####_        .        .       .  [       .  #        ####:",KGRN);
+		printf("\n%s:###~~~~~  [~~~~~~~######[~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]  ~~~~~~~~]  ~~~~~###:",KGRN);
+		printf("\n%s       _    ~#_   [#######]                          _~   ##_   _~   ##_",KGRN);
+		printf("\n%s              [#  ########[                        _~       ##         ##",KGRN);
+		printf("\n%s                  [########]",KGRN);
+		printf("\n%s                   ######_~",KGRN);
+		printf("\n%s                   ~##_~",KGRN);
+		printf("\n%s                 __#####~~__",KGRN);
+		printf("\n%s             __############ ~~___",KGRN);
+
+	}
+	else	//if the player doesnt have the right amount
+	{
+		printf("\n%sCome back when you have the money!!", KLTYLW);
+	}
+
 	return;
 }
 

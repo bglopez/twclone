@@ -13,6 +13,7 @@ void totalplanetinfo(int pnumb, char *buffer);
 void buildplayerinfo (int playernum, char *buffer);
 void buildnewplanet (struct player *curplayer, char *buffer, int sector);
 void buildshipinfo (int shipnum, char *buffer);
+void buildallshipinfo(char *buffer);
 void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data);
 void buildgameinfo(char *buffer);
 void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curship); 
