@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.1.1.1 $
- * Last Modified: $Date: 2001-04-29 02:28:06 $
+ * $Revision: 1.2 $
+ * Last Modified: $Date: 2001-06-16 06:04:38 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.1.1.1 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2001-04-29 02:28:06 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.2 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2001-06-16 06:04:38 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -732,6 +732,8 @@ void doporting(int sockid, struct player *curplayer)
 	   "\x1B[1;36mFuel Ore", "\x1B[1;36mOrganics",
 	   "\x1B[1;36mEquipment"};
    int playerproduct[3];
+   int testholds=0;		//Number of holds player can afford according
+   				//To the test price
    
    playerproduct[0] = curplayer->pship->ore;
    playerproduct[1] = curplayer->pship->organics;
@@ -791,9 +793,13 @@ void doporting(int sockid, struct player *curplayer)
    printf("\n");
    for (counter = 0; counter<=2; counter++)
    {
+     if (product[counter] > playerproduct[counter])
+	     testholds = playerproduct[counter];
+     else
+	     testholds = product[counter];
      if ((portconversion[type][counter] == 'B') && (playerproduct[counter] > 0))
      {
-         printf("\n");
+	 printf("\n");
          printf("\n%sYou have %s%d%s credits and %s%d%s empty cargo holds.", KGRN,
 		   KLTCYN, curplayer->credits, KGRN, KLTCYN,
 		   curplayer->pship->emptyholds, KGRN);
@@ -802,8 +808,8 @@ void doporting(int sockid, struct player *curplayer)
 	 printf("\n%sWe are buying up to %s%d%s. You have %s%d%s in your holds.",
 		  KMAG, KLTYLW, product[counter], KMAG, KLTYLW, 
 		  playerproduct[counter], KMAG);
-         printf("\n%sHow many holds of %s%s do you want to sell? ", KMAG,
-		       pnames[counter], KMAG);
+         printf("\n%sHow many holds of %s%s do you want to sell [%s%d%s]? ", KMAG,
+		       pnames[counter], KMAG, KLTYLW, testholds, KMAG);
          scanf("%d", &holds);
          if (holds > 0)
          {
@@ -824,7 +830,7 @@ void doporting(int sockid, struct player *curplayer)
 	      printf("\n");
 	      printf("\n%sWe'll buy them for %s%d%s credits.", KGRN, KLTYLW,
  			    offered, KGRN);
-  	      printf("\n%sYour offer ? ", KGRN);
+  	      printf("\n%sYour offer [%s%d%s]? ", KMAG, KLTYLW, offered, KMAG);
 	      scanf("%d", &playerprice);
 	      *buffer = '\0';
 	      strcpy(buffer, "PORT TRADE:");
@@ -847,8 +853,24 @@ void doporting(int sockid, struct player *curplayer)
    }
    for (counter = 0; counter<=2; counter++)
    {
+     if (curplayer->pship->emptyholds == 0)
+	     break;
      if ((strncmp(status[counter], "Selling", 7)==0))
      {
+   	 strcpy(buffer, "PORT TRADE:");
+	 addint(buffer, counter, ':', BUFF_SIZE);
+	 addint(buffer, 1, ':', BUFF_SIZE);
+	 addint(buffer, -1, ':', BUFF_SIZE);  //Get a test price
+	 sendinfo(sockid, buffer);
+	 *buffer = '\0';
+	 recvinfo(sockid, buffer);
+	 offered = popint(buffer, ":");
+	 accepted = popint(buffer, ":");
+	 xpgained = popint(buffer, ":");
+	 if (curplayer->pship->emptyholds < curplayer->credits/offered)
+		 testholds = curplayer->pship->emptyholds;
+	 else
+		 testholds = curplayer->credits/offered;
          printf("\n");
          printf("\n%sYou have %s%d%s credits and %s%d%s empty cargo holds.", KGRN,
 	 	   KLTCYN, curplayer->credits, KGRN, KLTCYN,
@@ -857,8 +879,8 @@ void doporting(int sockid, struct player *curplayer)
          printf("\n%sWe are selling up to %s%d%s. You have %s%d%s in your holds.",
 		  KMAG, KLTYLW, product[counter], KMAG, KLTYLW, 
 		  playerproduct[counter], KMAG);
-         printf("\n%sHow many holds of %s%s do you want to buy? ", KMAG,
-		       pnames[counter], KMAG);
+         printf("\n%sHow many holds of %s%s do you want to buy [%s%d%s]? ", KMAG,
+		       pnames[counter], KMAG, KLTYLW, testholds, KMAG);
          scanf("%d", &holds);
          if (holds > 0)
          {
@@ -879,7 +901,7 @@ void doporting(int sockid, struct player *curplayer)
 	      printf("\n");
 	      printf("\n%sWe'll sell them for %s%d%s credits.", KGRN, KLTYLW,
  			    offered, KGRN);
-  	      printf("\n%sYour offer ? ", KGRN);
+  	      printf("\n%sYour offer [%s%d%s]? ", KMAG, KLTYLW, offered, KMAG);
 	      scanf("%d", &playerprice);
 	      *buffer = '\0';
 	      strcpy(buffer, "PORT TRADE:");
@@ -1111,7 +1133,7 @@ char *prompttype(enum prompts type, int sector)
     case pt_port:
       printf("%s\n", KNRM);
       printf("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
-      printf("\n\n%sEnter your choice ?", KMAG);
+      printf("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);
       break;
     case move:
       printf("\n%sTo which Sector ?", KMAG);
