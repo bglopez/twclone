@@ -73,7 +73,8 @@ void clean_msgqueues(int msgidin, int msgidout, char *filename)
 	FILE *msglock=NULL;
 	char buffer[BUFF_SIZE];
 	int oldmsg;
-	
+
+	printf("\n");
 	msglock = fopen(filename, "r");
 	if (msglock != NULL)
 	{
