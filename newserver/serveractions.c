@@ -825,8 +825,10 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   }
   curplayer->experience = 0;
   curplayer->alignment = 0;
-  curplayer->turns = configdata->turnsperday; 
-  curplayer->credits = configdata->startingcredits;
+  //curplayer->turns = configdata->turnsperday;
+  curplayer->turns = 30;
+  curplayer->credits = 300;
+  //curplayer->credits = configdata->startingcredits;
   curplayer->lastprice = 0;
   curplayer->firstprice = 0;
   curplayer->ported = 0;
@@ -841,9 +843,11 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   strcpy(curship->name, shipname);
   curship->location = curplayer->sector;
   curship->type = 1;           //Start in a Merchant Cruiser
-  curship->fighters = configdata->startingfighters;
+  //curship->fighters = configdata->startingfighters;
+  curship->fighters = 10;
   curship->shields = 0;
-  curship->holds = configdata->startingholds;
+  //curship->holds = configdata->startingholds;
+  curship->holds = 20;
   curship->colonists = 0;
   curship->equipment = 0;
   curship->organics = 0;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "planet.h"
+#include "common.h"
 
 /*
  *	init_planets(filename, secarray)
