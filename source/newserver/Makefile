@@ -1,6 +1,6 @@
 CC=gcc
 #FLAGS=-Wall
-LIBS=-lpthread
+LIBS=-lpthread -ldb
 
 all: 	server
 
@@ -14,7 +14,7 @@ listen.o: listen.c
 		${CC} ${FLAGS} -c listen.c
 
 backend.o: backend.c
-		${CC} ${FLAGS} -c backend.c
+		${CC} ${FLAGS} -c backend.c 
 
 console.o:	console.c
 		${CC} ${FLAGS} -c console.c
