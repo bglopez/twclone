@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 CC = gcc
 NSPRINC = ../nspr-4.2/include
-NSPRLIB = ../nspr-4.2/lib/
+NSPRLIB = ../nspr-4.2/lib
 #CFLAGS = -g -O2 -Wall -pedantic -I $(NSPRINC)     
 CFLAGS = -g -O2 -Wall -I $(NSPRINC)     
 LFLAGS = -L/usr/local/lib -lpthread -ldl
