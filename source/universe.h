@@ -234,6 +234,7 @@ struct sector
   char *beacontext;		/* Test of a Beacon, NULL, if there is no beacon */
   char *nebulae;		/* I guess this stores the name, I dont know */
   struct list *playerlist[2];	/* The list of players in the sector */
+  struct list *shiplist[2]; /*The list of unmanned ships in the sector */
   struct port *portptr;		/* Pointer to ports in the sector */
   struct list *planets;		/* Pointer to list of planets in sector */
 };
