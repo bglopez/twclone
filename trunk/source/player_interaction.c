@@ -171,8 +171,19 @@ handle_player (void *threadinfo)
 	}
 		else if (strncmp(inbuffer, "STARDOCK", strlen("STARDOCK")) == 0 && loggedin)
 		{
+			strcpy(data.name, name);
 			popstring(inbuffer, temp, " ", BUFF_SIZE);
 			popstring(inbuffer, temp, ":", BUFF_SIZE);
+			if (strncmp(temp, "BUYSHIP", strlen("BUYSHIP")) == 0)
+				data.pcommand = p_buyship;
+			else if (strncmp(temp, "SELLSHIP", strlen("SELLSHIP")) == 0)
+				data.pcommand = p_sellship;
+			else if (strncmp(temp, "DEPOSIT", strlen("DEPOSIT")) == 0)
+				data.pcommand = p_deposit;
+			else if (strncmp(temp, "WITHDRAW", strlen("WITHDRAW")) == 0)
+				data.pcommand = p_withdraw;
+			else if (strncmp(temp, "BUYHARDWARE", strlen("BUYHARDWARE")) == 0)
+				data.pcommand = p_buyhardware;
 			strcpy(data.buffer, temp);
 			data.command = ct_stardock;
 			commandgood = 1;

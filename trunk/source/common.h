@@ -70,6 +70,11 @@ enum porttype
   p_rob,
   p_smuggle,
   p_attack,
-  p_quit
+  p_quit,
+  p_buyship,
+  p_sellship,
+  p_deposit,
+  p_withdraw,
+  p_buyhardware
 };
 #endif
