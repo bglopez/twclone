@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.40 $
- * Last Modified: $Date: 2003-12-22 21:26:33 $
+ * $Revision: 1.41 $
+ * Last Modified: $Date: 2003-12-23 20:14:45 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.40 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-12-22 21:26:33 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.41 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-12-23 20:14:45 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -410,7 +410,7 @@ void junkline ()
 void printhelp ()
 {
     printf
-    ("\n%s|================================%stwclone%s================================|",
+    ("\n%s|================================%sTWClone%s================================|",
      KGRN, KLTBLU, KGRN);
     printf
     ("\n%s|                            %sGlobal Commands%s                            |",
@@ -475,7 +475,7 @@ void printhelp ()
      KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN,
      KMAG, KLTCYN, KGRN);
     printf
-    ("\n%s|==============================%s0.12 alpha%s===============================|",
+    ("\n%s|==============================%s0.13 beta%s================================|",
      KGRN, KLTRED, KGRN);
 
 }
