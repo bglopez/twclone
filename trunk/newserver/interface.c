@@ -18,13 +18,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-/* twclone Program. client.c
+/* twclone Program. interface.c
  *
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.1.1.1 $
- * Last Modified: $Date: 2001-06-21 19:13:50 $
+ * $Revision: 1.1 $
+ * Last Modified: $Date: 2002-01-23 15:29:41 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.1.1.1 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2001-06-21 19:13:50 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.1 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-01-23 15:29:41 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
