@@ -97,7 +97,7 @@ enum commandtype
   ct_dropmember,
   ct_corppassword,
 };
-  
+
 struct msgbuffer
 {
   long mtype;
@@ -118,10 +118,10 @@ struct msgcommand
   long senderid;
 };
 
-int init_msgqueue();
-long getmsg(int msgid, char *buffer, long mtype);
-void sendmsg(int msgid, char *buffer, long mtype);
-void senddata(int msgid, struct msgcommand *data, long mtype);
-long getdata(int msgid, struct msgcommand *data, long mtype);
+int init_msgqueue ();
+long getmsg (int msgid, char *buffer, long mtype);
+void sendmsg (int msgid, char *buffer, long mtype);
+void senddata (int msgid, struct msgcommand *data, long mtype);
+long getdata (int msgid, struct msgcommand *data, long mtype);
 
 #endif

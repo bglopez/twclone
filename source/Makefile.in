@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -11,8 +11,8 @@
 # PARTICULAR PURPOSE.
 
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.4 2002-06-21 10:51:59 rdearman Exp $
-# Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
+# $Id: Makefile.in,v 1.5 2002-07-14 00:00:24 npsimons Exp $
+# Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,102 +80,34 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
-AMTAR = @AMTAR@
-AWK = @AWK@
 CC = @CC@
-DEPDIR = @DEPDIR@
-EXEEXT = @EXEEXT@
-INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISODATE = @ISODATE@
 MAKEINFO = @MAKEINFO@
-OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
-am__include = @am__include@
-am__quote = @am__quote@
-install_sh = @install_sh@
 
-EXTRA_DIST = \
-	config.data
+EXTRA_DIST =  	config.data
 
 
-pkgdata_DATA = \
-	config.data
+pkgdata_DATA =  	config.data
 
 
-bin_PROGRAMS = \
-	bigbang \
-	client \
-	server \
-	test_client \
-	test_server
+bin_PROGRAMS =  	bigbang 	client 	server 	test_client 	test_server
 
 
-bigbang_SOURCES = \
-	bigbang.c \
-	config.c \
-	config.h \
-	getopt.c \
-	getopt.h \
-	namegen.c \
-	namegen.h \
-	parse.c \
-	parse.h \
-	planet.c \
-	planet.h
+bigbang_SOURCES =  	bigbang.c 	config.c 	config.h 	getopt.c 	getopt.h 	namegen.c 	namegen.h 	parse.c 	parse.h 	planet.c 	planet.h
 
 
-client_SOURCES = \
-	ansi.h \
-	client.c \
-	client.h \
-	common.c \
-	common.h \
-	parse.c \
-	parse.h
+client_SOURCES =  	ansi.h 	client.c 	client.h 	common.c 	common.h 	parse.c 	parse.h
 
 
-server_SOURCES = \
-	boxmuller.c \
-	boxmuller.h \
-	common.c \
-	common.h \
-	config.c \
-	config.h \
-	hashtable.c \
-	hashtable.h \
-	maint.c \
-	maint.h \
-	msgqueue.c \
-	msgqueue.h \
-	parse.c \
-	parse.h \
-	planet.c \
-	planet.h \
-	player_interaction.c \
-	player_interaction.h \
-	portinfo.h \
-	server.c \
-	serveractions.c \
-	serveractions.h \
-	shipinfo.c \
-	shipinfo.h \
-	sysop_interaction.c \
-	sysop_interaction.h \
-	universe.c \
-	universe.h
+server_SOURCES =  	boxmuller.c 	boxmuller.h 	common.c 	common.h 	config.c 	config.h 	hashtable.c 	hashtable.h 	maint.c 	maint.h 	msgqueue.c 	msgqueue.h 	parse.c 	parse.h 	planet.c 	planet.h 	player_interaction.c 	player_interaction.h 	portinfo.h 	server.c 	serveractions.c 	serveractions.h 	shipinfo.c 	shipinfo.h 	sysop_interaction.c 	sysop_interaction.h 	universe.c 	universe.h
 
 
-test_client_SOURCES = \
-	common.c \
-	common.h \
-	test_client.c
+test_client_SOURCES =  	common.c 	common.h 	test_client.c
 
 
-test_server_SOURCES = \
-	common.c \
-	common.h \
-	test_server.c
+test_server_SOURCES =  	common.c 	common.h 	test_server.c
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -218,13 +150,13 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DATA =  $(pkgdata_DATA)
 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-Makefile.am Makefile.in TODO aclocal.m4 autoconf.h.in config.guess \
+Makefile.am Makefile.in NEWS TODO aclocal.m4 autoconf.h.in config.guess \
 config.sub configure configure.in install-sh missing mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/bigbang.P .deps/boxmuller.P .deps/client.P \
 .deps/common.P .deps/config.P .deps/getopt.P .deps/hashtable.P \
@@ -248,7 +180,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 $(ACLOCAL_M4):  configure.in 
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)

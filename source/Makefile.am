@@ -1,6 +1,6 @@
 # -*- makefile -*-
-# $Id: Makefile.am,v 1.3 2002-06-19 02:16:28 npsimons Exp $
-# Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
+# $Id: Makefile.am,v 1.4 2002-07-14 00:00:24 npsimons Exp $
+# Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,3 +93,4 @@ test_server_SOURCES = \
 	common.c \
 	common.h \
 	test_server.c
+

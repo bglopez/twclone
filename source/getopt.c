@@ -1,6 +1,6 @@
 /* -*- C -*-
-   $Id: getopt.c,v 1.1 2002-06-19 02:16:28 npsimons Exp $
-   Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
+   $Id: getopt.c,v 1.2 2002-07-14 00:00:25 npsimons Exp $
+   Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ int optind = 0, opterr, optopt;
     See the man page for getopt(3) for more details.
 
     @author Nathan Paul Simons <SimonsNP@navair.navy.mil>
-    @version $Revision: 1.1 $
+    @version $Revision: 1.2 $
     @return The option character if the option was found successfully,
     ':' if there was a missing parameter for one of the
     options, '?' for an unknown option character, or -1 for

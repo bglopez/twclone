@@ -106,37 +106,37 @@ int nameCount;
 
 char *firstSyllable[] = {	/* 100 */
   "A", "Ab", "Ac", "Add", "Ad", "Af", "Aggr", "Ax", "Az", "Bat", "Be", "Byt",
-    "Cyth", "Agr", "Ast", "As", "Al", "Adw", "Adr", "Ar", "B", "Br", "C",
-    "Cr", "Ch", "Cad", "D", "Dr", "Dw", "Ed", "Eth", "Et", "Er", "El", "Eow",
-    "F", "Fr", "Ferr", "G", "Gr", "Gw", "Gw", "Gal", "Gl", "H", "Ha", "Ib",
-    "Jer", "K", "Ka", "Ked", "L", "Loth", "Lar", "Leg", "M", "Mir", "N",
-    "Jer", "K", "Ka", "Ked", "L", "Loth", "Lar", "Leg", "M", "Mir", "N",
-    "Nyd", "Ol", "Oc", "On", "P", "Pr", "R", "Rh", "S", "Sev", "T", "Tr",
-    "Th", "Th", "V", "Y", "Yb", "Z", "W", "Wic", "Wac", "Wer", "Fert",
-    "D'al", "Fl'a", "L'Dre", "Ra", "Rea", "Og", "O'g", "Ndea", "Faw", "Cef",
-    "Cyth", "Wyh", "Gyh", "G'As", "Red", "Aas", "Aaw", "Ewwa", "Syw"  
+  "Cyth", "Agr", "Ast", "As", "Al", "Adw", "Adr", "Ar", "B", "Br", "C",
+  "Cr", "Ch", "Cad", "D", "Dr", "Dw", "Ed", "Eth", "Et", "Er", "El", "Eow",
+  "F", "Fr", "Ferr", "G", "Gr", "Gw", "Gw", "Gal", "Gl", "H", "Ha", "Ib",
+  "Jer", "K", "Ka", "Ked", "L", "Loth", "Lar", "Leg", "M", "Mir", "N",
+  "Jer", "K", "Ka", "Ked", "L", "Loth", "Lar", "Leg", "M", "Mir", "N",
+  "Nyd", "Ol", "Oc", "On", "P", "Pr", "R", "Rh", "S", "Sev", "T", "Tr",
+  "Th", "Th", "V", "Y", "Yb", "Z", "W", "Wic", "Wac", "Wer", "Fert",
+  "D'al", "Fl'a", "L'Dre", "Ra", "Rea", "Og", "O'g", "Ndea", "Faw", "Cef",
+  "Cyth", "Wyh", "Gyh", "G'As", "Red", "Aas", "Aaw", "Ewwa", "Syw"
 };
 char *middleSyllable[] = {	/* 50 */
   "a", "ase", "ae", "ae", "au", "ao", "are", "ale", "ali", "ay", "ardo", "e",
-    "ere", "ehe", "eje", "eo", "ei", "ea", "ea", "eye", "eri", "era", "ela",
-    "eli", "enda", "erra", "i", "ia", "ioe", "itti", "otte", "ie", "ire",
-    "eli", "enda", "erra", "i", "ia", "ioe", "itti", "otte", "ie", "ire",
-    "ira", "ila", "ili", "illi", "ira", "igo", "o", "oje", "oli", "olye",
-    "ua", "ue", "uyye", "oa", "oi", "oe", "ore" 
+  "ere", "ehe", "eje", "eo", "ei", "ea", "ea", "eye", "eri", "era", "ela",
+  "eli", "enda", "erra", "i", "ia", "ioe", "itti", "otte", "ie", "ire",
+  "eli", "enda", "erra", "i", "ia", "ioe", "itti", "otte", "ie", "ire",
+  "ira", "ila", "ili", "illi", "ira", "igo", "o", "oje", "oli", "olye",
+  "ua", "ue", "uyye", "oa", "oi", "oe", "ore"
 };
 char *lastSyllable[] = {	/* 100 */
   "and", "be", "bwyn", "baen", "bard", "ctred", "cred", "ch", "can", "dan",
-    "don", "der", "dric", "dfrid", "dus", "gord", "gan", "li", "le", "lgrin",
-    "lin", "lith", "lath", "loth", "ld", "ldric", "ldan", "mas", "mos", "mar",
-    "ond", "ydd", "idd", "nnon", "wan", "yth", "nad", "nn", "nor", "nd",
-    "ron", "rd", "sh", "seth", "ean", "th", "threm", "tha", "tan", "tem",
-    "ron", "rd", "sh", "seth", "ean", "th", "threm", "tha", "tan", "tem",
-    "tam", "vix", "vud", "wix", "wan", "win", "wyn", "wyr", "wyth", "zer",
-    "zan", "qela", "rli", "wa", "kera", "ji", "jia", "jioe", "jiti", "jote",
-    "kie", "hireg", "jira", "fila", "vili", "xilli", "cira", "digo", "no",
-    "noje", "woli", "yolye", "tua", "tue", "tye", "toa", "toi", "toe", "tore",
-    "apd", "pe", "btyn", "brrin", "berd", "cfed", "cadf", "cac", "cane",
-    "fdan", "fdon" 
+  "don", "der", "dric", "dfrid", "dus", "gord", "gan", "li", "le", "lgrin",
+  "lin", "lith", "lath", "loth", "ld", "ldric", "ldan", "mas", "mos", "mar",
+  "ond", "ydd", "idd", "nnon", "wan", "yth", "nad", "nn", "nor", "nd",
+  "ron", "rd", "sh", "seth", "ean", "th", "threm", "tha", "tan", "tem",
+  "ron", "rd", "sh", "seth", "ean", "th", "threm", "tha", "tan", "tem",
+  "tam", "vix", "vud", "wix", "wan", "win", "wyn", "wyr", "wyth", "zer",
+  "zan", "qela", "rli", "wa", "kera", "ji", "jia", "jioe", "jiti", "jote",
+  "kie", "hireg", "jira", "fila", "vili", "xilli", "cira", "digo", "no",
+  "noje", "woli", "yolye", "tua", "tue", "tye", "toa", "toi", "toe", "tore",
+  "apd", "pe", "btyn", "brrin", "berd", "cfed", "cadf", "cac", "cane",
+  "fdan", "fdon"
 };
 
 

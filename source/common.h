@@ -55,21 +55,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <netinet/in.h>
 
-int init_sockaddr(int, struct sockaddr_in *);
-int init_clientnetwork(char *hostname, int port);
-int sendinfo(int sockid, char *buffer);
-int recvinfo(int sockid, char *buffer);
-int acceptnewconnection(int sockid);
+int init_sockaddr (int, struct sockaddr_in *);
+int init_clientnetwork (char *hostname, int port);
+int sendinfo (int sockid, char *buffer);
+int recvinfo (int sockid, char *buffer);
+int acceptnewconnection (int sockid);
 
 enum porttype
 {
-     p_trade,
-     p_land,
-     p_upgrade,
-     p_negotiate,
-     p_rob,
-     p_smuggle,
-     p_attack,
-     p_quit
+  p_trade,
+  p_land,
+  p_upgrade,
+  p_negotiate,
+  p_rob,
+  p_smuggle,
+  p_attack,
+  p_quit
 };
 #endif

@@ -27,18 +27,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "universe.h"
 
-void init_hash_table(struct list *hash_table[], int hash_length);
-int hash(const char *symbol, int hash_length);
-void *find(const char *symbol, enum listtype type, struct list *hash_table[], int hash_length);
-void *insert(const char *symbol, enum listtype type, struct list *hash_table[], int hash_length);
-void *delete(const char *symbol, enum listtype type, struct list *hash_table[], int hash_length);
-void *insertitem(void *item, enum listtype type, struct list *hash_table[], int hash_length);
+void init_hash_table (struct list *hash_table[], int hash_length);
+int hash (const char *symbol, int hash_length);
+void *find (const char *symbol, enum listtype type, struct list *hash_table[],
+	    int hash_length);
+void *insert (const char *symbol, enum listtype type,
+	      struct list *hash_table[], int hash_length);
+void *delete (const char *symbol, enum listtype type,
+	      struct list *hash_table[], int hash_length);
+void *insertitem (void *item, enum listtype type, struct list *hash_table[],
+		  int hash_length);
 
 #endif
-
-
-
-
-
-
-

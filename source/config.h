@@ -25,16 +25,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 struct config
 {
-   int turnsperday;     //In this order in config.data
-   int maxwarps;
-   int startingcredits;
-   int startingfighters;
-   int startingholds;
-   int processinterval;   //How often stuff is processed
-   int autosave;	  //Save every some odd minutes
+  int turnsperday;		//In this order in config.data
+  int maxwarps;
+  int startingcredits;
+  int startingfighters;
+  int startingholds;
+  int processinterval;		//How often stuff is processed
+  int autosave;			//Save every some odd minutes
 };
 
-int init_config(char *filename);
+int init_config (char *filename);
 
 #endif
-
