@@ -11,11 +11,12 @@
 struct connection {
         int connfd;
         struct pollfd ufds;
-        void *ibuff[MAX_IBUFFSIZE];
-        int ibuff_len;
 		void *player_info;		// this would be a pointer to the actual plr.
 };
 
 void init_listen_thread(pthread_t *tid);
+
+int player_write(struct connection *cx, char *msg);
+int player_read(struct connection *cx, char *dest, int maxsize);
 
 #endif

@@ -21,11 +21,13 @@ static char *g_login_prompt =
 "Welcome to the Tradewars 2k GNU server. 
 
  Login (or type 'NEW'): ";
-
 static char *g_passwd_prompt = " Password: ";
+static char *g_reject_msg="Sorry, that password was incorrect.\nGood-Bye...\n";
+
 
 int init_socket(struct sockaddr_in *addr, int port);
 struct connection* next_connection(int sock_desc, struct sockaddr_in *addr);
+
 void* listen_thread(void *arg);
 void* player_login(void *arg);
 
@@ -78,14 +80,26 @@ void* listen_thread(void *arg){
 }
 
 void* player_login(void *arg){
+	char ibuff[MAX_IBUFFSIZE];
+
 	struct connection *cn = (struct connection*)arg;
-	write(cn->connfd, g_login_prompt, strlen(g_login_prompt));
-	cn->ibuff_len = recv(cn->connfd, (void *)cn->ibuff, MAX_IBUFFSIZE, 0);
-	fprintf(stderr, "got a login for %s\n", cn->ibuff);
-	write(cn->connfd, g_passwd_prompt, strlen(g_passwd_prompt));
-	cn->ibuff_len = recv(cn->connfd, (void *)cn->ibuff, MAX_IBUFFSIZE, 0);
+	player_write(cn, g_login_prompt);
+	player_read(cn, ibuff, MAX_IBUFFSIZE);
+	fprintf(stderr, "got a login for %s\n", ibuff);
+	player_write(cn, g_passwd_prompt);
+	player_read(cn, ibuff, MAX_IBUFFSIZE);
 	join_game(cn);
 	return NULL;
+}
+
+int player_write(struct connection *cx, char *msg){
+	if(!cx) return -1;
+	return write(cx->connfd, msg, strlen(msg));
+}
+
+int player_read(struct connection *cx, char *dest, int maxsize){
+	if(!cx) return -1;
+	return recv(cx->connfd, (void *)dest, maxsize, 0);
 }
 /*
 ncon->ufds.fd = ncon->connfd;
