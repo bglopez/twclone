@@ -131,6 +131,13 @@ struct planet
   char *name;
   char *type;
   struct planet *next;
+  int fighters;
+  int level;
+  int qsect;
+  int qatmos;
+  int shields;
+  int transporter;
+  int interdictor;
 };
 
 int getintstuff ();
@@ -155,8 +162,9 @@ void do_stardock_menu(int sockid, struct player *curplayer);
 int do_planet_select(int sockid, struct player *curplayer, struct sector *cursector);
 int do_planet_menu(int sockid, struct player *curplayer);
 int do_citadel_menu(int sockid, struct player *curplayer);
+void change_stuff(int sockid, struct player *curplayer, int type);
 void print_citadel_help();
-void do_planet_display(int sockid, struct player *curplayer);
+void do_planet_display(int sockid, struct player *curplayer, struct planet *curplanet);
 void print_planet_help();
 void do_shipyard_menu(int sockid, struct player *curplayer);
 void buyship(int sockid, struct player *curplayer);
