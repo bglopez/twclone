@@ -568,19 +568,12 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
  float lastprice;
  product = popint(buffer, ":");
  holds = popint(buffer, ":");
+ playerprice = popint(buffer, ":");
  maxproduct = curport->maxproduct[product];
  curproduct = curport->product[product];
  firstprice = curplayer->firstprice;
  lastprice = curplayer->lastprice;
-
- if (holds > (curship->holds - (curship->ore + curship->organics + curship->equipment + curship->colonists)))
- {
-    strcpy(buffer, "BAD");
-    return;
- }
- else
-   ;
-
+ 
  if (curplayer->lastprice == 0)
  {
    //0 for Ore, 1 for organics, 2 for equipment, 3 for credits
@@ -592,7 +585,7 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
 	-(1 - curproduct/maxproduct));
 	  if ((curproduct + holds) > maxproduct)
 	  {
-	     strcpy(buffer, "BAD");   //To keep from going out of bounds
+	     strcpy(buffer, "BAD: Port cannot buy more");   //To keep from going out of bounds
 	     return;
 	  }
       }
@@ -602,16 +595,30 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
 	-maxproduct/3000)*exp(-curproduct/maxproduct);
 	 if ((curproduct - holds) < 0)
 	 {
-	    strcpy(buffer, "BAD");  //To keep from going out of bounds
+	    strcpy(buffer, "BAD: Port cannot sell more");  //To keep from going out of bounds
 	    return;
+	 }
+ 	 if (holds > (curship->holds - (curship->ore + curship->organics + curship->equipment + curship->colonists)))
+ 	 {
+    	    strcpy(buffer, "BAD: User does not have enough holds");
+    	    return;
 	 }
       }
       else
-	strcpy(buffer, "BAD");
+	strcpy(buffer, "BAD: Port does not sell or buy");
       deviation = .1*mean;
       offered = box_muller(mean, deviation);
-      curplayer->lastprice=offered;
-      curplayer->firstprice=offered;
+      if (playerprice == -1)  //In case we're getting a test price
+      {
+	 fprintf(stderr, "Got a test price for %d\n", offered);
+	 curplayer->lastprice = 0;
+	 curplayer->firstprice = 0;
+      }
+      else
+      {
+         curplayer->lastprice=offered;
+         curplayer->firstprice=offered;
+      }
       xpgained = 0;
       accepted = 0;
    }
@@ -620,7 +627,6 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
  {
    if (product != 3)
    {
-      playerprice = popint(buffer, ":");
       if (portconversion[curport->type][product] == 'B')
       {
 	if ((playerprice <= (firstprice/0.967 - 2)) ||
@@ -660,11 +666,15 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
 	  accepted = 0;
 	  xpgained = 0;
 	}
+	if (offered >= playerprice)
+	{
+	  accepted = 1;
+	}
 	holds = 0 - holds;     //If buying from player want to decriment holds
       }
       else if (portconversion[curport->type][product] == 'S')
       {
-        fprintf(stderr, "\nOffered price is %d, They have %d", playerprice,
+        fprintf(stderr, "Offered price is %d, They have %di\n", playerprice,
 	      curplayer->credits);
         if (playerprice > curplayer->credits)  //In case someones trying to
         {					     //out fox the system
@@ -674,7 +684,11 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
 	   addint(buffer, xpgained, ':', BUFF_SIZE);
 	   return;
         }
- 
+	if (holds > (curship->holds - (curship->ore + curship->organics + curship->equipment + curship->colonists)))
+	{
+    	   strcpy(buffer, "BAD: User does not have enough holds");
+    	   return;
+	}
 	if ((playerprice >= firstprice*0.967 + 2) ||
 	    (playerprice >= curplayer->firstprice))
 	{
@@ -711,12 +725,17 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
 	   xpgained = 0;
 	   offered = (lastprice + firstprice*0.967)/2;
 	}
+	if (offered <= playerprice)
+	{
+	   accepted = 1;
+	}
 	playerprice = 0 - playerprice;  //Deduction from players credits
       }
    }
  }
  if (accepted == 1)
  {
+   fprintf(stderr, "Price accepted!\n");
    curplayer->lastprice = curplayer->firstprice = 0;
    curplayer->experience = curplayer->experience + xpgained;
    curplayer->credits = curplayer->credits + playerprice;
@@ -769,7 +788,7 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
      }
    }
  }
- else
+ else if (playerprice != -1)
    curplayer->lastprice = offered;
  buffer[0] = '\0';
  addint(buffer, offered, ':', BUFF_SIZE);
