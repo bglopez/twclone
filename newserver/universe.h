@@ -18,10 +18,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#ifndef UNIVERSE_H
-#define UNIVERSE_H
+#ifndef _UNIVERSE_H_
+#define _UNIVERSE_H_
 
-#include "common.h"
+#define MAX_WARPS_PER_SECTOR 5
 
 struct port
 { 
