@@ -169,6 +169,14 @@ handle_player (void *threadinfo)
 	  data.command = ct_fedcomm;
 	  commandgood = 1;
 	}
+		else if (strncmp(inbuffer, "STARDOCK", strlen("STARDOCK")) == 0 && loggedin)
+		{
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			popstring(inbuffer, temp, ":", BUFF_SIZE);
+			strcpy(data.buffer, temp);
+			data.command = ct_stardock;
+			commandgood = 1;
+		}
       else if (strncmp (inbuffer, "LAND", strlen ("LAND")) == 0 && loggedin)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
