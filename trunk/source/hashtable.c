@@ -33,8 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * location in the hash_table to NULL         |
 \*********************************************/
 
-void
-init_hash_table (struct list *hash_table[], int hash_length)
+void init_hash_table (struct list *hash_table[], int hash_length)
 {
   int x;
   for (x = 0; x < hash_length; x++)
@@ -267,8 +266,7 @@ delete (const char *symbol, enum listtype type, struct list *hash_table[],
 }
 
 //Returns NULL if the addition is not made, and item if it is
-void *
-insertitem (void *item, enum listtype type, struct list *hash_table[],
+void * insertitem (void *item, enum listtype type, struct list *hash_table[],
 	    int hash_length)
 {
   int key;

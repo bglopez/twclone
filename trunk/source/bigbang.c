@@ -125,6 +125,7 @@ int
 main (int argc, char **argv)
 {
   int c;
+  int loop;
   char *tmpname;
   int x, y, z, tempint, randint, tosector, fromsector, startsec, secptrcpy,
     jumpsize;
@@ -135,16 +136,22 @@ main (int argc, char **argv)
   FILE *file;
   FILE *planetfile;
   struct sector *secptr;
-  char *terraInfo = "1:1:terra:-1:1:Unknown:\n";
+  char *terraInfo = malloc(sizeof(char)*400);
+			 "1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:";
+  char *ferrinfo = malloc(sizeof(char)*400);
+  char *plout = malloc(sizeof(char)*400);
   char *randomPlanetInfo;
   int ferringhiSector;
 
+  
   char *usageinfo =
     "Usage: bigbang [options]\n    Options:-t < integer >\n    indicate the max length of tunnels and dead ends.(default /minimum 6)\n    - s < integer >\n    indicate the max number of sectors.(default /minimum 500)\n    - p < integer >\n    indicate the max number of ports which MUST be at least 10 LESS than the\n    number of sectors.(default /minimum 190)\n    - o < integer >\n    indicate the percentage chance that a final jump will be a one -\n    way.(default /minimum 3)\n    - d < integer >\n    indicate the percentage chance that a tunnel will be a dead end.\n    (default /minimum 30)\n    - g < integer > generate a number of random planets.(default 0) \n ";
   /* This has to be taken out because of the knockon affect it was having with the rest of the program.
      -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
    */
   opterr = 0;
+
+strcpy(terraInfo,"1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:");
 
 /*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
   while ((c = getopt (argc, argv, "t:s:p:d:o:g:")) != -1)
@@ -402,9 +409,15 @@ main (int argc, char **argv)
 
   printf ("Creating planets...");
   planetfile = fopen ("./planets.data", "w");
+  for (loop = 1; loop <= 299 - strlen(terraInfo); loop++)
+		strcat(terraInfo, " ");
+  strcat(terraInfo, "\n");
   fprintf (planetfile, terraInfo);
-  fprintf (planetfile, "%d:%d:Ferringhi:-2:1:Unknown:\n", 2,
-	   ferringhiSector);
+  sprintf (ferrinfo, "%d:%d:Ferringhi:1:-2:Unknown:1000:1000:1000:0:0:0:0:3:100000:20:30:10:0:0:0:", 2, ferringhiSector);
+  for (loop = 1; loop <= 299 - strlen(ferrinfo); loop++)
+		strcat(ferrinfo, " ");
+  strcat(ferrinfo, "\n");
+  fprintf(planetfile, ferrinfo);
   randomPlanetInfo = malloc (sizeof (strNameLength));
   if (numRandomPlanets > 0)
     {
@@ -416,8 +429,13 @@ main (int argc, char **argv)
 	    {
 	      tempint = randomnum (21, (numSectors - 1));
 	    }
-	  fprintf (planetfile, "%d:%d:%s:0:%d:Unknown:\n", c, tempint,
-		   randomname (randomPlanetInfo), randomnum(1,5));
+	  sprintf (ferrinfo, "%d:%d:%s:%d:0:Unknown:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+			, c, tempint, randomname (randomPlanetInfo), randomnum(1,5));
+  	  for (loop = 1; loop <= 299 - strlen(ferrinfo); loop++)
+	  	strcat(ferrinfo, " ");
+	  strcat(ferrinfo, "\n");
+  	  fprintf(planetfile, ferrinfo);
+
 	  c++;
 	}
     }

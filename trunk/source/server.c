@@ -108,6 +108,7 @@ int main (int argc, char *argv[])
     fflush (stdout);
     init_config ("config.data");
     printf (" Done\n");
+	 init_planetinfo("planettypes.data");
 
     printf ("initializing the universe from '%s'...", "universe.data");
     fflush (stdout);
@@ -210,6 +211,7 @@ int main (int argc, char *argv[])
     }
     saveallports ();
 	 saveshiptypeinfo();
+	 save_planetinfo("planettypes.data");
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
     //when we're done, clean up the msg queues

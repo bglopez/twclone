@@ -44,8 +44,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define MAX_SAFE_PLANETS 5
 struct planet **planets;
+planetClass **planetTypes;
 
 int init_planets (char *filename, struct sector **secarray);
+void init_planetinfo(char *filename);
 int insert_planet (struct planet *p, struct sector *s, int playernumber);
 
 #endif
