@@ -1,7 +1,7 @@
 Readme for TWClone
 Website: http://twclone.sourceforge.net
 
-Instructions on Installation can be found in the Install file.
+Instructions on installation can be found in the INSTALL file.
 
 Files to note:
 
@@ -14,4 +14,14 @@ Files to note:
 	How to install.
 3) LICENSE
 	The GNU Public License
+
+Quick Install
+=============
+$ ./configure
+$ make
+$ make install
+
+Developers
+==========
+Run "./gen" to generate Makefile.in, configure, and other files.
 
