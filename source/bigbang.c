@@ -35,8 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 **
 ** 5) Added randomly placed Ferringhi sector.
 **
-** 6) Now creates the planet.data file with terra and ferringhi planets included by
-**    default.
+** 6) Now creates the planet.data file with terra and ferringhi planets
+** included by default.
 **
 ** 7) Creates any number of random planets input by the user.
 **
@@ -48,10 +48,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-//#include <getopt.h>
+#include <getopt.h>
 #include "config.h"
 #include "universe.h"
-
 
 /*  This is the max length of tunnels and dead ends. */
 #define MAXTUNLEN		6
@@ -140,8 +139,7 @@ main (int argc, char **argv)
   char *randomPlanetInfo;
   int ferringhiSector;
 
-  char *usageinfo =
-    "Usage: bigbang [options]
+  char *usageinfo = "Usage: bigbang [options]
     Options:
     -t < integer >
        indicate the max length of tunnels and dead ends.(default /minimum 6)
@@ -158,10 +156,10 @@ main (int argc, char **argv)
        (default /minimum 30)
     - g < integer > 
        generate a number of random planets.(default 0) \n ";
-    /* This has to be taken out because of the knockon affect it was having with the rest of the program.
-       -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
-     */
-    opterr = 0;
+  /* This has to be taken out because of the knockon affect it was having with the rest of the program.
+     -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
+   */
+  opterr = 0;
 
 /*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
   while ((c = getopt (argc, argv, "t:s:p:d:o:g:")) != -1)
