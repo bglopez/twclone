@@ -81,6 +81,7 @@ struct player
   int alignment;
   int turns;
   int credits;
+  int bank_balance;
   int lastprice;		/* Last price offered by a port. */
   int firstprice;		/* first price offered by a port */
   unsigned short intransit;	/* Is the player moving? */
