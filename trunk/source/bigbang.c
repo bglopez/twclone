@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /* Modification History **
 **************************
 ** 
-** LAST MODIFICATION DATE: 08 June 2002
+** LAST MODIFICATION DATE: 10 June 2002
 ** Author: Rick Dearman
 ** 1) Modified all defined items to allow them to be user defined instead. 
 **    With one exception which was the MAXJUMPPERCENT which was caused problems
@@ -34,6 +34,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** 4) Added consellation names for sectors.
 **
 ** 5) Added randomly placed Ferringhi sector.
+**
+** 6) Now creates the planet.data file with terra and ferringhi planets included by
+**    default.
+**
+** 7) Creates any number of random planets input by the user.
 **
 */
 
@@ -76,6 +81,8 @@ int percentOneway = DEADENDPERCENT;
 /* Length of strings for names, memory is an issue */
 int strNameLength = 25;
 
+int numRandomPlanets = 0;
+
 /*  THESE ARE THE SET-IN-STONE FEDSPACE LINKS */
 /*  DON'T EVEN THINK ABOUT TOUCHING THESE... */
 const int fedspace[10][6] = {
@@ -110,6 +117,7 @@ void sectorsort (struct sector *base[configdata->maxwarps], int elements);
 extern char *randomname (char *name);
 extern char *consellationName (char *name);
 extern void init_usedNames ();
+extern int insert_planet (struct planet *p, struct sector *s);
 
 
 
@@ -125,12 +133,16 @@ main (int argc, char **argv)
   int len;
   char *fileline, *tempstr;
   FILE *file;
+  FILE *planetfile;
   struct sector *secptr;
+  char *terraInfo = "1:1:terra:c:The Federation:1:\n";
+  char *randomPlanetInfo;
+  int ferringhiSector;
 
   char *usageinfo =
     "Usage: bigbang [options]
     Options:
-    -t < integer >
+    - t < integer >
        indicate the max length of tunnels and dead ends.(default /minimum 6)
     - s < integer >
        indicate the max number of sectors.(default /minimum 500)
@@ -142,14 +154,16 @@ main (int argc, char **argv)
        way.(default /minimum 3)
     - d < integer >
        indicate the percentage chance that a tunnel will be a dead end.
-       (default /minimum 30) \n ";
+       (default /minimum 30) 
+    - g < integer >
+       generate a number of random planets. (default 0)\n ";
     /* This has to be taken out because of the knockon affect it was having with the rest of the program.
        -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
      */
     opterr = 0;
 
 /*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
-  while ((c = getopt (argc, argv, "t:s:p:d:o:")) != -1)
+  while ((c = getopt (argc, argv, "t:s:p:d:o:g:")) != -1)
     {
       switch (c)
 	{
@@ -175,6 +189,9 @@ main (int argc, char **argv)
 	  percentOneway =
 	    (ONEWAYJUMPPERCENT >
 	     atoi (optarg)) ? ONEWAYJUMPPERCENT : atoi (optarg);
+	  break;
+	case 'g':
+	  numRandomPlanets = (numRandomPlanets > atoi (optarg)) ? numRandomPlanets : atoi (optarg);
 	  break;
 	case '?':
 	  if (isprint (optopt))
@@ -257,7 +274,7 @@ main (int argc, char **argv)
   for (x = 0; x < numSectors; x++)
     sectorlist[x]->number = x + 1;
 
-  printf ("Creating Fedspace...");
+  printf ("Creating fedspace...");
   /*  Sets up Fed Space */
   for (x = 0; x < 10; x++)
     {
@@ -391,11 +408,39 @@ main (int argc, char **argv)
   printf ("done.\n");
 
 
-  printf ("Creating Ferringhi Home Sector...");
-  tempint = randomnum (21, (numSectors-1));
-  sectorlist[tempint]->beacontext = "Ferringhi";
-  sectorlist[tempint]->nebulae = "Ferringhi";
+  printf ("Creating ferringhi home sector...");
+  ferringhiSector = randomnum (21, (numSectors-1));
+  sectorlist[ferringhiSector]->beacontext = "Ferringhi";
+  sectorlist[ferringhiSector]->nebulae = "Ferringhi";
   printf ("done.\n");
+
+  printf ("Creating planets...");
+  planetfile = fopen ("./planets.data", "w");
+  fprintf (planetfile,terraInfo );
+  fprintf(planetfile, "%d:%d:Ferringhi:c:Ferringhi:1:\n", 2, ferringhiSector);
+  randomPlanetInfo = malloc (sizeof(strNameLength));
+  if (numRandomPlanets > 0)
+    {
+      c = 3;
+      for(x=0;x<numRandomPlanets;x++)
+	{
+	    tempint = randomnum (21, (numSectors-1));
+	    while(tempint == ferringhiSector || tempint < 10)
+	      { 
+		tempint = randomnum (21, (numSectors-1));
+	      }
+	    fprintf(planetfile, "%d:%d:%s:c:No Owner:1:\n", c, tempint,randomname (randomPlanetInfo));
+	    c++;
+	}
+    }
+
+  printf ("done.\n");
+
+  printf ("Saving Planets to file...");
+  close (planetfile);
+  printf ("done.\n");
+
+
   /*  Sorts each sector's warps into numeric order */
   for (x = 0; x < numSectors; x++)
     {

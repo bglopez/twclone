@@ -70,3 +70,6 @@ insert_planet (struct planet *p, struct sector *s)
 	   p->name, s->number);
   return s->number;
 }
+
+
+
