@@ -151,6 +151,8 @@ void print_bank_help();
 void do_stardock_menu(int sockid, struct player *curplayer);
 void do_shipyard_menu(int sockid, struct player *curplayer);
 void buyship(int sockid, struct player *curplayer);
+size_t slen(const char *string);
+char *spaces(int numspaces); 
 void do_bank_menu(int sockid, struct player *curplayer);
 void printwelcome ();
 void do_ship_upgrade(int sockid, struct player *curplayer);

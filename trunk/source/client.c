@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.38 $
- * Last Modified: $Date: 2003-11-14 22:49:02 $
+ * $Revision: 1.39 $
+ * Last Modified: $Date: 2003-11-18 23:08:19 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.38 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-14 22:49:02 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.39 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-18 23:08:19 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1209,6 +1209,7 @@ void buyship(int sockid, struct player *curplayer)
 {
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	char *input = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *spacer = NULL;
 	char temp[BUFF_SIZE];
 	char yesno;
 	char ch;
@@ -1235,13 +1236,19 @@ void buyship(int sockid, struct player *curplayer)
 	{
 		popstring(buffer, temp, ",", BUFF_SIZE);
 		price = popint(buffer, ":");
-		printf("\n%s%s\t\t%s:   %s%d",KGRN,temp,KLTYLW,KLTCYN,price);
+		spacer = spaces(25 - strlen(temp));
+		printf("\n%s%s%s%s: %s%d",KGRN,temp,spacer,KLTYLW,KLTCYN,price);
+		free(spacer);
+		spacer = NULL;
 		fflush(stdout);
 		if (*(buffer+0)=='\0')
 			done = 1;
 	}
-	printf("\n\t\t\t%s=======",KNRM);
-	printf("\n%sTrade in Value\t\t%s:%s%d",KGRN,KLTYLW,KRED,total);
+	printf("\n\t\t\t   %s=======",KNRM);
+	spacer = spaces(25 - strlen("Trade in Value"));
+	printf("\n%sTrade in Value%s%s: %s%d",KGRN,spacer,KLTYLW,KRED,total);
+	free(spacer);
+	spacer = NULL;
 	printf("\n");
 	printf("\n%sStill interested ?%s ",KMAG,KLTCYN);
 	scanf("%c", &yesno);
@@ -1276,6 +1283,7 @@ void buyship(int sockid, struct player *curplayer)
 		{
 				  
 			done = 1;
+			
 		}
 		else if (isspace(*(input+0)) == 0)
 		{
@@ -1296,8 +1304,24 @@ void buyship(int sockid, struct player *curplayer)
 					{
 						popstring(buffer, temp, ",", BUFF_SIZE);
 						price = popint(buffer, ":");
-						printf("\n%s<%s%d%s> %s\t\t%s%d", KMAG,KGRN,count,KMAG, temp,
-							KGRN, price);
+						if (count<10)
+							spacer = spaces(40 - slen(temp));
+						else
+							spacer = spaces(39 - slen(temp));
+						if (curplayer->credits + total >= price)
+						{
+							printf("\n%s<%s%d%s> %s%s%s%d", KMAG,KGRN,count,KMAG
+												 , temp, spacer, KGRN, price);
+						}
+						else
+						{
+							printf("\n%s<%s%d%s> %s%s%s%d", KMAG,KGRN,count,KMAG
+												 , temp, spacer, KGRY, price);
+
+						}
+						fflush(stdout);
+						free(spacer);
+						spacer = NULL;
 						count++;
 						if (*(buffer+0)=='\0')
 							moredone=1;
@@ -1307,35 +1331,44 @@ void buyship(int sockid, struct player *curplayer)
 					break;
 				}
 		}
-	}
-	strcpy(buffer, "STARDOCK LISTSHIPS:");
-	sendinfo(sockid, buffer);
-	recvinfo(sockid, buffer);
-	count = 1;
-	moredone = 0;
-	while (!moredone)
-	{
-		popstring(buffer, temp, ",", BUFF_SIZE);
-		price = popint(buffer, ":");
-		if (*(buffer+0) == '\0')
-			moredone=1;
-		if (count == choice)
-			moredone = 1;
-		count++;
-	}
-
-	printf("\n%sShip Category #%d  Ship Class : %s",KGRN, choice, temp);
-	printf("\n");
-	printf("\n%sThe cost for one of these is %s%d",KGRN,KLTYLW, price);
-	printf("\n");
-	printf("\n%sWant to buy it? ",KMAG);
-	scanf("%c", &yesno);
-	junkline();
-	if (yesno!='y' && yesno!='Y')
-	{
-		free(buffer);
-		free(input);
-		return;
+		strcpy(buffer, "STARDOCK LISTSHIPS:");
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		count = 1;
+		moredone = 0;
+		while (!moredone)
+		{
+			popstring(buffer, temp, ",", BUFF_SIZE);
+			price = popint(buffer, ":");
+			if (*(buffer+0) == '\0')
+				moredone=1;
+			if (count == choice)
+				moredone = 1;
+			count++;
+		}
+		if ((curplayer->credits + total < price) && done == 1)
+		{
+			printf("\n%sYou can't afford that ship!",KGRN);
+			done=0;
+			moredone=0;
+		}
+		if (done == 1)
+		{
+			printf("\n%sShip Category #%d  Ship Class : %s",KGRN, choice, temp);
+			printf("\n");
+			printf("\n%sThe cost for one of these is %s%d",KGRN,KLTYLW, price);
+			printf("\n");
+			printf("\n%sWant to buy it? ",KMAG);
+			scanf("%c", &yesno);
+			junkline();
+			if (yesno!='y' && yesno!='Y')
+			{
+				printf("\n%sOk then, what do you want?",KGRN);
+				printf("\n");
+				done = 0;
+				moredone = 0;
+			}
+		}
 	}
 	//Should this be (C)orporage or (P)ersonal Ship?
 	strcpy(buffer, "STARDOCK SELLSHIP:");
@@ -1384,6 +1417,51 @@ void buyship(int sockid, struct player *curplayer)
 	free(input);
 	return;
 }
+
+size_t slen(const char *string)
+{
+	int alpha=0;
+	int length=0;
+	int counter=0;
+	int value=0;
+	int weird=0;
+	int space=0;
+
+	length = strlen(string);
+	for (counter=0; counter < length; counter++)
+	{
+		if (isalpha(*(string+counter)))
+		{
+			alpha++;
+		}
+		if (isspace(*(string+counter)))
+		{
+			space++;
+		}
+		value = (int)*(string+counter);
+		if ((value > 32 && value <= 47))
+		{
+				weird++;
+		}
+		//fprintf(stderr, "\nAlpha %d, space %d, weird %d", alpha, space, weird);
+	}
+	return(alpha+space+weird);
+}
+
+char *spaces(int numspaces)
+{
+	char *test = (char *)malloc(sizeof(char)*(numspaces+1));
+	int counter=0;
+
+	strcpy(test, "\0");
+	for (counter=0; counter<numspaces; counter++)
+	{
+		*(test + counter) = ' ';
+	}
+	*(test + (numspaces)) = '\0';
+	return(test);
+}
+
 void do_bank_menu(int sockid, struct player *curplayer)
 {
 	enum prompts ptype;
