@@ -555,6 +555,7 @@ void saveplayer(int pnumb, char *filename)
 	char *stufftosave=(char *)malloc(BUFF_SIZE);
 	FILE *playerfile;
 	fpos_t *playerplace;
+	int loop=0, len=0;
 	
 	strcpy(buffer, "\0");
 	strcpy(intptr, "\0");
@@ -570,6 +571,12 @@ void saveplayer(int pnumb, char *filename)
   	addint(stufftosave, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
   	addint(stufftosave, players[pnumb - 1]->turns, ':', BUFF_SIZE);
   	addint(stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	len = strlen(stufftosave);
+
+	for (loop=1;loop<=99-len;loop++)
+		strcat(stufftosave, " ");
+	strcat(stufftosave, "\n");
+
  
 	playerfile = fopen(filename, "r+");
 	while(1)
@@ -596,6 +603,7 @@ void saveship(int snumb, char *filename)
 	char *stufftosave=(char *)malloc(BUFF_SIZE);
 	FILE *playerfile;
 	fpos_t *playerplace;
+	int loop=0, len;
 
 	strcpy(buffer, "\0");
 	strcpy(intptr, "\0");
@@ -614,6 +622,10 @@ void saveship(int snumb, char *filename)
   	addint(stufftosave, ships[snumb - 1]->organics, ':', BUFF_SIZE);
   	addint(stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
   	addint(stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
+	len = strlen(stufftosave);
+	for (loop=1;loop<=99-len;loop++)   //This puts a buffer of space in the save
+		strcat(stufftosave, " ");		//file so things don't get overwritten
+	strcat(stufftosave, "\n");			//when saving.
 
 	playerfile = fopen(filename, "r+");
 	while(1)
