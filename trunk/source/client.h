@@ -60,6 +60,9 @@ enum prompts
   pt_port,
   autopilot,
   move,
+  pl_menu,
+  pl_lmenu,
+  pl_cmenu,
   debug
 };
 
@@ -149,10 +152,15 @@ void print_stardock_help();
 void print_shipyard_help();
 void print_bank_help();
 void do_stardock_menu(int sockid, struct player *curplayer);
+void do_planet_select(int sockid, struct player *curplayer, struct sector *cursector);
+void do_planet_menu(int sockid, struct player *curplayer);
+void do_planet_display(int sockid, struct player *curplayer);
+void print_planet_help();
 void do_shipyard_menu(int sockid, struct player *curplayer);
 void buyship(int sockid, struct player *curplayer);
+int dlen(int input); 
 size_t slen(const char *string);
-char *spaces(int numspaces); 
+char *spaces(int numspaces);
 void do_bank_menu(int sockid, struct player *curplayer);
 void printwelcome ();
 void do_ship_upgrade(int sockid, struct player *curplayer);
