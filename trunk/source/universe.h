@@ -106,6 +106,7 @@ struct player
   struct realtimemessage *messages;	/* Holds realtime messages */
   int movingto;			/* What sector the player is moving to */
   unsigned short loggedin;	/* This is not in the file */
+  int lastplanet;   /*This is the last planet type that they created! */
 };
 
 struct realtimemessage

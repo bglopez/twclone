@@ -1006,8 +1006,9 @@ void processcommand (char *buffer, struct msgcommand *data)
             strcpy(buffer, "BAD: Moving you can't do that!\n");
             return;
         }
+		  strcpy(buffer, data->buffer);
 		  //Check other flags here
-        buildnewplanet (curplayer, data->buffer,
+        buildnewplanet (curplayer, buffer,
                         (int) ships[curplayer->ship - 1]->location);
         break;
     default:
@@ -1939,7 +1940,7 @@ void planetupgrade(char *buffer, struct planet *curplanet)
 	{
 		if ((curplanet->fuelColonist + curplanet->organicsColonist + 
 			curplanet->equipmentColonist) < 
-			curplanet->pClass->citadelUpgradeColonist[curplanet->citdl->level])
+			curplanet->pClass->citadelUpgradeColonist[curplanet->citdl->level]/1000)
 		{
 			strcpy(buffer, "BAD: Not enough Colonists");
 			return;
@@ -2824,13 +2825,38 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
 }
 
 /**************** WORKING *************************/
-void buildnewplanet (struct player *curplayer, char *planetname, int sector)
+void buildnewplanet (struct player *curplayer, char *buffer, int sector)
 {
     int i, p_num = 0, p_sec, p_type;
     char *p_name, *p_owner;
     char p_ownertype = 'p', dummy;
+	 char *planetname = (char *)malloc(sizeof(char)*(MAX_NAME_LENGTH+1));
+	 int input;
+	 
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
+	 popstring(buffer, planetname, ":", BUFF_SIZE);
+	 input = popint(buffer, ":");
 
+	 if (input != 1)
+	 {
+		if (curplayer->lastplanet != 0)
+		{
+			strcpy(buffer, "BAD: You have already created a planet!");
+			return;
+		}
+		else
+		{
+	 		//This should really be a probability distribution with M being at the top
+	 		// followed by L, O, K, H, U, C. But for now this will work
+	 		p_type = randomnum(1,configdata->number_of_planet_types-1);
+			curplayer->lastplanet = p_type;
+			strcpy(buffer, "\0");
+			addstring(buffer, planetTypes[p_type]->typeClass, ':', BUFF_SIZE);
+			addstring(buffer, planetTypes[p_type]->typeName, ':', BUFF_SIZE);
+			return;
+		}
+	 }
+	 
     for (i = 0; i <= configdata->max_total_planets; i++)
     {
         if (planets[i] == NULL)
@@ -2840,9 +2866,9 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
         }
     }
 
-	 //This should really be a probability distribution with M being at the top
-	 // followed by L, O, K, H, U, C. But for now this will work
-	 p_type = randomnum(1,configdata->number_of_planet_types-1);
+	 p_type = curplayer->lastplanet;
+	 curplayer->lastplanet = 0;
+	 strcpy(buffer, "OK: Creating planet!");
     planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet));
     planets[p_num-1]->num = p_num;
     planets[p_num-1]->name = (char *)malloc((MAX_NAME_LENGTH+1)*sizeof(char));
@@ -2912,6 +2938,7 @@ void buildnewplayer (struct player *curplayer, char *shipname)
 	 curplayer->bank_balance = 0;
     curplayer->lastprice = 0;
     curplayer->firstprice = 0;
+	 curplayer->lastplanet = 0;
     //curplayer->ported = 0;
 	 curplayer->flags=P_LOGGEDIN;
     curplayer->loggedin = 1;

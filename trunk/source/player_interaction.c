@@ -312,7 +312,7 @@ void *handle_player (void *threadinfo)
 	       && loggedin)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
-	  popstring (inbuffer, data.buffer, ":", BUFF_SIZE);
+	  strcpy(data.buffer, inbuffer);
 	  data.command = ct_genesis;
 	  commandgood = 1;
 	}

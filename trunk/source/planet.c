@@ -228,7 +228,7 @@ void save_planetinfo(char *filename)
 							 ',', BUFF_SIZE);
 	}
 	addint(stufftosave, planetTypes[index]->citadelUpgradeColonist[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
-	for (loop=0;loop<2; loop++)
+	for (loop=0;loop<3; loop++)
 	{
 		addint(stufftosave, planetTypes[index]->maxColonist[loop],
 							 ',', BUFF_SIZE);

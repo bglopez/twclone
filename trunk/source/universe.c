@@ -245,6 +245,7 @@ void init_playerinfo (char *filename)
         curplayer->beginmove = 0;
         curplayer->movingto = 0;
         curplayer->messages = NULL;
+		  curplayer->lastplanet = 0;
 
         if (players[playernum - 1] != NULL)
         {

@@ -11,7 +11,7 @@ void planettake(char *buffer, struct player *curplayer);
 void planetleave(char *buffer, struct player *curplayer);
 void totalplanetinfo(int pnumb, char *buffer); 
 void buildplayerinfo (int playernum, char *buffer);
-void buildnewplanet (struct player *curplayer, char *planetname, int sector);
+void buildnewplanet (struct player *curplayer, char *buffer, int sector);
 void buildshipinfo (int shipnum, char *buffer);
 void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data);
 void buildgameinfo(char *buffer);
