@@ -1,0 +1,6 @@
+This is a master server for the twclone game system.
+
+To compile this master server you the nspr libraries from
+www.mozilla.org these are used to give portable threads so that this
+server will work on most OS's.
+

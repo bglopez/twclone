@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+
+<SERVERLIST>
+
+<SERVER hostname='' url=''>
+<GAME version='' age=''>name</GAME>
+<PLAYERINFO max='' percentgood='' ingame='' withcid=''></PLAYERINFO>
+
+
+
+
+</SERVER>
+
+</SERVERLIST>
+
+
+<!--
+int ver,
+char *host,
+char *url,
+int age_of_game,
+int maxplayers,
+int maxports,
+int maxplanets,
+int players_in_game,
+int ports_in_game,
+int planets_in_game,
+int value_of_ports,
+int percent_good_players,
+int percent_planets_with_cid,
+int corps_in_game,
+int ships_in_game,
+int fighters_in_game,
+int mines_in_game,
+int gametype,
+int turns_per_day,
+int percent_planetary_trade,
+int steal_from_buy_port,
+int initial_fighters,
+int initial_holds,
+int initial_credits,
+int clear_busts,
+int last_bust_clear,
+int multiple_photon_fire,
+int sectors_in_game,
+int display_stardock,
+int ship_delay,
+int start_with_planet,
+int local_display_on,
+int classic_ferrengi,
+int max_regen_per_visit,
+int rob_steal_delay,
+int invincible_ferrengal,
+int tournament_mode
+-->
