@@ -8,6 +8,8 @@
 #include <netdb.h>	// gethostbyname
 #include <unistd.h>	// close, write
 #include <string.h>	// memcpy, memset
+#include <pthread.h>
+#include <signal.h>
 
 #include "player.h"
 
@@ -68,10 +70,15 @@ void init_listen_thread(pthread_t *tid){
 }
 		
 void* listen_thread(void *arg){
+	sigset_t newmask;
 	struct connection *cx;
 	struct sockaddr_in addr;
 	pthread_t tid;
 	int sockfd = init_socket(&addr, 9999);
+
+	sigaddset(&newmask, SIGINT);
+	pthread_sigmask(SIG_BLOCK, &newmask, NULL);
+
 	while(1){
 		cx = next_connection(sockfd, &addr);
 		pthread_create(&tid, NULL, player_login, cx);
