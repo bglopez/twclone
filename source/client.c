@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.26 $
- * Last Modified: $Date: 2003-10-10 03:15:09 $
+ * $Revision: 1.27 $
+ * Last Modified: $Date: 2003-10-12 00:33:43 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.26 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-10 03:15:09 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.27 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-12 00:33:43 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -200,21 +200,30 @@ main (int argc, char *argv[])
                     }
                     if (cursector->ports->type == 0)
                     {
-                        printf
-                        ("Porting at Class 0 Ports currently unavailable");
-                        break;
+                        //printf("Porting at Class 0 Ports currently unavailable");
+								//Upgrades are called from 
                     }
+						  //This next bit is cheating but it works!
 
-                    mickey = prompttype (ptype, 0, sockid);
+                    mickey = prompttype (ptype, cursector->ports->type, sockid);
                     switch (*(mickey + 0))
                     {
-                    case 'q':
-                    case 'Q':
-                        break;
-                    case 't':
-                    case 'T':
-                        doporting (sockid, curplayer);
-                        break;
+                    		case 'q':
+                    		case 'Q':
+                        	break;
+                    		case 't':
+                    		case 'T':
+                        	doporting (sockid, curplayer);
+									//Until I find out why it seg faults this is here
+									getmyinfo(sockid, curplayer);
+                        	break;
+						  		case 's':
+						  		case 'S':
+									printf("Landing at Stardock current disabled! But you can do upgrades!");
+									do_ship_upgrade(sockid, curplayer);
+									break;
+								default:
+									break;
                     }
                     break;	//Porting ain't done yet.
                 case 'm':
@@ -844,7 +853,10 @@ getsectorinfo (int sockid, struct sector *cursector)
                 if (cursector->players == NULL)
                     cursector->players = curplayer;
                 else
+					 {
+						if (place != NULL)
                     place->next = curplayer;
+					 }
                 place = curplayer;
                 curplayer = NULL;
                 if (strlen (temp) == 0)	//If we're beyond the length of
@@ -1022,8 +1034,118 @@ clearplayer (struct player *curplayer)
     return;
 }
 
-void
-doporting (int sockid, struct player *curplayer)
+void do_ship_upgrade(int sockid, struct player *curplayer)
+{
+	char *buffer = (char *)malloc(BUFF_SIZE);
+	char *temp = (char *)malloc(BUFF_SIZE);
+	char choice;
+	int price_holds;
+	int holds=0;
+	int price_figs;
+	int figs=0;
+	int price_shields;
+	int shields=0;
+	int stillhere=1;
+	int holds_can_buy=0;
+	int shields_can_buy=0;
+	int figs_can_buy=0;
+	int amount=0;
+	int type=0;
+	int dummy=0;
+
+	while (stillhere)
+	{
+		getmyinfo(sockid, curplayer);
+		*buffer='\0';
+		strcpy(buffer, "PORT UPGRADE:7:1:0:");
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		price_holds = popint(temp, ",");
+		holds = popint(temp, ",");
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		price_shields = popint(temp, ",");
+		shields = popint(temp, ",");
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		price_figs = popint(temp, ",");
+		figs = popint(temp, ",");
+	
+		*buffer='\0';
+		strcpy(buffer, "PORT UPGRADE:7:1:2:");
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		dummy = popint(temp, ",");
+		holds_can_buy = popint(temp, ",");
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		dummy = popint(temp, ",");
+		shields_can_buy = popint(temp, ",");
+		popstring(buffer, temp, ":", BUFF_SIZE);
+		dummy = popint(temp, ",");
+		figs_can_buy = popint(temp, ",");
+
+		
+		printf("\n%sYou have %s%d %scredits.",KGRN,KLTCYN,curplayer->credits,KGRN);
+		printf("\n%sCommerce report for: %s04:24:54 PM Sat Oct 10, 2015%s    You can buy:", KLTYLW,KLTCYN, KLTYLW);
+		printf("\n%sA %sCargo holds      %s:%s       %d %scredits / next hold             %s%d", KGRN, KMAG, KLTYLW, KLTCYN, price_holds, KMAG, KLTCYN, holds_can_buy);
+		printf("\n%sB %sFighters         %s:%s       %d %scredits per fighter             %s%d", KGRN, KMAG, KLTYLW, KLTCYN, price_figs, KMAG, KLTCYN, figs_can_buy);
+		printf("\n%sC %sShield Points    %s:%s       %d %scredits per point               %s%d", KGRN, KMAG, KLTYLW, KLTCYN, price_shields, KMAG, KLTCYN, shields_can_buy);
+		printf("\n");
+		printf("\n%sWhich item do you wish to buy? %s(A,B,C,Q):",KMAG,KLTYLW,KNRM);
+		scanf("%c", &choice);
+
+		printf("\n");
+		switch (choice)
+		{
+			case 'a':
+			case 'A':
+				printf("\n%sYou have %s%d%s holds.",KMAG,KLTCYN,curplayer->pship->holds,KMAG);
+				printf("\n%sInstalling your next Cargo Hold will cost %s%d%s credits.",KMAG,KLTCYN,price_holds,KMAG);
+				printf("\n%sHow many Cargo Holds do you want installed? ",KMAG);
+				scanf("%d", &amount);
+				type = 4;
+				break;
+			case 'b':
+			case 'B':
+				printf("\n%sYou have %s%d%s fighters.",KMAG,KLTCYN,curplayer->pship->fighters,KMAG);
+				printf("\n%sHow many L-3B fighters do you want to buy (Max %d) ? ",KMAG,figs_can_buy);
+				scanf("%d", &amount);
+				type = 6;
+				break;
+			case 'c':
+			case 'C':
+				printf("\n%sYou have %s%d%s shields.",KMAG,KLTCYN,curplayer->pship->shields,KMAG);
+				printf("\nHow many shield armor points do you want to buy (Max %d) ? ",shields_can_buy);
+				scanf("%d", &amount);
+				type = 5;
+				break;
+			case 'q':
+			case 'Q':
+				stillhere=0;
+				break;
+			default:
+				printf("\nInvalid Selection Please try again");
+				break;
+		}
+		junkline();
+		if (stillhere!=0)
+		{
+			strcpy(buffer, "PORT UPGRADE:");
+			addint(buffer, type, ':', BUFF_SIZE);
+			//Add how many we're buying
+			addint(buffer, amount, ':', BUFF_SIZE);
+			//Tell the server that we are buying, not pricing
+			addint(buffer, 1, ':', BUFF_SIZE);
+			sendinfo(sockid, buffer);
+			recvinfo(sockid, buffer);
+		}
+	}
+
+	free(buffer);
+	free(temp);
+	return;
+}
+void doporting (int sockid, struct player *curplayer)
 {
     int maxproduct[3];
     int product[3];
@@ -1040,10 +1162,7 @@ doporting (int sockid, struct player *curplayer)
     int offered = 0;
     int accepted = 0;
     int xpgained = 0;
-    char pnames[3][20] = {
-                             "\x1B[1;36mFuel Ore", "\x1B[1;36mOrganics",
-                             "\x1B[1;36mEquipment"
-                         };
+    char pnames[3][20] = {"\x1B[1;36mFuel Ore","\x1B[1;36mOrganics","\x1B[1;36mEquipment"};
     int playerproduct[3];
     int testholds = 0;		//Number of holds player can afford according
     //To the test price
@@ -1088,6 +1207,13 @@ doporting (int sockid, struct player *curplayer)
     //Docking...
     //One turn deducted, <number> turns left.
     //
+	 if (type==0)
+	 {
+		free(buffer);
+		do_ship_upgrade(sockid, curplayer);
+		return;
+	 }
+				
     printf ("\n%sCommerce report for %s%s%s", KLTYLW, KLTCYN, name, KLTYLW);
     printf ("\n");
     //-=-=-         Docking Log        -=-=-
@@ -1240,8 +1366,7 @@ doporting (int sockid, struct player *curplayer)
                 }
                 while (!accepted);
                 if (xpgained > 0)
-                    printf
-                    ("\n%sFor your great trading you receive %s%d%s experience point(s).",
+                    printf("\n%sFor your great trading you receive %s%d%s experience point(s).",
                      KGRN, KLTYLW, xpgained, KGRN);
                 getmyinfo (sockid, curplayer);
             }
@@ -1253,6 +1378,7 @@ doporting (int sockid, struct player *curplayer)
             curplayer->pship->emptyholds, KGRN);
     printf ("\n");
     curplayer->pship->ported = curplayer->pship->ported + 1;
+	 free(buffer);
 
 }
 
@@ -1448,8 +1574,7 @@ movesector (char *holder, int sockid, int current, struct sector *cursector)
 }
 
 
-char *
-prompttype (enum prompts type, int sector, int sockid)
+char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
 {
     int hour = 0;
     int min = 0;
@@ -1485,10 +1610,9 @@ prompttype (enum prompts type, int sector, int sockid)
                 }
             }
 
-            printf
-            ("\n\n%sCommand [%sTL%s=%s%d:%d:%d%s]%s:%s[%s%d%s] (%s?=Help%s)? :",
+            printf("\n\n%sCommand [%sTL%s=%s%d:%d:%d%s]%s:%s[%s%d%s] (%s?=Help%s)? :",
              KMAG, KLTYLW, KYLW, KLTYLW, hour, min, sec, KMAG, KBLD, KMAG,
-             KLTCYN, sector, KMAG, KLTYLW, KMAG);
+             KLTCYN, sector_or_porttype, KMAG, KLTYLW, KMAG);
             //Prints out the Main command line
             printf ("%s ", KNRM);	//Gets rid of any extra colors.
             break;
@@ -1501,9 +1625,12 @@ prompttype (enum prompts type, int sector, int sockid)
             break;
         case pt_port:
             printf ("%s\n", KNRM);
-            printf ("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
-            printf ("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
-            printf ("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);
+				//Attack goes here
+				if (sector_or_porttype==9)
+					printf("\n%s<%sS%s>%s Land on the %sStardock", KMAG, KGRN, KMAG, KGRN, KYLW);
+            printf("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
+            printf("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
+            printf("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);
             break;
         case move:
             printf ("\n%sTo which Sector ?", KMAG);
