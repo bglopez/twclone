@@ -45,6 +45,7 @@ enum commandtype
   ct_update,
   ct_fedcomm,
   ct_online,
+  ct_stardock,
   ct_land,
   ct_scan,
   ct_beacon,
