@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.14 $
- * Last Modified: $Date: 2002-06-20 06:37:17 $
+ * $Revision: 1.15 $
+ * Last Modified: $Date: 2002-06-29 22:14:33 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.14 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-20 06:37:17 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.15 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-29 22:14:33 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -700,6 +700,7 @@ getsectorinfo (int sockid, struct sector *cursector)
   int tempplayer;
   struct player *curplayer = NULL, *place = NULL;
   struct port *curport = NULL;
+  struct planet *curplanet = NULL, *pplace = NULL;
   char beacon[50], nebulae[50];
 
   for (counter = 0; counter <= MAX_WARPS_PER_SECTOR; counter++)
@@ -798,8 +799,8 @@ getsectorinfo (int sockid, struct sector *cursector)
       popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
       strncpy (temp, tempbuf, strlen (tempbuf));
       for (counter = 0; counter <= MAX_PLAYERS; counter++)
-	{
-	  if ((curplayer =
+		{
+	  	if ((curplayer =
 	       (struct player *) malloc (sizeof (struct player))) != NULL)
 	    {
 	      tempplayer = popint (temp, ",");
@@ -810,23 +811,62 @@ getsectorinfo (int sockid, struct sector *cursector)
 	      psinfo (sockid, tempplayer, curplayer);
 	      tempplayer = popint (tempbuf, ",");	//For wierd
 	      if (strncmp (temp, tempbuf, 5) != 0)	//Data corruption 
-		strcpy (temp, tempbuf);	//errors
+				strcpy (temp, tempbuf);	//errors
 	      if (cursector->players == NULL)
-		cursector->players = curplayer;
+				cursector->players = curplayer;
 	      else
-		place->next = curplayer;
+				place->next = curplayer;
 	      place = curplayer;
 	      curplayer = NULL;
 	      if (strlen (temp) == 0)	//If we're beyond the length of
-		counter = MAX_PLAYERS + 1;	//the string, then no more loop
+				counter = MAX_PLAYERS + 1;	//the string, then no more loop
 	    }
 	  else
 	    {
 	      printf ("\nUnable to allocate memory");
 	      return (cursector->number);
 	    }
-	}
+		}
+	 }
+  position = position+2; //to get rid of fighter stuff
+  if ((length = strcspn (buff + position, ":")) == 0)	//If no planets
+    {
+      cursector->planets = NULL;	//No planets!
+      position++;
     }
+  else
+    {
+      len = pos = 0;
+      strcpy (tempbuf, "\0");
+      popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
+      strncpy (temp, tempbuf, strlen (tempbuf));
+      for (counter = 0; counter <= MAX_PLANETS; counter++)
+		{
+	  		if ((curplanet =
+	       (struct planet *) malloc (sizeof (struct planet))) != NULL)
+	    	{
+	      	tempplayer = popint (temp, ",");
+	      	curplanet->name = NULL;
+	      	curplanet->next = NULL;
+	      	tempplayer = popint (tempbuf, ",");	//For wierd
+	      	if (strncmp (temp, tempbuf, 5) != 0)	//Data corruption 
+					strcpy (temp, tempbuf);	//errors
+	      	if (cursector->planets == NULL)
+					cursector->planets = curplanet;
+	      	else
+					pplace->next = curplanet;
+	      	pplace = curplanet;
+	      	curplanet = NULL;
+	      	if (strlen (temp) == 0)	//If we're beyond the length of
+					counter = MAX_PLANETS + 1;	//the string, then no more loop
+	    	}
+	 	 else
+	    	{
+	      	printf ("\nUnable to allocate memory");
+	      	return (cursector->number);
+		 	}
+		}
+	 }
   // To be continued.
   return cursector->number;
 }
@@ -864,6 +904,7 @@ printsector (struct sector *cursector)
   if (cursector->planets != NULL)
   {
 		printf("\n%sPlanets %s:%s (%sM%s) Terra", KMAG, KLTYLW, KGRN, KLTYLW, KGRN);
+		free(cursector->planets);
   }
   if (cursector->players != NULL)
     {

@@ -47,7 +47,7 @@ char porttypes[10][25] = { "\x1B[1;36mSpecial", "\x1B[0;32mBB\x1B[0;1;36mS",
 
 
 #define MAXWARPS 5000	//until the server sends this
-
+#define MAX_PLANETS 500  //Ditto
 
 enum prompts
 {

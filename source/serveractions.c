@@ -526,7 +526,43 @@ builddescription (int sector, char *buffer, int playernum)
   addstring(buffer, "", ':', BUFF_SIZE);  /* # of fighters goes here */
   addstring(buffer, "", ':', BUFF_SIZE);  /* Mode of fighters goes here */
   /* Now comes planets! */
+  p = 0;
+  element = NULL;
+  element = sectors[sector - 1]->planets;
+  if (element == NULL)
+    addstring (buffer, "", ':', BUFF_SIZE);
+  else
+    {
+      do
+		{
+	   	if (p != 0)
+				addint (buffer, p, ',', BUFF_SIZE);
+	   	p = ((struct planet *) element->item)->num;
+			element = element->listptr;
+		}
+      while (element != NULL);
+      if (p != 0)
+			addint (buffer, p, ':', BUFF_SIZE);
+      else
+			addstring (buffer, "", ':', BUFF_SIZE);
+    }
 
+/*
+ *This works but for testing purposes I'm taking it out
+ * if (element == NULL)
+		addstring(buffer, "", ':', BUFF_SIZE);
+  else
+  {
+  		while (element != NULL)
+  		{
+			p = ((struct planet *)element->item)->num;
+			fprintf(stderr, "\nbuilddescription: Sector %d found planet %d", sector, p); 
+			if (p != 0)
+				addint(buffer, p, ',', BUFF_SIZE);
+			element = element->listptr;
+		}
+		addstring(buffer, "", ':', BUFF_SIZE);
+  }*/
   return;
 }
 
