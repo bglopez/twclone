@@ -490,9 +490,9 @@ handle_player (void *threadinfo)
 	  getmsg (msgidout, outbuffer, pthread_self ());
 	}
       else
-	strcpy (outbuffer, "BAD");
+	strcpy (outbuffer, "BAD\n");
 
-      if (!loggedin && strncmp (outbuffer, "BAD", 3) != 0 && commandgood == 2)
+      if (!loggedin && strncmp (outbuffer, "BAD\n", 3) != 0 && commandgood == 2)
 	loggedin = 1;
 
       if (sendinfo (sockid, outbuffer) == -1)
@@ -509,3 +509,8 @@ handle_player (void *threadinfo)
 
   return NULL;
 }
+
+
+
+
+
