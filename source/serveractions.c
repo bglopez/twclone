@@ -1771,8 +1771,63 @@ void planetleave(char *buffer, struct player *curplayer)
 
 void planetupgrade(char *buffer, struct planet *curplanet)
 {
+	int upgrade=0;
+	time_t timenow;
 
+	upgrade = popint(buffer, ":");
+
+	strcpy(buffer, "\0");
+	timenow = time(NULL);
+	if (curplanet->citdl->upgradestart != 0)
+	{
+		addint(buffer, (curplanet->citdl->upgradestart - timenow)/(3600*24),
+					':', BUFF_SIZE);
+	}
+	else
+		addint(buffer, 0, ':', BUFF_SIZE);
+	addint(buffer, curplanet->pClass->citadelUpgradeColonist[curplanet->citdl->level], ':', BUFF_SIZE);
+	addint(buffer, curplanet->pClass->citadelUpgradeOre[curplanet->citdl->level], ':', BUFF_SIZE);
+	addint(buffer, curplanet->pClass->citadelUpgradeOrganics[curplanet->citdl->level], ':', BUFF_SIZE);
+	addint(buffer, curplanet->pClass->citadelUpgradeEquipment[curplanet->citdl->level], ':', BUFF_SIZE);
+	addint(buffer, curplanet->pClass->citadelUpgradeTime[curplanet->citdl->level], ':', BUFF_SIZE);
+	if ((upgrade == 1) && (curplanet->citdl->upgradestart == 0))
+	{
+		if ((curplanet->fuelColonist + curplanet->organicsColonist + 
+			curplanet->equipmentColonist) < 
+			curplanet->pClass->citadelUpgradeColonist[curplanet->citdl->level])
+		{
+			strcpy(buffer, "BAD: Not enough Colonists");
+			return;
+		}
+		if (curplanet->fuel < 
+			curplanet->pClass->citadelUpgradeOre[curplanet->citdl->level])
+		{
+			strcpy(buffer, "BAD: Not enough Ore");
+			return;
+		}
+		if (curplanet->organics < 
+			curplanet->pClass->citadelUpgradeOrganics[curplanet->citdl->level])
+		{
+			strcpy(buffer, "BAD: Not enough Organics");
+			return;
+		}
+		if (curplanet->equipment < 
+			curplanet->pClass->citadelUpgradeEquipment[curplanet->citdl->level])
+		{
+			strcpy(buffer, "BAD: Not enough Equipment");
+			return;
+		}
+		curplanet->citdl->upgradestart = timenow;
+		curplanet->fuel = curplanet->fuel - 
+			curplanet->pClass->citadelUpgradeOre[curplanet->citdl->level];
+		curplanet->organics = curplanet->organics - 
+			curplanet->pClass->citadelUpgradeOrganics[curplanet->citdl->level];
+		curplanet->equipment = curplanet->equipment - 
+			curplanet->pClass->citadelUpgradeEquipment[curplanet->citdl->level];
+		strcpy(buffer, "OK: Staring Citadel upgrade!");
+	}
 }
+
 void totalplanetinfo(int pnumb, char *buffer)
 {
 	buffer[0] = '\0';

@@ -138,7 +138,7 @@ main (int argc, char **argv)
   FILE *planetfile;
   struct sector *secptr;
   char *terraInfo = malloc(sizeof(char)*400);
-			 "1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:";
+			 "1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:";
   char *ferrinfo = malloc(sizeof(char)*400);
   char *plout = malloc(sizeof(char)*400);
   char *randomPlanetInfo;
@@ -416,7 +416,7 @@ strcpy(terraInfo,"1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:");
 		strcat(terraInfo, " ");
   strcat(terraInfo, "\n");
   fprintf (planetfile, terraInfo);
-  sprintf (ferrinfo, "%d:%d:Ferringhi:1:-2:Unknown:1000:1000:1000:0:0:0:0:3:100000:20:30:10:0:0:0:", 2, ferringhiSector);
+  sprintf (ferrinfo, "%d:%d:Ferringhi:1:-2:Unknown:1000:1000:1000:0:0:0:0:3:100000:20:30:10:0:0:0:0:", 2, ferringhiSector);
   for (loop = 1; loop <= 299 - strlen(ferrinfo); loop++)
 		strcat(ferrinfo, " ");
   strcat(ferrinfo, "\n");
@@ -432,7 +432,7 @@ strcpy(terraInfo,"1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:");
 	    {
 	      tempint = randomnum (21, (numSectors - 1));
 	    }
-	  sprintf (ferrinfo, "%d:%d:%s:%d:0:Unknown:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
+	  sprintf (ferrinfo, "%d:%d:%s:%d:0:Unknown:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
 			, c, tempint, randomname (randomPlanetInfo), randomnum(1,5));
   	  for (loop = 1; loop <= 299 - strlen(ferrinfo); loop++)
 	  	strcat(ferrinfo, " ");

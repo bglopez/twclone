@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.49 $
- * Last Modified: $Date: 2004-01-02 08:44:02 $
+ * $Revision: 1.50 $
+ * Last Modified: $Date: 2004-01-03 03:57:11 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.49 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-02 08:44:02 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.50 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-03 03:57:11 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -401,7 +401,8 @@ void debugmode (int sockid)
     printf ("\n>");
     fgets (buffer, BUFF_SIZE, stdin);
     buffer[strcspn (buffer, "\n")] = '\0';
-
+	 if (strlen(buffer) == 0)
+		strcpy(buffer, "UPDATE");
     if (sendinfo (sockid, buffer) == -1)
         return;
     printf ("\nSent '%s'\n", buffer);
@@ -416,6 +417,8 @@ void debugmode (int sockid)
         fgets (buffer, BUFF_SIZE, stdin);
         buffer[strcspn (buffer, "\n")] = '\0';
 
+		  if (strlen(buffer)==0)
+				strcpy(buffer, "UPDATE");
         if (sendinfo (sockid, buffer) == -1)
             exit (-1);
 
@@ -1306,6 +1309,10 @@ int do_citadel_menu(int sockid, struct player *curplayer,
 				getmyinfo(sockid, curplayer);
 				printmyinfo(curplayer);
 				break;
+			case 'u':
+			case 'U':
+				citadelupgrade(sockid, curplanet);
+				break;
 			case '?':
 				print_citadel_help();
 				break;
@@ -1360,9 +1367,12 @@ int do_planet_menu(int sockid, struct player *curplayer)
 	int done=0;
 	int quitting=0;
 
+	getmyinfo(sockid, curplayer);
 	do_planet_display(sockid, curplayer, curplanet);
 	while (!done)
 	{
+		getmyinfo(sockid, curplayer);
+		getplanetinfo(sockid, curplanet);
 		printf("\n");
 		choice = prompttype(pl_menu, 0, sockid);
 		switch(*(choice+0))
@@ -1380,11 +1390,18 @@ int do_planet_menu(int sockid, struct player *curplayer)
 				break;
 		case 'c':
 		case 'C':
-				strcpy(buffer, "PLANET CITADEL:");
-				sendinfo(sockid, buffer);
-				recvinfo(sockid, buffer);
-				done = do_citadel_menu(sockid, curplayer, curplanet);
-				quitting = done;
+				if (curplanet->level != 0)
+				{
+					strcpy(buffer, "PLANET CITADEL:");
+					sendinfo(sockid, buffer);
+					recvinfo(sockid, buffer);
+					done = do_citadel_menu(sockid, curplayer, curplanet);
+					quitting = done;
+				}
+				else
+				{
+					citadelupgrade(sockid, curplanet);
+				}
 				break;
 		case 'a':
 		case 'A':
@@ -1421,6 +1438,133 @@ int do_planet_menu(int sockid, struct player *curplayer)
 	return(quitting);
 }
 
+void citadelupgrade(int sockid, struct planet *curplanet)
+{
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int timeleft=0;
+	int colonists=0;
+	int ore=0;
+	int org=0;
+	int equip=0;
+	int time=0;
+	char yesno;
+	int bad=0;
+
+	strcpy(buffer, "PLANET UPGRADE:0:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+
+	timeleft = popint(buffer, ":");
+	colonists = popint(buffer, ":");
+	ore = popint(buffer, ":");
+	org = popint(buffer, ":");
+	equip = popint(buffer, ":");
+	time = popint(buffer, ":");
+
+	switch(curplanet->level)
+	{
+		case 0:
+			printf("\n%sThis planet does not have a citadel on it. If you wish to construct one,", KLTCYN);
+			printf("\n%syou must first have the raw materials on the planet to build the Citadel.", KLTCYN);
+			printf("\nA citadel will allow you do various military functions as well as store");
+			printf("\nyour ship overnight, and store money in a treasury that gains interest.");
+			printf("\n");
+			printf("\n%sCitadel construction on this planet requires the following:", KGRN);
+			break;
+		case 1:
+			printf("\n%sThis citadel does not have a Comat computer on it.", KLTCYN);
+			printf("\n");
+			printf("\nA Combat computer allows you to specifiy a Military Reaction Level, which");
+			printf("\nwill send out that percentage of fighters to automatically attack any");
+			printf("\ninvading enemy. The rest of the fighters will be left in a defensive ");
+			printf("\nposition guarding planet.");
+			printf("\n");
+			printf("\n%sCombat computer construction on this plnaet requires the following:", KGRN);
+			break;
+		case 2:
+			printf("\n%sThis citadel does not have a Quasar Cannon on it.", KLTCYN);
+			printf("\n");
+			printf("\nA Quasar Cannon or Q-Cannon uses up the fuel ore on the planet to shoot at");
+			printf("\nenemies in the sector and enemies trying to land on the planet.");
+			printf("\n");
+			printf("\n%sQuasar Cannon construction on this planet requires the following:", KGRN);
+			break;
+		case 3:
+			printf("\n%sThis citadel does not have a TransWarp drive on it.", KLTCYN);
+			printf("\n");
+			printf("\nA TransWarp drive allows the planet to TransWarp to any other sector");
+			printf("\nthat you have a fighter in, provided that you have enough fuel ore on");
+			printf("\nthe planet.");
+			printf("\n");
+			printf("\n%sTransWarp drive construction on this planet requires the following:", KGRN);
+			break;
+		case 4:
+			printf("\n%sThis citadel does not have a Planetary Shield Generator on it.", KLTCYN);
+			printf("\n");
+			printf("\nA Planetary Shield Generator creates a shield around the planet that");
+			printf("\nprevents attackers from disabling the Quasar Cannon with a photon missile");
+			printf("\nand it also provides another defensive barrier that attackersmust ");
+			printf("\novercome before landing on the planet.");
+			printf("\n");
+			printf("\n%sPlanetary Shield Generator construction on this planet requires the following:", KGRN);
+			break;
+		case 5:
+			printf("\n%sThis citadel does not have an Interdictor Generator on it.", KLTCYN);
+			printf("\n");
+			printf("\nAn Interdictor Generator creates a massive gravity well that prevents");
+			printf("\nother ships from leaving this sector except via TransWarp.");
+			printf("\n");
+			printf("\n%sInterdictor Generator construction on this planet requires the following:", KGRN);
+			break;
+		case 6:
+			printf("\n%sYour citadel can not be upgraded further", KGRN);
+			return;
+	}
+	printf("\n%s%d%s Colonists to support the construction,", KLTYLW, colonists,
+				KGRN);
+	printf("\n%s%d%s units of Fuel Ore,", KLTYLW, ore, KGRN);
+	printf("\n%s%d%s units of Organics,", KLTYLW, org, KGRN);
+	printf("\n%s%d%s units of Equipment and", KLTYLW, equip, KGRN);
+	printf("\n%s%d%s days to construct.", KLTYLW, time, KGRN);
+	printf("\n");
+	printf("\n%sDo you wish to construct it?", KMAG);
+	scanf("%c", &yesno);
+	
+	if (yesno=='y' || yesno=='Y')
+	{
+		strcpy(buffer, "PLANET UPGRADE:1:");
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+	}
+	if (curplanet->colonists < colonists)
+	{
+		printf("\n%sYou need %s%d%s Colonists to build a citadel.", KGRN, KLTYLW,
+							 colonists, KGRN);
+		bad=1;
+	}
+	if (curplanet->ore < ore)
+	{
+		printf("\n%sYou need %s%d%s units of %sFuel Ore%s to build a citadel.",
+				KGRN, KLTYLW, ore, KGRN, KLTCYN, KGRN);
+		bad=1;
+	}
+	if (curplanet->organics < org)
+	{
+		printf("\n%sYou need %s%d%s units of %sOrganics%s to build a citadel.",
+				KGRN, KLTYLW, org, KGRN, KLTCYN, KGRN);
+		bad=1;
+	}
+	if (curplanet->equipment < equip)
+	{
+		printf("\n%sYou need %s%d%s units of %sEquipment%s to build a citadel.",
+				KGRN, KLTYLW, equip, KGRN, KLTCYN, KGRN);
+		bad=1;
+	}
+	if (bad==1)
+	{
+		printf("\n%sTry again later when you have enough of everything on this planet.",KGRN);
+	}
+}
 void change_stuff(int sockid, struct player *curplayer, int type)
 {
 	char *buffer= (char *)malloc(sizeof(char)*BUFF_SIZE);
@@ -1563,6 +1707,11 @@ void getplanetinfo(int sockid, struct planet *curplanet)
 	curplanet->transporter = popint(buffer, ":");
 	curplanet->interdictor = popint(buffer, ":");
 	curplanet->fighters = planetamt[3];
+	curplanet->colonists = col[0] + col[1] + col[2];
+	curplanet->ore = planetamt[0];
+	curplanet->organics = planetamt[1];
+	curplanet->equipment = planetamt[2];
+
 	free(buffer);
 	free(ptype);
 	free(ptname);

@@ -56,6 +56,7 @@ void saveplanets(char *filename)
 		addint(stufftosave, planets[index]->citdl->transporterlvl, ':'
 							 , BUFF_SIZE);
 		addint(stufftosave, planets[index]->citdl->interdictor, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->upgradestart, ':', BUFF_SIZE);
 		for (loop=0; loop< 399 - strlen(stufftosave); loop++)
 			strcat(stufftosave, " ");
 		strcat(stufftosave, "\n");
@@ -133,6 +134,7 @@ int init_planets (char *filename)
  		  planets[p_num - 1]->citdl->planetaryShields = popint(buffer, ":");
 		  planets[p_num - 1]->citdl->transporterlvl = popint(buffer, ":");
 		  planets[p_num - 1]->citdl->interdictor = popint(buffer, ":");
+		  planets[p_num - 1]->citdl->upgradestart = popint(buffer, ":");
         
 		  insert_planet (planets[p_num - 1], sectors[p_sec - 1], 0);
 		  }
