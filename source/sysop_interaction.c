@@ -41,10 +41,10 @@ void *getsysopcommands(void *threadinfo)
       fgets(buffer, BUFF_SIZE, stdin);
       buffer[strcspn(buffer, "\n")] = '\0';
       if (strcmp(buffer, "QUIT") == 0)
-	{
-	  data.command = ct_quit;
-	  senddata(msgidin, &data, pthread_self());
-	}
+		{
+	  		data.command = ct_quit;
+	  		senddata(msgidin, &data, pthread_self());
+		}
     }
   return NULL;
 }
