@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.27 $
- * Last Modified: $Date: 2003-10-12 00:33:43 $
+ * $Revision: 1.28 $
+ * Last Modified: $Date: 2003-10-12 01:16:28 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.27 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-12 00:33:43 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.28 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-12 01:16:28 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -288,7 +288,7 @@ printwelcome ()
     printf ("\n");
     printf ("\nTWClone Hompage: %shttp://twclone.sourceforge.net%s", KLTCYN,
             KGRN);
-    printf ("\nCurrent Release: 0.11");
+    printf ("\nCurrent Release: 0.12");
     printf ("\n");
 }
 
@@ -484,7 +484,7 @@ printhelp ()
      KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN,
      KMAG, KLTCYN, KGRN);
     printf
-    ("\n%s|==============================%s0.10 alpha%s===============================|",
+    ("\n%s|==============================%s0.12 alpha%s===============================|",
      KGRN, KLTRED, KGRN);
 
 }
