@@ -90,7 +90,7 @@ processcommand (char *buffer, struct msgcommand *data)
         {
             //if(move_player(curplayer, data, buffer) < 0)
             //{
-            strcpy (buffer, "BAD\n");
+            strcpy (buffer, "BAD:Not enough turns!\n");
             return;
         }
         //}
@@ -416,6 +416,18 @@ processcommand (char *buffer, struct msgcommand *data)
         			  {
             			sendtosector (curplayer->sector, curplayer->number, 3);
         			  }
+                 if (curplayer->sector == 0)
+                 {
+                    curplayer =
+                        delete (curplayer->name, player,
+                                sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
+                 }
+                 else
+                 {
+                    curplayer =
+                        delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
+                 }
+
 				}
             switch (data->pcommand)
             {
@@ -427,15 +439,24 @@ processcommand (char *buffer, struct msgcommand *data)
             case p_land:
 					 if (curport->type == 9)
 					 {
- 					 	if (curplayer->sector == 0)
-        			 	{
-            			sendtosector (ships[curplayer->ship - 1]->location,
+						if ((ships[curplayer->ship - 1]->flags & S_STARDOCK) 
+											 != S_STARDOCK)
+						{
+							if (curplayer->sector == 0)
+        			 		{
+            				sendtosector (ships[curplayer->ship - 1]->location,
                           curplayer->number, 4);
-					 	}
-        			 	else
-        			 	{
-            			sendtosector (curplayer->sector, curplayer->number, 4);
-        			 	}
+								curplayer =
+                        delete (curplayer->name, player,
+                           sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
+					 		}
+        			 		else
+        			 		{
+            				sendtosector (curplayer->sector, curplayer->number, 4);
+        			 			curplayer =
+                        delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
+							}
+						}
 
 					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
 					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_STARDOCK;
@@ -467,35 +488,50 @@ processcommand (char *buffer, struct msgcommand *data)
 
                 break;
             case p_quit:
+					 if ((ships[curplayer->ship -1]->flags & S_PORTED) == S_PORTED)
+					 {
+						ships[curplayer->ship - 1]->flags = 
+								 ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PORTED);
+					 	strcpy(buffer, "OK: Leaving port");
+						if (curplayer->sector == 0)
+        			 	{
+                     insertitem(curplayer, player,
+                     sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
+						}
+        			 	else
+        			 	{
+                     insertitem(curplayer, player,
+							sectors[curplayer->sector - 1]->playerlist, 1);
+						}
+						if ((ships[curplayer->ship - 1]->flags & S_STARDOCK) == S_STARDOCK)
+					 	{
+						  ships[curplayer->ship - 1]->flags =
+						  ships[curplayer->ship - 1]->flags & (S_MAX ^ S_STARDOCK);
+							if (curplayer->sector == 0)
+        			 		{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -4);
+					 		}
+        			 		else
+        			 		{
+            			sendtosector (curplayer->sector, curplayer->number, -4);
+        			 		}
+					 	}
+					 	else
+					 	{
+					 		if (curplayer->sector == 0)
+        			 		{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -3);
+					 		}
+        			 		else
+        			 		{
+            			sendtosector (curplayer->sector, curplayer->number, -3);
+        			 		}
+					 	}
 					 ships[curplayer->ship - 1]->flags = 
 								 ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PORTED);
 					 strcpy(buffer, "OK: Leaving port");
-					 fprintf(stderr, "\nprocesscommand: Ship flags are (%d), ANDed with S_STARDOCK are (%d)", ships[curplayer->ship -1]->flags, ships[curplayer->ship - 1]->flags & S_STARDOCK); 
-					 if ((ships[curplayer->ship - 1]->flags & S_STARDOCK) == S_STARDOCK)
-					 {
-						fprintf(stderr, "\npcmd: Ship flags ANDed are 0");
-						if (curplayer->sector == 0)
-        			 	{
-            			sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, -4);
-					 	}
-        			 	else
-        			 	{
-            			sendtosector (curplayer->sector, curplayer->number, -4);
-        			 	}
-					 }
-					 else
-					 {
-							
-					 	if (curplayer->sector == 0)
-        			 	{
-            			sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, -3);
-					 	}
-        			 	else
-        			 	{
-            			sendtosector (curplayer->sector, curplayer->number, -3);
-        			 	}
 					 }
                 break;
             default:
@@ -551,8 +587,10 @@ processcommand (char *buffer, struct msgcommand *data)
 						bank_withdrawl(buffer, curplayer);
 						break;
 					case p_buyship:
+						buyship(buffer, curplayer);
 						break;
 					case p_sellship:
+						sellship(buffer, curplayer);
 						break;
 					case p_priceship:
 						priceship(buffer, curplayer);
@@ -965,6 +1003,12 @@ void saveplayer (int pnumb, char *filename)
 
     //sprintf (intptr, "%d:", pnumb - 1);
     sprintf (stufftosave, "%d:", pnumb);
+	 if (players[pnumb -1] == NULL)
+	 {
+		strcat(stufftosave, "(Null):(Null):0:0:0:0:0:0:0:0:0:");
+	 }
+	 else
+	 {
     addstring (stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
     addstring (stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
     addint (stufftosave, players[pnumb - 1]->sector, ':', BUFF_SIZE);
@@ -979,6 +1023,7 @@ void saveplayer (int pnumb, char *filename)
 	 sprintf(intptr, "%ld", players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
 	 addint(stufftosave, players[pnumb - 1]->flags, ':', BUFF_SIZE);
+	 }
 	 //Now to use intptr to find where to place the person.
 	 sprintf(intptr, "%d:", pnumb - 1);
     len = strlen (stufftosave);
@@ -1049,6 +1094,12 @@ saveship (int snumb, char *filename)
 
     sprintf (intptr, "%d:", snumb - 1);
     sprintf (stufftosave, "%d:", snumb);
+	 if (ships[snumb -1] == NULL)
+	 {
+		strcat(stufftosave, "(Null):0:0:0:0:0:0:0:0:0:0:0:");
+	 }
+	 else
+	 {
     addstring (stufftosave, ships[snumb - 1]->name, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->type, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->location, ':', BUFF_SIZE);
@@ -1061,6 +1112,7 @@ saveship (int snumb, char *filename)
     addint (stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
 	 addint(stufftosave, ships[snumb - 1]->flags, ':', BUFF_SIZE);
+	 }
     len = strlen (stufftosave);
     for (loop = 1; loop <= 199 - len; loop++)	//This puts a buffer of space in the save
         strcat (stufftosave, " ");	//file so things don't get overwritten
@@ -1293,7 +1345,7 @@ void sellship(char *buffer, struct player *curplayer)
 	free(curship->name);
 	delete(shipname, ship, symbols, HASH_LENGTH);
 	curplayer->ship = 0;
-	ships[shipnum]=NULL;
+	ships[shipnum-1]=NULL;
 	return;
 }
 
@@ -1375,9 +1427,9 @@ void buyship(char *buffer, struct player *curplayer)
 		return;
 	}
 	if ((curship =
-			(struct ship *)find(name, ship, symbols, HASH_LENGTH)) == NULL)
+			(struct ship *)find(name, ship, symbols, HASH_LENGTH)) != NULL)
 	{
-		fprintf(stderr, "buyship: duplicate shipname!");
+		fprintf(stderr, "\nbuyship: duplicate shipname!");
 		strcpy(buffer, "BAD: Another ship has this name already!");
 		return;
 	}
@@ -1394,6 +1446,9 @@ void buyship(char *buffer, struct player *curplayer)
 		if (i>MAX_SHIPS-1)
 		{
 			done=1;
+			strcpy(buffer, "BAD: No more ships allowable!");
+			fprintf(stderr, "\nbuyship: Max ships reached!");
+			return;
 		}
 		else
 		{
@@ -1417,12 +1472,21 @@ void buyship(char *buffer, struct player *curplayer)
 	curship->organics = 0;
 	curship->ore = 0;
 	curship->owner = curplayer->number;
-	curship->flags = 0 | S_STARDOCK | S_PORTED;
-	curship->ported = 1;
 	if (manned==1)
 	{
+		curship->flags = 0 | S_STARDOCK | S_PORTED;
+		curship->ported = 0;
 		curplayer->ship = curship->number;
 		curplayer->sector = 0;
+		strcpy(buffer, "OK: You are manning a new ship!");
+	}
+	else
+	{
+		curship->flags = 0;
+		curship->ported = 0;
+		//I hope this doesn't break
+		insertitem(curship, ship, sectors[curship->location]->shiplist, 1);
+		strcpy(buffer, "OK: You own an unmanned ship in this sector");
 	}
 	curplayer->credits = curplayer->credits - shiptypes[type -1].basecost;
 	return;

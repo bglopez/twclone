@@ -161,6 +161,7 @@ init_universe (char *filename, struct sector ***array)
         if (strlen (temp) == 0)
             strcpy ((*array)[sectornum - 1]->nebulae, "\0");
         init_hash_table ((*array)[sectornum - 1]->playerlist, 1);
+		  init_hash_table ((*array)[sectornum - 1]->shiplist, 1);
         (*array)[sectornum - 1]->portptr = NULL;
         (*array)[sectornum - 1]->planets = NULL;
     }
@@ -243,6 +244,13 @@ init_playerinfo (char *filename)
                      "init_playinfo: duplicate player numbers, exiting...\n");
             exit (-1);
         }
+		  if (curplayer->ship == 0)
+		  {
+				players[playernum - 1]=NULL;
+				curplayer = delete(name, player, symbols, HASH_LENGTH);
+		  }
+		  else
+		  {
         players[playernum - 1] = curplayer;
 
         if (insertitem (curplayer, player,
@@ -265,6 +273,7 @@ init_playerinfo (char *filename)
 
         //printf("init_playerinfo: adding '%s' with passwd '%s', in sector '%d'\n",
         //   name, passwd, curplayer->sector);
+		  }
     }
 
     fclose (playerinfo);
@@ -326,7 +335,15 @@ init_shipinfo (char *filename)
                      "init_shipinfo: duplicate ship numbers, exiting...\n");
             exit (-1);
         }
+		  if (curship->location == 0)
+		  {
+				ships[x - 1] = NULL;
+				curship = delete(name,ship,symbols,HASH_LENGTH);
+		  }
+		  else
+		  {
         ships[x - 1] = curship;
+		  }
     }
     fclose (shipfile);
 
