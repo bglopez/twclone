@@ -1,5 +1,5 @@
 dnl -*- autoconf -*-
-dnl $Id: configure.in,v 1.2 2002-06-15 06:19:54 npsimons Exp $
+dnl $Id: configure.in,v 1.3 2002-06-17 14:41:41 rdearman Exp $
 dnl Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 dnl 
 dnl This program is free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ AC_CHECK_LIB(pthread, pthread_create, , \
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(ctype.h errno.h getopt.h math.h netdb.h netinet/in.h \
+AC_CHECK_HEADERS(ctype.h errno.h  math.h netdb.h netinet/in.h \
 	pthread.h stdio.h stdlib.h string.h sys/ipc.h sys/msg.h \
 	sys/poll.h sys/socket.h sys/time.h sys/types.h termios.h \
 	time.h unistd.h, , \
