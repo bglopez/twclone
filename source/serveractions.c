@@ -166,7 +166,7 @@ processcommand (char *buffer, struct msgcommand *data)
             return;
         }
         curplayer->loggedin = 1;
-		  //curplayer->flags = curplayer->flags | P_LOGGEDIN;
+		  curplayer->flags = curplayer->flags | P_LOGGEDIN;
         if (curplayer->sector == 0)
         {
             builddescription (ships[curplayer->ship - 1]->location, buffer,
@@ -309,7 +309,7 @@ processcommand (char *buffer, struct msgcommand *data)
         saveship(curplayer->ship, "./ships.data");
         strcpy(buffer, "OK\n");
         curplayer->loggedin = 0;
-		  //curplayer->flags = curplayer->flags ^ P_LOGGEDIN;
+		  curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
         break;
     case ct_portinfo:
         if ((curplayer =
@@ -407,7 +407,7 @@ processcommand (char *buffer, struct msgcommand *data)
             switch (data->pcommand)
             {
             case p_trade:
-					 //ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
                 trading (curplayer, curport, buffer,
                          ships[curplayer->ship - 1]);
                 break;
@@ -416,7 +416,7 @@ processcommand (char *buffer, struct msgcommand *data)
             case p_negotiate:
                 break;
             case p_upgrade:
-					 //ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
 					 do_ship_upgrade(curplayer, buffer, ships[curplayer->ship - 1]);
                 break;
             case p_rob:
@@ -426,8 +426,8 @@ processcommand (char *buffer, struct msgcommand *data)
             case p_attack:
                 break;
             case p_quit:
-					 //if ((ships[curplayer->ship - 1]->flags & S_PORTED) == S_PORTED)
-					//		ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags ^ S_PORTED;
+					  ships[curplayer->ship - 1]->flags = 
+								 ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PORTED);
                 //insertitem(curplayer, player, sectors[curport->location -1]->playerlist, 1);
                 break;
             default:
@@ -1706,7 +1706,7 @@ buildnewplayer (struct player *curplayer, char *shipname)
     curplayer->lastprice = 0;
     curplayer->firstprice = 0;
     //curplayer->ported = 0;
-	 //curplayer->flags=P_LOGGEDIN;
+	 curplayer->flags=P_LOGGEDIN;
     curplayer->loggedin = 1;
     if ((curship =
                 (struct ship *) insert (shipname, ship, symbols, HASH_LENGTH)) == NULL)

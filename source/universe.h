@@ -42,15 +42,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_CIDADEL_LEVEL 7
 
 //Here go flags for ships
-#define S_INTRANSIT = 1;
-#define S_PORTED = 2;
-#define S_STARDOCK = 4;
-#define S_PLANET = 8;
-#define S_CITADEL = 16;
+#define S_INTRANSIT 1 
+#define S_PORTED 2
+#define S_STARDOCK 4
+#define S_PLANET 8
+#define S_CITADEL 16
+#define S_MAX 31
 //And now for player flags
-#define P_LOGGEDIN = 1;
-#define P_STARDOCK = 2;
-#define P_COMMISIONED = 4;
+#define P_LOGGEDIN 1
+#define P_STARDOCK 2
+#define P_COMMISIONED 4
+#define P_MAX 7
 
 struct port
 {
