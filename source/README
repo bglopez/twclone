@@ -15,6 +15,12 @@ Files to note:
 3) LICENSE
 	The GNU Public License
 
+Note on data files:
+	If you want to edit the data files by hand look at the header(.h) files.
+	They should explain in what order the data is stored. Also if your editor
+	of choice has a REPLACE option for editing files, use it lest BadThings(tm)
+	happen.
+
 Quick Install
 =============
 $ ./configure
