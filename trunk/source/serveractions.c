@@ -579,6 +579,18 @@ void saveplayer(int pnumb, char *filename)
 
  
 	playerfile = fopen(filename, "r+");
+	if (playerfile == NULL)
+	{
+		fprintf(stderr, "\nsaveplayer: No playerfile! Saving to new one!");
+		if ((pnumb-1)!=0)
+		{
+			fprintf(stderr, "\nsaveplayer: Player is not player 1 for new save file!");
+			exit(-1);
+		}
+		playerfile = fopen(filename, "w");
+		fprintf(playerfile, "%s", stufftosave);
+		fclose(playerfile);
+	}
 	while(1)
 	{
 		strcpy(buffer, "\0");
@@ -628,6 +640,14 @@ void saveship(int snumb, char *filename)
 	strcat(stufftosave, "\n");			//when saving.
 
 	playerfile = fopen(filename, "r+");
+	if (playerfile == NULL)
+	{
+		fprintf(stderr, "\nsaveship: No ship file! Saving to new one!");
+		playerfile = fopen(filename, "w");
+		fprintf(playerfile, "%s", stufftosave);
+		fclose(playerfile);
+	}
+
 	while(1)
 	{
 		strcpy(buffer, "\0");
