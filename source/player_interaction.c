@@ -75,7 +75,11 @@ makeplayerthreads (void *threadinfo)
   return NULL;
 }
 
-
+int catchpipes(char *inbuff)
+{
+   strcpy(inbuff, "QUIT:");
+   return;
+}
 /*
   handle_player
 
@@ -101,6 +105,10 @@ void *handle_player (void *threadinfo)
   printf ("Thread %d: Created\n", (int) pthread_self ());
   loggedin = 0;
 
+   //Ignore SIG_PIPE
+   signal(13, SIG_IGN);
+
+
   do
     {
       commandgood = 0;
@@ -113,9 +121,7 @@ void *handle_player (void *threadinfo)
 			fflush(stderr);
 			pthread_exit (NULL);
 		}
-
-      //fprintf(stderr, "handle_player: I got '%s' as the messagem and loggedin = %d\n", 
-      //inbuffer, loggedin);
+	
 
       //parse stuff from client, should be expanded, modularized
       if (strncmp (inbuffer, "DESCRIPTION", strlen ("DESCRIPTION")) == 0
@@ -671,7 +677,15 @@ void *handle_player (void *threadinfo)
 	loggedin = 1;
 
       if (sendinfo (sockid, outbuffer) == -1)
+      {
+
+	fprintf(stderr, "Thread %d: Unexpected exit...\n", (int)pthread_self());
+	strcpy(data.name, name);
+	data.command = ct_logout;
+	senddata(msgidin, &data, pthread_self());
+	getmsg (msgidout, outbuffer, pthread_self());
 	pthread_exit (NULL);
+      }
 
     }
   while (strcmp (inbuffer, "QUIT") != 0);
