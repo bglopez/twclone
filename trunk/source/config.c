@@ -108,12 +108,13 @@ int saveconfig(char *filename)
 {
   FILE *configfile = NULL;
   char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
-  char *bangdate = (char *)malloc(sizeof(char)*BUFF_SIZE);
+  char *bdate = (char *)malloc(sizeof(char)*BUFF_SIZE);
+  int loop=0;
   
   configfile = fopen (filename, "w");
 
   strcpy(buffer, "\0");
-  strcpy(bangdate, "\0");
+  strcpy(bdate, "\0");
 
   addint(buffer, configdata->turnsperday, ':', BUFF_SIZE);
   addint(buffer, configdata->maxwarps, ':', BUFF_SIZE);
@@ -123,6 +124,7 @@ int saveconfig(char *filename)
   addint(buffer, configdata->processinterval, ':', BUFF_SIZE);
   addint(buffer, configdata->autosave, ':', BUFF_SIZE);
   addint(buffer, configdata->max_players, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_ships, ':', BUFF_SIZE);
   addint(buffer, configdata->max_ports, ':', BUFF_SIZE);
   addint(buffer, configdata->max_planets, ':', BUFF_SIZE);
   addint(buffer, configdata->max_total_planets, ':', BUFF_SIZE);
@@ -131,14 +133,16 @@ int saveconfig(char *filename)
   addint(buffer, configdata->number_of_planet_types, ':', BUFF_SIZE);
   addint(buffer, configdata->max_ship_name_length, ':', BUFF_SIZE);
   addint(buffer, configdata->ship_type_count, ':', BUFF_SIZE);
-  sprintf(bangdate, "%ld", configdata->bangdate);
-  addstring(buffer, bangdate, ':', BUFF_SIZE);
+  sprintf(bdate, "%ld", configdata->bangdate);
+  addstring(buffer, bdate, ':', BUFF_SIZE);
+  for (loop=0; loop < 199 - strlen(buffer); loop++)
+		strcat(buffer, " ");
   strcat(buffer, "\n");
 
   fprintf(configfile, buffer);
 
   fclose(configfile);
   free(buffer);
-  free(bangdate);
+  free(bdate);
   return (1);
 }

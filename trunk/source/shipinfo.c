@@ -1,5 +1,7 @@
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #include "shipinfo.h"
 #include "common.h"
 #include "config.h"
@@ -10,14 +12,14 @@ extern struct sp_shipinfo **shiptypes;
 void saveshiptypeinfo(char *filename)
 {
 	FILE *shipfile;
-	char *stufftosave=(char *)malloc(sizeof(char)*BUFF_SIZE);
+	char stufftosave[BUFF_SIZE];
 	int index=0;
 	int len=0;
 	int loop;
 
 	shipfile = fopen(filename, "w");
 
-	for (index=0; index < SHIP_TYPE_COUNT; index++)
+	for (index=0; index < configdata->ship_type_count; index++)
 	{
 		strcpy(stufftosave, "\0");
 		addstring(stufftosave, shiptypes[index]->name, ':', BUFF_SIZE);
@@ -54,7 +56,7 @@ void init_shiptypeinfo (char *filename)
 {
 	int index=0;
 	FILE *shipfile=NULL;
-	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char buffer[BUFF_SIZE];
 	int done=0;
 
 	shiptypes = (struct sp_shipinfo **)
