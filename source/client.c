@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.33 $
- * Last Modified: $Date: 2003-11-12 23:33:35 $
+ * $Revision: 1.34 $
+ * Last Modified: $Date: 2003-11-13 00:45:01 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.33 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-12 23:33:35 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.34 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-13 00:45:01 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1427,13 +1427,15 @@ void doporting (int sockid, struct player *curplayer)
             KLTCYN, curplayer->credits, KGRN, KLTCYN,
             curplayer->pship->emptyholds, KGRN);
     printf ("\n");
+	 strcpy(buffer, "PORT QUIT:");
+	 sendinfo(sockid, buffer);
+	 recvinfo(sockid, buffer);
     curplayer->pship->ported = curplayer->pship->ported + 1;
 	 free(buffer);
 
 }
 
-int
-movesector (char *holder, int sockid, int current, struct sector *cursector)
+int movesector (char *holder, int sockid, int current, struct sector *cursector)
 {
     enum prompts ptype;
     int sector;
@@ -1878,6 +1880,18 @@ getmessages (char *buffer)
     case -2:
         printf ("\n%s%s%s leaves the game.", KLTCYN, name, KGRN);
         break;
+	 case 3:
+		  printf("\n%s%s%s lands at the port.", KLTCYN, name, KGRN);
+		  break;
+	 case -3:
+		  printf("\n%s%s%s leaves the port.", KLTCYN, name, KGRN);
+		  break;
+	 case 4:
+		  printf("\n%s%s%s lands on the Stardock.", KLTCYN, name, KGRN);
+		  break;
+	 case -4:
+		  printf("\n%s%s%s blasts off the Stardock.", KLTCYN, name, KGRN);
+		  break;
     default:
         break;
     }

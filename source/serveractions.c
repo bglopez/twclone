@@ -305,11 +305,11 @@ processcommand (char *buffer, struct msgcommand *data)
         {
             sendtosector (curplayer->sector, curplayer->number, -2);
         }
-        saveplayer(curplayer->number, "./players.data");
-        saveship(curplayer->ship, "./ships.data");
-        strcpy(buffer, "OK\n");
         curplayer->loggedin = 0;
 		  curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
+		  saveplayer(curplayer->number, "./players.data");
+        saveship(curplayer->ship, "./ships.data");
+        strcpy(buffer, "OK\n");
         break;
     case ct_portinfo:
         if ((curplayer =
@@ -404,6 +404,19 @@ processcommand (char *buffer, struct msgcommand *data)
                sectors[curport->location - 1]->playerlist, 1);
                curplayer->ported = 1;
                } */
+				if (((ships[curplayer->ship - 1]->flags & S_PORTED) != S_PORTED) 
+									 && (data->pcommand != p_land))
+				{
+					  if (curplayer->sector == 0)
+        			  {
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, 3);
+					  }
+        			  else
+        			  {
+            			sendtosector (curplayer->sector, curplayer->number, 3);
+        			  }
+				}
             switch (data->pcommand)
             {
             case p_trade:
@@ -412,23 +425,78 @@ processcommand (char *buffer, struct msgcommand *data)
                          ships[curplayer->ship - 1]);
                 break;
             case p_land:
+					 if (curport->type == 9)
+					 {
+ 					 	if (curplayer->sector == 0)
+        			 	{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, 4);
+					 	}
+        			 	else
+        			 	{
+            			sendtosector (curplayer->sector, curplayer->number, 4);
+        			 	}
+
+					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+					 	ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_STARDOCK;
+					 	strcpy(buffer, "OK: Landed on stardock");
+					 }
+					 else
+					 {
+						strcpy(buffer, "BAD: Port is not a class 9");
+					 }
                 break;
             case p_negotiate:
+					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+
                 break;
             case p_upgrade:
 					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
 					 do_ship_upgrade(curplayer, buffer, ships[curplayer->ship - 1]);
                 break;
             case p_rob:
+					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+
                 break;
             case p_smuggle:
+				    ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+
                 break;
             case p_attack:
+					 ships[curplayer->ship - 1]->flags = ships[curplayer->ship - 1]->flags | S_PORTED;
+
                 break;
             case p_quit:
-					  ships[curplayer->ship - 1]->flags = 
+					 ships[curplayer->ship - 1]->flags = 
 								 ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PORTED);
-                //insertitem(curplayer, player, sectors[curport->location -1]->playerlist, 1);
+					 strcpy(buffer, "OK: Leaving port");
+					 fprintf(stderr, "\nprocesscommand: Ship flags are (%d), ANDed with S_STARDOCK are (%d)", ships[curplayer->ship -1]->flags, ships[curplayer->ship - 1]->flags & S_STARDOCK); 
+					 if ((ships[curplayer->ship - 1]->flags & S_STARDOCK) == S_STARDOCK)
+					 {
+						fprintf(stderr, "\npcmd: Ship flags ANDed are 0");
+						if (curplayer->sector == 0)
+        			 	{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -4);
+					 	}
+        			 	else
+        			 	{
+            			sendtosector (curplayer->sector, curplayer->number, -4);
+        			 	}
+					 }
+					 else
+					 {
+							
+					 	if (curplayer->sector == 0)
+        			 	{
+            			sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -3);
+					 	}
+        			 	else
+        			 	{
+            			sendtosector (curplayer->sector, curplayer->number, -3);
+        			 	}
+					 }
                 break;
             default:
                 break;
