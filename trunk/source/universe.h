@@ -113,13 +113,28 @@ struct ship
 
 enum planettype
 {
-  terra, /* Special case since terra has almost limitless supply of colonists. */
-  M, /* Earth type */
-  L, /* Mountainous */
-  O, /* Oceanic */
-  K, /* Desert Wasteland */
-  H, /* Volcanic */
-  G, /* Gaseous (Not the offical designator) */
+  terra, /* 
+	 ** Special case since terra has almost 
+	 ** limitless supply of colonists. 
+	 */
+  M, /* Earth type 
+     ** 
+     */
+  L, /* Mountainous 
+     ** F=2,o=5,e=20
+     */
+  O, /* Oceanic 
+     ** f=20,o=2,100
+     */
+  K, /* Desert Wasteland 
+     ** f=2,o=100,e=500
+     */
+  H, /* Volcanic 
+     ** f=1,o=N/A,e=500
+     */
+  U, /* Gaseous 
+     ** f=N/A,o=N/A,e=N/A
+     */
   I  /* Glacial/Ice (Not the offical designator) */
 };
 
