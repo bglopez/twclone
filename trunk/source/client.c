@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.39 $
- * Last Modified: $Date: 2003-11-18 23:08:19 $
+ * $Revision: 1.40 $
+ * Last Modified: $Date: 2003-12-22 21:26:33 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.39 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-18 23:08:19 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.40 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-12-22 21:26:33 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -53,8 +53,7 @@ static int peek = -1;
 #include "client.h"
 #include "portinfo.h"
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
     char *goofey = NULL;		//For holding input from stdin
     char *mickey = NULL;
@@ -63,7 +62,6 @@ main (int argc, char *argv[])
     int port = 1234;		//Port number of the server
     int sockid;			//Socket ID
     char *buffer;
-    enum prompts ptype;
     struct sector *cursector = NULL;	//Stores stuff about the current sector
     struct player *curplayer = NULL;	//For the player logging in
     struct ship *curship = NULL;	//For the current players ship
@@ -118,12 +116,7 @@ main (int argc, char *argv[])
        recvinfo(int sockid, char *buffer);
      */
 
-    dologin (sockid);
-    //recvinfo(sockid, buffer);    //Gets rid of the stuff login sends
-    buffer = NULL;
-    printwelcome ();
-    whosplaying (sockid);
-    printf ("\n");
+	 //Now for some basic memory allocation
     if ((cursector = (struct sector *) malloc (sizeof (struct sector))) != NULL)
     {				//Need memory
         cursector->players = NULL;
@@ -150,15 +143,20 @@ main (int argc, char *argv[])
         curship->type = NULL;
         curship->next = NULL;	//Again more pointer initialization
         curplayer->pship = curship;
+
+		  dologin (sockid);
+    	  buffer = NULL;
+		  printwelcome ();
+    	  whosplaying (sockid);
+    	  printf ("\n");
         getmyinfo (sockid, curplayer);
         sector = getsectorinfo (sockid, cursector);
         printsector (cursector);
         for (; loop;)
         {
-            ptype = command;	//Main command type of prompt
             if (goofey != NULL)
                 free (goofey);
-            goofey = prompttype (ptype, sector, sockid);
+            goofey = prompttype (command, sector, sockid);
             if (isdigit (*(goofey + 0)) != 0)
             {
                 sector = movesector (goofey, sockid, sector, cursector);
@@ -170,8 +168,7 @@ main (int argc, char *argv[])
                 case 'q':
                 case 'Q':
                     printf ("\x1B[5;31m<Quit>?%s ", KNRM);
-                    ptype = quit;
-                    if (getyes (prompttype (ptype, 0, sockid)))
+                    if (getyes (prompttype (quit, 0, sockid)))
                     {
                         loop = 0;
                         sendinfo (sockid, "QUIT");
@@ -191,7 +188,6 @@ main (int argc, char *argv[])
                     break;
                 case 'p':
                 case 'P':
-                    ptype = pt_port;
                     sector = getsectorinfo (sockid, cursector);
                     if (cursector->ports == NULL)
                     {
@@ -205,7 +201,7 @@ main (int argc, char *argv[])
                     }
 						  //This next bit is cheating but it works!
 
-                    mickey = prompttype (ptype, cursector->ports->type, sockid);
+                    mickey = prompttype (pt_port, cursector->ports->type, sockid);
                     switch (*(mickey + 0))
                     {
                     		case 'q':
@@ -239,8 +235,7 @@ main (int argc, char *argv[])
                                 cursector->warps[counter]);
                     }
 
-                    ptype = move;
-                    goofey = prompttype (ptype, sector, sockid);
+                    goofey = prompttype (move, sector, sockid);
                     if (isdigit (*(goofey + 0)) != 0)
                     {
                         sector = movesector (goofey, sockid, sector, cursector);
@@ -278,8 +273,7 @@ main (int argc, char *argv[])
 
 }
 
-void
-printwelcome ()
+void printwelcome ()
 {
     printf ("\n%sWelcome to TWClone.", KGRN);
     printf ("\n\n%s", CVS_REVISION);
@@ -291,8 +285,7 @@ printwelcome ()
     printf ("\n");
 }
 
-void
-fedcommlink (int sockid)
+void fedcommlink (int sockid)
 {
     char message[BUFF_SIZE], buffer[BUFF_SIZE];
 
@@ -308,8 +301,7 @@ fedcommlink (int sockid)
 
 }
 
-void
-whosplaying (int sockid)
+void whosplaying (int sockid)
 {
     char *buffer = (char *) malloc (BUFF_SIZE * sizeof (char));
     char *temp = (char *) malloc (BUFF_SIZE * sizeof (char));
@@ -2186,8 +2178,7 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
     return input;
 }
 
-int
-dologin (int sockid)
+int dologin (int sockid)
 {
     char *buffer = NULL;		//To store stuff
     char *stuff = NULL;
@@ -2298,8 +2289,7 @@ dologin (int sockid)
     return (1);
 }
 
-int
-getyes (char *answer)
+int getyes (char *answer)
 {
     if (*(answer + 0) == 'y' || *(answer + 0) == 'Y')
     {
@@ -2363,8 +2353,7 @@ void getmessages (char *buffer)
         break;
     }
 }
-int
-init_nowait_io ()
+int init_nowait_io ()
 {
     tcgetattr (0, &orig);
     new = orig;
@@ -2377,16 +2366,14 @@ init_nowait_io ()
 }
 
 
-int
-done_nowait_io (int status)
+int done_nowait_io (int status)
 {
     tcsetattr (0, TCSANOW, &orig);
     return (status);
 }
 
 
-int
-kbhit ()
+int kbhit ()
 {
     char ch;
     int nread;
@@ -2408,8 +2395,7 @@ kbhit ()
     return 0;
 }
 
-int
-readch ()
+int readch ()
 {
     char ch;
 
@@ -2427,8 +2413,7 @@ readch ()
 //this function returns a password of up to
 //10 chars.  if someone has a longer pw it
 //truncates it to a shorter pw.
-char *
-get_invis_password (void)
+char * get_invis_password (void)
 {
     char *pw_buffer, nextchar;
     int doneyet = 0, i = 0;
