@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.23 $
- * Last Modified: $Date: 2002-11-03 08:14:20 $
+ * $Revision: 1.24 $
+ * Last Modified: $Date: 2003-02-10 01:40:30 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.23 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-11-03 08:14:20 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.24 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-02-10 01:40:30 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -194,27 +194,28 @@ main (int argc, char *argv[])
 		  ptype = pt_port;
 		  sector = getsectorinfo (sockid, cursector);
 		  if (cursector->ports == NULL)
-		  {
-				printf("There's no port in this sector!");
-				break;
-		  }
+		    {
+		      printf ("There's no port in this sector!");
+		      break;
+		    }
 		  if (cursector->ports->type == 0)
-		  {
-			printf("Porting at Class 0 Ports currently unavailable");
-			break;
-		  }
+		    {
+		      printf
+			("Porting at Class 0 Ports currently unavailable");
+		      break;
+		    }
 
 		  mickey = prompttype (ptype, 0, sockid);
 		  switch (*(mickey + 0))
-		  {
-				case 'q':
-				case 'Q':
-					break;
-				case 't':
-				case 'T':
-					doporting(sockid, curplayer);
-					break;
-		  }
+		    {
+		    case 'q':
+		    case 'Q':
+		      break;
+		    case 't':
+		    case 'T':
+		      doporting (sockid, curplayer);
+		      break;
+		    }
 		  break;	//Porting ain't done yet.
 		case 'm':
 		case 'M':	//Shorthand for this command is to type  
@@ -767,10 +768,10 @@ getsectorinfo (int sockid, struct sector *cursector)
       popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
       strncat (nebulae, tempbuf, length);
       if (strncmp (tempbuf, "Uncharted Space", 15) == 0)
-		{
-	  		strcpy (nebulae, KBLU);
-	  		strcat (nebulae, "uncharted space");
-		}
+	{
+	  strcpy (nebulae, KBLU);
+	  strcat (nebulae, "uncharted space");
+	}
     }
   if ((length = strcspn (buff + position, ":")) == 0)	//If no port
     {
@@ -781,7 +782,7 @@ getsectorinfo (int sockid, struct sector *cursector)
     popstring (buffer + position, portname, ":", MAX_NAME_LENGTH);
   if ((length = strcspn (buff + position, ":")) == 0)	//If no port!
     {
-		cursector->ports = NULL;
+      cursector->ports = NULL;
       porttype = 10;
       position++;
     }
@@ -796,24 +797,24 @@ getsectorinfo (int sockid, struct sector *cursector)
   if (strlen (portname) != 0)
     {
       if ((curport = (struct port *) malloc (sizeof (struct port))) != NULL)
-		{
-	  		curport->name = (char *) malloc (strlen (portname) + 1);
-	  		strncpy (curport->name, portname, strlen (portname) + 1);
-	  		if (porttype != 10)
-	    		curport->type = porttype;
-			else
-			{
-				free(curport->name);
-				free(curport);
-				curport=NULL;
-			}
-	  		cursector->ports = curport;
-		}
+	{
+	  curport->name = (char *) malloc (strlen (portname) + 1);
+	  strncpy (curport->name, portname, strlen (portname) + 1);
+	  if (porttype != 10)
+	    curport->type = porttype;
+	  else
+	    {
+	      free (curport->name);
+	      free (curport);
+	      curport = NULL;
+	    }
+	  cursector->ports = curport;
+	}
       else
-		{
-	  		printf ("\nUnable to allocate memory");
-	  		return (cursector->number);
-		}
+	{
+	  printf ("\nUnable to allocate memory");
+	  return (cursector->number);
+	}
     }
   if ((length = strcspn (buff + position, ":")) == 0)	//If no players
     {
@@ -1498,9 +1499,9 @@ prompttype (enum prompts type, int sector, int sockid)
 	  printf ("\n%sConfirmed? (Y/N)? ", KMAG);
 	  break;
 	case pt_port:
-	  printf("%s\n", KNRM);
-	  printf("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
-	  printf("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
+	  printf ("%s\n", KNRM);
+	  printf ("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
+	  printf ("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
 	  printf ("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);
 	  break;
 	case move:

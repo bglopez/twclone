@@ -648,7 +648,8 @@ sectorsort (struct sector *base[configdata->maxwarps], int elements)
     }
 }
 
-void makeports()
+void
+makeports ()
 {
   struct port *curport;
   int type = 0;
@@ -664,41 +665,41 @@ void makeports()
       curport = (struct port *) malloc (sizeof (struct port));
       curport->number = loop + 1;
       tmpname = randomname (tmpname);
-      curport->name = (char *) malloc (sizeof(char)*80);
+      curport->name = (char *) malloc (sizeof (char) * 80);
       strcpy (name, "\0");
-		
-		if (loop==0)
-		{
-			strcpy(curport->name, "Sol");
-			type = 0;
-		}
-		else if (loop==1)
-		{
-			strcpy(curport->name, "Alpha Centauri");
-			type = 0;
-		}
-		else if (loop==2)
-		{
-			strcpy(curport->name, "Rylos");
-			type = 0;
-		}
-		else if (loop==3)
-		{
-			strcpy(curport->name, "Stargate Alpha I");
-			type = 9;
-      	curport->maxproduct[0] = randomnum (2800, 3000);
-      	curport->maxproduct[1] = randomnum (2800, 3000);
-      	curport->maxproduct[2] = randomnum (2800, 3000);
-		}
-		else
-		{
-      	sprintf (name, "%s", tmpname);
-      	strcpy (curport->name, name);
-      	curport->maxproduct[0] = randomnum (2800, 3000);
-      	curport->maxproduct[1] = randomnum (2800, 3000);
-      	curport->maxproduct[2] = randomnum (2800, 3000);
-      	type = randomnum (1, 8);
-		}
+
+      if (loop == 0)
+	{
+	  strcpy (curport->name, "Sol");
+	  type = 0;
+	}
+      else if (loop == 1)
+	{
+	  strcpy (curport->name, "Alpha Centauri");
+	  type = 0;
+	}
+      else if (loop == 2)
+	{
+	  strcpy (curport->name, "Rylos");
+	  type = 0;
+	}
+      else if (loop == 3)
+	{
+	  strcpy (curport->name, "Stargate Alpha I");
+	  type = 9;
+	  curport->maxproduct[0] = randomnum (2800, 3000);
+	  curport->maxproduct[1] = randomnum (2800, 3000);
+	  curport->maxproduct[2] = randomnum (2800, 3000);
+	}
+      else
+	{
+	  sprintf (name, "%s", tmpname);
+	  strcpy (curport->name, name);
+	  curport->maxproduct[0] = randomnum (2800, 3000);
+	  curport->maxproduct[1] = randomnum (2800, 3000);
+	  curport->maxproduct[2] = randomnum (2800, 3000);
+	  type = randomnum (1, 8);
+	}
       curport->type = type;
       curport->product[0] = 0;
       curport->product[1] = 0;
@@ -708,49 +709,49 @@ void makeports()
 
 
       switch (type)
-		{
-			case 1:
-	  			curport->product[2] = curport->maxproduct[2];
-	  			break;
-			case 2:
-				curport->product[1] = curport->maxproduct[1];
-	  			break;
-			case 3:
-				curport->product[1] = curport->maxproduct[1];
-	  			curport->product[2] = curport->maxproduct[2];
-	  			break;
-			case 4:
-	  			curport->product[0] = curport->maxproduct[0];
-	  			break;
-			case 5:
-	  			curport->product[0] = curport->maxproduct[0];
-	  			curport->product[2] = curport->maxproduct[2];
-	  			break;
-			case 6:
-	  			curport->product[0] = curport->maxproduct[0];
-	  			curport->product[1] = curport->maxproduct[1];
-				break;
-			case 7:
-				curport->product[0] = curport->maxproduct[0];
-				curport->product[1] = curport->maxproduct[1];
-				curport->product[2] = curport->maxproduct[2];
-				break;
-			default:
-	  			break;
-			}
+	{
+	case 1:
+	  curport->product[2] = curport->maxproduct[2];
+	  break;
+	case 2:
+	  curport->product[1] = curport->maxproduct[1];
+	  break;
+	case 3:
+	  curport->product[1] = curport->maxproduct[1];
+	  curport->product[2] = curport->maxproduct[2];
+	  break;
+	case 4:
+	  curport->product[0] = curport->maxproduct[0];
+	  break;
+	case 5:
+	  curport->product[0] = curport->maxproduct[0];
+	  curport->product[2] = curport->maxproduct[2];
+	  break;
+	case 6:
+	  curport->product[0] = curport->maxproduct[0];
+	  curport->product[1] = curport->maxproduct[1];
+	  break;
+	case 7:
+	  curport->product[0] = curport->maxproduct[0];
+	  curport->product[1] = curport->maxproduct[1];
+	  curport->product[2] = curport->maxproduct[2];
+	  break;
+	default:
+	  break;
+	}
       portlist[loop] = curport;
       curport = NULL;
 
       /*  Now for assigning the port to a sector */
-		if (loop!=0)
-		{
-      	sector = randomnum (0, numSectors - 1);
-      	while (sectorlist[sector]->portptr != NULL)
-				sector = randomnum (0, NUMSECTORS - 1);
-      	portlist[loop]->location = sector + 1;
-		}
-		else
-			portlist[loop]->location = 1;
-		sectorlist[sector]->portptr = portlist[loop];
+      if (loop != 0)
+	{
+	  sector = randomnum (0, numSectors - 1);
+	  while (sectorlist[sector]->portptr != NULL)
+	    sector = randomnum (0, NUMSECTORS - 1);
+	  portlist[loop]->location = sector + 1;
+	}
+      else
+	portlist[loop]->location = 1;
+      sectorlist[sector]->portptr = portlist[loop];
     }
 }
