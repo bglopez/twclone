@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.22 $
- * Last Modified: $Date: 2002-11-03 07:58:34 $
+ * $Revision: 1.23 $
+ * Last Modified: $Date: 2002-11-03 08:14:20 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.22 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:58:34 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.23 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-11-03 08:14:20 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -193,15 +193,17 @@ main (int argc, char *argv[])
 		case 'P':
 		  ptype = pt_port;
 		  sector = getsectorinfo (sockid, cursector);
+		  if (cursector->ports == NULL)
+		  {
+				printf("There's no port in this sector!");
+				break;
+		  }
 		  if (cursector->ports->type == 0)
 		  {
 			printf("Porting at Class 0 Ports currently unavailable");
 			break;
 		  }
-		  if (cursector->ports == NULL)
-		  {
-				printf("There's no port in this sector!");
-		  }
+
 		  mickey = prompttype (ptype, 0, sockid);
 		  switch (*(mickey + 0))
 		  {
