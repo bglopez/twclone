@@ -26,7 +26,7 @@ struct sp_shipinfo
   unsigned short photons;
 };
 
-void init_shiptypeinfo ();
-void saveshiptypeinfo();
+void init_shiptypeinfo (char *filename);
+void saveshiptypeinfo(char *filename);
 
 #endif

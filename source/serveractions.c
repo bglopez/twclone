@@ -1386,7 +1386,7 @@ void saveship (int snumb, char *filename)
 
 }
 
-void saveallports ()
+void saveallports (char *filename)
 {
     char *intptr = (char *) malloc (10);
     char *buffer = (char *) malloc (BUFF_SIZE);
@@ -1395,7 +1395,7 @@ void saveallports ()
     int loop = 0, len;
     int portnumb = 1;
 
-    portfile = fopen ("./ports.data", "w");
+    portfile = fopen (filename, "w");
     while (ports[portnumb - 1] != NULL)
     {
         strcpy (stufftosave, "\0");
