@@ -189,6 +189,7 @@ void init_playerinfo(char *filename)
 		curplayer->intransit = 0;
 		curplayer->beginmove = 0;
 		curplayer->movingto = 0;
+		curplayer->messages = NULL;
 
       if (players[playernum - 1] != NULL)
 	{

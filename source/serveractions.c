@@ -30,6 +30,7 @@ void processcommand(char *buffer, struct msgcommand *data)
 {
   struct player *curplayer;
   struct port *curport;
+  struct realtimemessage *curmessage;
   float fsectorcount = (float)sectorcount;  //For rand() stuff in newplayer
   int linknum = 0;
   int seconds = 0;
@@ -94,12 +95,14 @@ void processcommand(char *buffer, struct msgcommand *data)
 	      	fprintf(stderr, "processcommand: Move was successfull\n");
 	      	if (curplayer->sector == 0)
 				{
+				sendtosector(ships[curplayer->ship -1]->location, curplayer->number, -1);
 		  		curplayer = delete(curplayer->name, player, 
 			    sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
 		  		ships[curplayer->ship - 1]->location = data->to;
 				}
 	      	else
 				{
+				sendtosector(curplayer->sector, curplayer->number, -1);
 		  		curplayer = delete(curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
 		  		curplayer->sector = data->to;
 				}
@@ -168,21 +171,30 @@ void processcommand(char *buffer, struct msgcommand *data)
 	builddescription(curplayer->sector, buffer, curplayer->number);
       break;
 	 case ct_update:
-		if (intransit(data) == 0)
-		{	
-      	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
+    	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
 			{
 	  			strcpy(buffer, "BAD");
 	  			return;
 			}
-      	if (curplayer->sector == 0)
+		if (curplayer->messages != NULL)
+			{  //This handles the realtime messages
+				curmessage = curplayer->messages;
+				strcpy(buffer, "OK:");
+				strcat(buffer, curmessage->message);
+				curplayer->messages = curmessage->nextmessage;
+				free(curmessage->message);
+				free(curmessage);
+				return;
+			}
+		if (intransit(data) == 0)
+		{	
+			if (curplayer->sector == 0)
 				builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
       	else
 				builddescription(curplayer->sector, buffer, curplayer->number);
 		}
 		else
 			strcpy(buffer, "OK: Still in Transit");
-		//Put realtime messages here!
 		break;
     case ct_playerinfo:
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
@@ -425,7 +437,8 @@ int intransit(struct msgcommand *data)
 				curplayer->intransit = 0;
 				curplayer->beginmove = 0;
 				curplayer->turns = curplayer->turns - shiptypes[ships[curplayer->ship - 1]->type - 1].turns;
-				insertitem(curplayer, player, sectors[data->to - 1]->playerlist, 1);
+				insertitem(curplayer, player, sectors[curplayer->movingto - 1]->playerlist, 1);
+				sendtosector(curplayer->movingto, curplayer->number, 1);
 			return(0);
 			}
 			else
@@ -961,4 +974,56 @@ int move_player(struct player *p, struct msgcommand *data, char *buffer)
 			}
       	findautoroute((p->sector == 0) ? ships[p->ship - 1]->location : (p->sector), data->to, buffer);
 	return data->to;
+}
+
+void addmessage(struct realtimemessage *basemessage, char *message)
+{
+   struct realtimemessage *curmessage=NULL, *newmessage=NULL;
+	
+	curmessage=basemessage;
+	newmessage = (struct realtimemessage *)malloc(sizeof(struct realtimemessage));
+   while(curmessage->nextmessage != NULL)
+		  curmessage=curmessage->nextmessage;
+	newmessage->message = (char *)malloc(BUFF_SIZE);
+	newmessage->nextmessage = NULL;
+	strcpy(newmessage->message, message);
+	curmessage->nextmessage = newmessage;
+	
+}
+
+void sendtosector(int sector, int playernum, int direction)
+{
+   struct list *element;
+	char *buffer = (char *)malloc(sizeof(BUFF_SIZE));
+	char temp[5];
+	struct realtimemessage *curmessage=NULL;
+	int p=0;	
+  
+   sprintf(temp, ":%d:", direction);
+	//For direction 1 is <name> warps into, -1 is <name> warps out of
+ 	element = sectors[sector - 1]->playerlist[0];
+	strcpy(buffer, players[playernum -1]->name);
+	strcat(buffer, temp);
+  	if (element == NULL)
+    return;
+  	else
+	{
+      do
+		{
+	  		if (((struct player *)element->item)->number != playernum)
+	    	{
+	      	if (p != 0)
+					addmessage(((struct player *)element->item)->messages, buffer);
+	      	p = ((struct player *)element->item)->number;
+	    	}
+	  		element = element->listptr;
+		}
+      while(element != NULL);
+      if (p != 0)
+			addmessage(((struct player *)element->item)->messages, buffer);
+      else
+			;
+	}
+
+
 }
