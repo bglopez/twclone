@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.41 $
- * Last Modified: $Date: 2003-12-23 20:14:45 $
+ * $Revision: 1.42 $
+ * Last Modified: $Date: 2003-12-29 22:07:14 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.41 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-12-23 20:14:45 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.42 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-12-29 22:07:14 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -2349,6 +2349,15 @@ void getmessages (char *buffer)
 	 case -4:
 		  printf("\n%s%s%s blasts off the Stardock.", KLTCYN, name, KGRN);
 		  break;
+	 case 5:
+		  printf("\n%s%s%s lands on %s%s%s.", KLTCYN, name, KGRN, KLTCYN, 
+								message, KGRN);
+		  break;
+	 case -5:
+		  printf("\n%s%s%s blasts off of %s%s%s.", KLTCYN, name, KGRN, KLTCYN, 
+								 message, KGRN);
+		  break;
+	  
     default:
         break;
     }

@@ -33,6 +33,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 {
     struct player *curplayer;
     struct port *curport;
+	 struct sector *cursector;
     struct realtimemessage *curmessage;
     float fsectorcount = (float) sectorcount;	//For rand() stuff in newplayer
     int linknum = 0;
@@ -111,7 +112,7 @@ void processcommand (char *buffer, struct msgcommand *data)
                     if (curplayer->sector == 0)
                     {
                         sendtosector (ships[curplayer->ship - 1]->location,
-                                      curplayer->number, -1);
+                                      curplayer->number, -1,0);
                         curplayer =
                             delete (curplayer->name, player,
                                     sectors[ships[curplayer->ship - 1]->location -
@@ -120,7 +121,8 @@ void processcommand (char *buffer, struct msgcommand *data)
                     }
                     else
                     {
-                        sendtosector (curplayer->sector, curplayer->number, -1);
+                        sendtosector (curplayer->sector, curplayer->number
+													 , -1,0);
                         curplayer =
                             delete (curplayer->name, player,
                                     sectors[curplayer->sector - 1]->playerlist, 1);
@@ -171,12 +173,12 @@ void processcommand (char *buffer, struct msgcommand *data)
             builddescription (ships[curplayer->ship - 1]->location, buffer,
                               curplayer->number);
             sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, 2);
+                          curplayer->number, 2,0);
         }
         else
         {
             builddescription (curplayer->sector, buffer, curplayer->number);
-            sendtosector (curplayer->sector, curplayer->number, 2);
+            sendtosector (curplayer->sector, curplayer->number, 2,0);
         }
         break;
     case ct_newplayer:
@@ -206,12 +208,12 @@ void processcommand (char *buffer, struct msgcommand *data)
             builddescription (ships[curplayer->ship - 1]->location, buffer,
                               curplayer->number);
             sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, 2);
+                          curplayer->number, 2,0);
         }
         else
         {
             builddescription (curplayer->sector, buffer, curplayer->number);
-            sendtosector (curplayer->sector, curplayer->number, 2);
+            sendtosector (curplayer->sector, curplayer->number, 2,0);
         }
         break;
     case ct_update:
@@ -298,11 +300,11 @@ void processcommand (char *buffer, struct msgcommand *data)
         if (curplayer->sector == 0)
         {
             sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, -2);
+                          curplayer->number, -2,0);
         }
         else
         {
-            sendtosector (curplayer->sector, curplayer->number, -2);
+            sendtosector (curplayer->sector, curplayer->number, -2,0);
         }
         curplayer->loggedin = 0;
 		  curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
@@ -310,6 +312,114 @@ void processcommand (char *buffer, struct msgcommand *data)
         saveship(curplayer->ship, "./ships.data");
         strcpy(buffer, "OK\n");
         break;
+	 case ct_land:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy(buffer, "BAD: Moving you can't do that!\n");
+            return;
+        }
+		  //Check other flags here
+		  if (curplayer->sector == 0)
+				cursector = sectors[ships[curplayer->ship - 1]->location - 1];
+		  else
+				cursector = sectors[curplayer->sector - 1];
+		  if (cursector->planets == NULL)
+		  {
+				strcpy(buffer, "BAD: No planet in this sector!");
+				return;
+		  }
+		  if (planets[data->to - 1]->sector != cursector->number)
+		  {
+				strcpy(buffer, "BAD: That planet is not in this sector!");
+				return;
+		  }
+		  if ((ships[curplayer->ship - 1]->flags & S_PLANET) != S_PLANET)
+		  {
+		  		ships[curplayer->ship - 1]->flags =
+					 ships[curplayer->ship - 1]->flags | S_PLANET;
+				sendtosector(cursector->number, curplayer->number, 5, data->to);
+				ships[curplayer->ship - 1]->onplanet = data->to;
+				strcpy(buffer, "OK: Landing on planet!");
+		  }
+		  else
+		  {
+				strcpy(buffer, "BAD: You're already on a planet!");
+		  }
+		  break;
+	 case ct_planet:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy(buffer, "BAD: Moving you can't do that!\n");
+            return;
+        }
+		  //Check other flags here
+		  if (curplayer->sector == 0)
+				cursector = sectors[ships[curplayer->ship - 1]->location - 1];
+		  else
+				cursector = sectors[curplayer->sector - 1];
+		  if (cursector->planets == NULL)
+		  {
+				strcpy(buffer, "BAD: No planet in this sector!");
+				return;
+		  }
+		  if ((ships[curplayer->ship - 1]->flags & S_PLANET) != S_PLANET)
+		  {
+				strcpy(buffer, "BAD: Not on a planet!");
+				return;
+		  }
+		  switch(data->plcommand)
+		  {
+			case pl_display:
+				break;
+			case pl_ownership:
+				break;
+			case pl_destroy:
+				break;
+			case pl_take:
+				break;
+			case pl_leave:
+				break;
+			case pl_citadel:
+				break;
+			case pl_rest:
+				break;
+			case pl_militarylvl:
+				break;
+			case pl_qcannon:
+				break;
+			case pl_evict:
+				break;
+			case pl_swap:
+				break;
+			case pl_cquit:
+				break;
+			case pl_quit:
+				if ((ships[curplayer->ship - 1]->flags & S_PLANET) == S_PLANET)
+				{
+					ships[curplayer->ship - 1]->flags = 
+						ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PLANET);
+					strcpy(buffer, "OK: Leaving Planet!");
+					sendtosector(cursector->number, curplayer->number, -5, 
+							ships[curplayer->ship - 1]->onplanet);
+					ships[curplayer->ship - 1]->onplanet = 0;
+				}
+				break;
+		  }
+		  break;
     case ct_portinfo:
         if ((curplayer =
                     (struct player *) find (data->name, player, symbols,
@@ -411,11 +521,11 @@ void processcommand (char *buffer, struct msgcommand *data)
 					  if (curplayer->sector == 0)
         			  {
             			sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, 3);
+                          curplayer->number, 3,0);
 					  }
         			  else
         			  {
-            			sendtosector (curplayer->sector, curplayer->number, 3);
+            			sendtosector (curplayer->sector, curplayer->number, 3,0);
         			  }
                  if (curplayer->sector == 0)
                  {
@@ -444,13 +554,14 @@ void processcommand (char *buffer, struct msgcommand *data)
 							if (curplayer->sector == 0)
         			 		{
             				sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, 4);
+                          curplayer->number, 4,0);
                         delete (curplayer->name, player,
                            sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
 					 		}
         			 		else
         			 		{
-            				sendtosector (curplayer->sector, curplayer->number, 4);
+            				sendtosector (curplayer->sector, curplayer->number
+													 , 4,0);
                         delete (curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
 							}
 						}
@@ -508,11 +619,11 @@ void processcommand (char *buffer, struct msgcommand *data)
 							if (curplayer->sector == 0)
         			 		{
             			sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, -4);
+                          curplayer->number, -4,0);
 					 		}
         			 		else
         			 		{
-            			sendtosector (curplayer->sector, curplayer->number, -4);
+            			sendtosector (curplayer->sector, curplayer->number, -4,0);
         			 		}
 					 	}
 					 	else
@@ -520,11 +631,11 @@ void processcommand (char *buffer, struct msgcommand *data)
 					 		if (curplayer->sector == 0)
         			 		{
             			sendtosector (ships[curplayer->ship - 1]->location,
-                          curplayer->number, -3);
+                          curplayer->number, -3,0);
 					 		}
         			 		else
         			 		{
-            			sendtosector (curplayer->sector, curplayer->number, -3);
+            			sendtosector (curplayer->sector, curplayer->number, -3,0);
         			 		}
 					 	}
 					 ships[curplayer->ship - 1]->flags = 
@@ -876,7 +987,7 @@ int intransit (struct msgcommand *data)
                                              1]->turns;
             insertitem (curplayer, player,
                         sectors[curplayer->movingto - 1]->playerlist, 1);
-            sendtosector (curplayer->movingto, curplayer->number, 1);
+            sendtosector (curplayer->movingto, curplayer->number, 1,0);
             return (0);
         }
         else
@@ -1107,6 +1218,7 @@ void saveship (int snumb, char *filename)
     addint (stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
 	 addint(stufftosave, ships[snumb - 1]->flags, ':', BUFF_SIZE);
+	 addint(stufftosave, ships[snumb - 1]->onplanet, ':', BUFF_SIZE);
 	 }
     len = strlen (stufftosave);
     for (loop = 1; loop <= 199 - len; loop++)	//This puts a buffer of space in the save
@@ -1978,8 +2090,7 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
 
 /*****************************************/
 
-void
-buildnewplayer (struct player *curplayer, char *shipname)
+void buildnewplayer (struct player *curplayer, char *shipname)
 {
 
     int i;			//A counter
@@ -2027,6 +2138,7 @@ buildnewplayer (struct player *curplayer, char *shipname)
     curship->ore = 0;
     curship->owner = curplayer->number;
 	 curship->flags = 0;
+	 curship->onplanet = 0;
 	 curship->ported = 0;
     curplayer->ship = curship->number;
     curplayer->sector = 0;	//The player is now in a ship
@@ -2161,8 +2273,7 @@ addmessage (struct player *curplayer, char *message)
 
 }
 
-void
-sendtosector (int sector, int playernum, int direction)
+void sendtosector (int sector, int playernum, int direction, int planetnum)
 {
     struct list *element;
     char buffer[50];
@@ -2174,6 +2285,11 @@ sendtosector (int sector, int playernum, int direction)
     element = sectors[sector - 1]->playerlist[0];
     strcpy (buffer, players[playernum - 1]->name);
     strcat (buffer, temp);
+	 if (direction == 5 || direction == -5)
+	 {
+		strcat(buffer, planets[planetnum - 1]->name);
+		strcat(buffer, ":");
+	 }
     if (element == NULL)
     {
         return;

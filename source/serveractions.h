@@ -30,7 +30,7 @@ void buyhardware(char *buffer, struct player *curplayer);
 void whosonline (char *buffer);
 void sendtoallonline (char *message);
 void addmessage (struct player *curplayer, char *message);
-void sendtosector (int sector, int playernum, int direction);
+void sendtosector (int sector, int playernum, int direction, int planetnum);
 void saveplayer (int pnumb, char *filename);
 void saveship (int snumb, char *filename);
 void saveallports ();

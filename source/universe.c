@@ -334,6 +334,7 @@ void init_shipinfo (char *filename)
         curship->ore = popint (buffer, ":");
         curship->owner = popint (buffer, ":");
 		  curship->flags = popint(buffer, ":");
+		  curship->onplanet = popint(buffer, ":");
         if (ships[x - 1] != NULL)
         {
             fprintf (stderr,

@@ -130,6 +130,7 @@ struct ship
   int owner;
   int flags;
   int ported;
+  int onplanet;
 };
 
 enum planettype
