@@ -43,6 +43,7 @@ struct config
   int max_ship_name_length;
   int ship_type_count;
   unsigned long bangdate;
+  int numnodes;
 };
 
 int init_config (char *filename);

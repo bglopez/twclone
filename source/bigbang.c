@@ -692,6 +692,7 @@ int innode(int sector)
     int counter;
     int nodemin;
     int nodemax;
+
     if (numNodes == 1)
     {
         return 1;
@@ -702,7 +703,6 @@ int innode(int sector)
         nodemax = (int)counter*(float)numSectors/(float)numNodes;
         if (sector >= nodemin && sector <= nodemax)
         {
-				fprintf(stderr, "innode: Sector %d is in node %d\n", sector, counter);
             return(counter);
         }
     }
@@ -775,6 +775,7 @@ makeports ()
     int sector = 0;
     char name[25];
     char *tmpname;
+	 int curnode;
 
     tmpname = malloc (sizeof (strNameLength));
 
@@ -878,18 +879,25 @@ makeports ()
         /*  Now for assigning the port to a sector */
         if (loop != 0)
         {
-				if (((loop <= 3) && (loop > (numNodes+3))) || (numNodes == 1) )
+				if (numNodes == 1)
 				{
             	sector = randomnum (0, numSectors - 1);
             	while (sectorlist[sector]->portptr != NULL)
                 	sector = randomnum (0, NUMSECTORS - 1);
             	portlist[loop]->location = sector + 1;
 				}
-				else if ((loop > 3) && (loop <= numNodes+3) && (numNodes != 1))
+				else if ((loop > 3) && (loop <= numNodes+3))
 				{
 					sector = randomnum(0, numSectors - 1);
-					while ((sectorlist[sector]->portptr != NULL) && (innode(sector+1)==(loop-3)))
-						sector = randomnum(0, numSectors - 1);
+					curnode = innode(sector+1);
+					while ((curnode != (loop-3)))
+					{
+							do
+							{
+							sector = randomnum(0, numSectors - 1);
+							curnode = innode(sector+1);
+							}while(sectorlist[sector]->portptr!=NULL);
+					}
 					portlist[loop]->location = sector + 1;
 				}
 				else

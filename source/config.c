@@ -99,6 +99,7 @@ int init_config (char *filename)
   configdata->ship_type_count = popint(buffer, ":");
   popstring(buffer, bangdate, ":", BUFF_SIZE);
   configdata->bangdate = strtoul(bangdate,NULL,10); 
+  configdata->numnodes = popint(buffer, ":");
 
   fclose(configfile);
   return (1);
@@ -135,6 +136,8 @@ int saveconfig(char *filename)
   addint(buffer, configdata->ship_type_count, ':', BUFF_SIZE);
   sprintf(bdate, "%ld", configdata->bangdate);
   addstring(buffer, bdate, ':', BUFF_SIZE);
+  addint(buffer, configdata->numnodes, ':', BUFF_SIZE);
+
   for (loop=0; loop < 199 - strlen(buffer); loop++)
 		strcat(buffer, " ");
   strcat(buffer, "\n");
