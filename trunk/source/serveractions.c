@@ -797,7 +797,7 @@ void bank_withdrawl(char *buffer, struct player *curplayer)
 	{
 		curplayer->bank_balance = curplayer->bank_balance - request;
 		curplayer->credits = curplayer->credits + request;
-		strcpy(buffer, "Ok: Withdrawl complete!");
+		strcpy(buffer, "OK: Withdrawl complete!");
 	}
 	return;
 }
@@ -1454,7 +1454,7 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 		strcpy(buffer, "BAD: No port in this sector!");
 		return;
 	}
-	else if (sectors[curship->location - 1]->portptr->type != 0 ||
+	else if (sectors[curship->location - 1]->portptr->type != 0 &&
 			sectors[curship->location - 1]->portptr->type != 9)
 	{
 		strcpy(buffer, "BAD: No Class 0 or 9 port in this sector!");
