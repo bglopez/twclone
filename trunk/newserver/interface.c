@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.1 $
- * Last Modified: $Date: 2002-01-23 15:29:41 $
+ * $Revision: 1.2 $
+ * Last Modified: $Date: 2002-02-05 02:52:11 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.1 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-01-23 15:29:41 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.2 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-02-05 02:52:11 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -50,10 +50,10 @@ static int peek = -1;
 #include "ansi.h"
 #include "common.h"
 #include "parse.h"
-#include "client.h"
+#include "interface.h"
 #include "portinfo.h"
 
-int main(int argc, char *argv[])
+int user_interface(int argc, char *argv[])
 {
   char *goofey=NULL;               //For holding input from stdin
   char *mickey=NULL;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     Network initilization
   */
   //parse command line
-  switch(argc)
+/*  switch(argc)
     {
     case 3:  //specified port and host
       //change the string to a long
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
   //setting up the sockaddt pointing to the server
   sockid = init_clientnetwork(argv[1], port);
   printf(" done\n");
-
+*/
   /*
     Network initilization
   */

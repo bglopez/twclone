@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
-#define MAX_WARPS_PER_SECTOR 5
+#define MAX_WARPS_PER_SECTOR 6
 
 struct port
 { 
