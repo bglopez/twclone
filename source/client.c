@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.47 $
- * Last Modified: $Date: 2004-01-01 03:48:22 $
+ * $Revision: 1.48 $
+ * Last Modified: $Date: 2004-01-01 06:14:35 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.47 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-01 03:48:22 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.48 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-01 06:14:35 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -66,6 +66,7 @@ int main (int argc, char *argv[])
     struct player *curplayer = NULL;	//For the player logging in
     struct ship *curship = NULL;	//For the current players ship
 	 int temp=0;
+	 int onplanet=0;
 
     gettimeofday (&t, 0);
 
@@ -154,15 +155,21 @@ int main (int argc, char *argv[])
 		  strcpy(buffer, "ONPLANET:");
 		  sendinfo(sockid, buffer);
 		  recvinfo(sockid, buffer);
-		  temp = popint(buffer, ":");
-		  if (temp == 1)
+		  onplanet = popint(buffer, ":");
+		  if (onplanet == 1)
 		  {
-				do_planet_menu(sockid, curplayer);
+				temp = do_planet_menu(sockid, curplayer);
+				if (temp == 1)
+				{
+					loop = 0;
+				}
 		  }
-        sector = getsectorinfo (sockid, cursector);
-        printsector (cursector);
-        for (; loop;)
-        {
+		  if (loop==1)
+		  {
+        	sector = getsectorinfo (sockid, cursector);
+        	printsector (cursector);
+        	for (; loop;)
+        	{
             if (goofey != NULL)
                 free (goofey);
             goofey = prompttype (command, sector, sockid);
@@ -297,8 +304,9 @@ int main (int argc, char *argv[])
 					 {	
 						loop=0;
 					 }
-            }
-        }
+				}
+			}
+		  }
         return (0);
     }
     else
@@ -1227,16 +1235,32 @@ int do_planet_select(int sockid, struct player *curplayer,
 	return(quitting);
 }
 
-int do_citadel_menu(int sockid, struct player *curplayer)
+int do_citadel_menu(int sockid, struct player *curplayer,
+					 struct planet *curplanet)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	struct sector *cursector;
 	char yesno;
 	int done=0;
 
+	if ((cursector = (struct sector *)malloc(sizeof(struct sector))) != NULL)
+	{
+        cursector->players = NULL;
+        cursector->ships = NULL;
+        cursector->ports = NULL;
+        cursector->planets = NULL;
+        cursector->beacontext = NULL;	//Initialization of pointers
+        cursector->nebulae = NULL;
+	}
+
 	while (!done)
 	{
+		getmyinfo(sockid, curplayer);
+		getplanetinfo(sockid, curplanet);
 		printf("\n");
+		printf("\n%sCitadel treasury contains %s%d%s credits.", KGRN,
+							 KLTYLW, curplanet->credits, KGRN);
 		choice = prompttype(pl_cmenu, 0, sockid);
 		switch(*(choice+0))
 		{
@@ -1255,14 +1279,28 @@ int do_citadel_menu(int sockid, struct player *curplayer)
 				//strcpy(buffer, "PLANET REST:");
 				printf("%s\nDo you wish to end your turn and remain here? ", KMAG);
 				scanf("%c", &yesno);
-				if (yesno == 'y' || yesno == 'n')
+				junkline();
+				if ((yesno == 'y') || (yesno == 'Y'))
 				{
 					strcpy(buffer, "QUIT");
 					sendinfo(sockid,buffer);
 					recvinfo(sockid,buffer);
 					return(1);
 				}
-				junkline();
+				break;
+			case 't':
+			case 'T':
+				treasury(sockid, curplayer, curplanet->credits);
+				break;
+			case 's':
+			case 'S':
+				getsectorinfo(sockid, cursector);
+				printsector(cursector);
+				break;
+			case 'i':
+			case 'I':
+				getmyinfo(sockid, curplayer);
+				printmyinfo(curplayer);
 				break;
 			case '?':
 				print_citadel_help();
@@ -1280,7 +1318,34 @@ int do_citadel_menu(int sockid, struct player *curplayer)
 	}
 	free(choice);
 	free(buffer);
+	//free(cursector);
 	return(0);
+}
+
+void treasury(int sockid, struct player *curplayer, int pcredits)
+{
+	char torf;
+	int amt=0;
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	printf("\n%sTransfer To or From the Treasury %s(T/F)%s ", KMAG, KLTYLW, 
+						 KMAG);
+	scanf("%c", &torf);
+	junkline();
+	printf("\n%sYou have %s%d%s Credits, and the Treasury has %s%d%s", KGRN,
+				KLTYLW, curplayer->credits, KGRN, KLTYLW, pcredits,
+				KGRN);
+	printf("\n%sHow much to transfer? ", KMAG);
+	scanf("%d", &amt);
+	junkline();
+	if ((torf == 't') || (torf=='T'))
+		strcpy(buffer, "PLANET LEAVE:7:");
+	else
+		strcpy(buffer, "PLANET TAKE:7:");
+	addint(buffer, amt, ':', BUFF_SIZE);
+	fprintf(stderr, "\n(%s)%c", buffer,torf);
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	free(buffer);
 }
 
 int do_planet_menu(int sockid, struct player *curplayer)
@@ -1311,7 +1376,10 @@ int do_planet_menu(int sockid, struct player *curplayer)
 				break;
 		case 'c':
 		case 'C':
-				done = do_citadel_menu(sockid, curplayer);
+				strcpy(buffer, "PLANET CITADEL:");
+				sendinfo(sockid, buffer);
+				recvinfo(sockid, buffer);
+				done = do_citadel_menu(sockid, curplayer, curplanet);
 				quitting = done;
 				break;
 		case 'a':
@@ -1440,6 +1508,65 @@ void change_stuff(int sockid, struct player *curplayer, int type)
 	free(buffer);
 	free(curplanet);
 }
+
+void getplanetinfo(int sockid, struct planet *curplanet)
+{
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int sector;
+	int pnumb;
+	char *pname = (char *)malloc(sizeof(char)*MAX_NAME_LENGTH*2);
+	char *ptype = (char *)malloc(sizeof(char)*MAX_NAME_LENGTH);
+	char *ptname = (char *)malloc(sizeof(char)*MAX_NAME_LENGTH*2);
+	char *creator = (char *)malloc(sizeof(char)*MAX_NAME_LENGTH);
+	char *owner = (char *)malloc(sizeof(char)*MAX_NAME_LENGTH);
+	int onumb;
+	int col[4];
+	int colb[4];
+	int dailyp[4];
+	int planetamt[4];
+	int planetmax[4];
+	int loop;
+
+	strcpy(buffer, "PLANET DISPLAY:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+
+	popstring(buffer, pname, ":", BUFF_SIZE);
+	pnumb = popint(buffer, ":");
+	sector = popint(buffer, ":");
+	popstring(buffer, ptype, ":", BUFF_SIZE);
+	popstring(buffer, ptname, ":", BUFF_SIZE);
+	onumb = popint(buffer, ":");
+	popstring(buffer, creator, ":", BUFF_SIZE);
+	for (loop=0; loop<3; loop++)
+		col[loop] = popint(buffer, ":");
+	for (loop=0; loop<4; loop++)
+		planetamt[loop] = popint(buffer, ":");
+	for (loop=0; loop<4; loop++)
+	{
+		colb[loop] = popint(buffer, ":");
+		dailyp[loop] = col[loop]/colb[loop];
+	}
+	dailyp[3] = (dailyp[0] + dailyp[1] +dailyp[2])/colb[3];
+	for (loop=0; loop<4; loop++)
+		planetmax[loop] = popint(buffer, ":");
+	curplanet->level = popint(buffer, ":");
+	curplanet->credits = popint(buffer, ":");
+	curplanet->mrl = popint(buffer, ":");
+	curplanet->qatmos = popint(buffer, ":");
+	curplanet->qsect = popint(buffer, ":");
+	curplanet->shields = popint(buffer, ":");
+	curplanet->transporter = popint(buffer, ":");
+	curplanet->interdictor = popint(buffer, ":");
+	curplanet->fighters = planetamt[3];
+	free(buffer);
+	free(ptype);
+	free(ptname);
+	free(creator);
+	free(owner);
+
+}
+
 void do_planet_display(int sockid, struct player *curplayer,
 					 struct planet *curplanet)
 {
@@ -1482,8 +1609,16 @@ void do_planet_display(int sockid, struct player *curplayer,
 	dailyp[3] = (dailyp[0] + dailyp[1] +dailyp[2])/colb[3];
 	for (loop=0; loop<4; loop++)
 		planetmax[loop] = popint(buffer, ":");
-	//Put citadel info getting here
-	
+	curplanet->level = popint(buffer, ":");
+	curplanet->credits = popint(buffer, ":");
+	curplanet->mrl = popint(buffer, ":");
+	curplanet->qatmos = popint(buffer, ":");
+	curplanet->qsect = popint(buffer, ":");
+	curplanet->shields = popint(buffer, ":");
+	curplanet->transporter = popint(buffer, ":");
+	curplanet->interdictor = popint(buffer, ":");
+	curplanet->fighters = planetamt[3];
+
 	strcpy(buffer, "\0");
 	sprintf(buffer, "PLAYERINFO %d:", onumb);
 	sendinfo(sockid, buffer);
@@ -1528,6 +1663,27 @@ printf("\n%sFighters   %sN/A%s%sN/A%s%s%d%s%s%d%s%s%d%s%s%d"
 					 planetmax[3]);
 
 printf("\n");
+
+if (curplanet->level != 0)
+{
+	printf("\n%sPlanet has a level %s%d%s Citadel, treasury contains %s%d%s credits.",
+		KYLW,KLTYLW, curplanet->level, KYLW, KLTYLW, curplanet->credits, KYLW);
+	if (curplanet->level >= 2)
+	{
+		printf("\n%sMilitary reaction=%s%d%s%%", KYLW, KLTYLW, 
+							 curplanet->mrl,KYLW);
+	}
+	if (curplanet->level >= 3)
+	{
+		printf(", %sQcannon%s power=%s%d%s%%, AtmosLvl=%s%d%s%%, SectLvl=%s%d%s%%",
+			KLTCYN,KYLW,KLTYLW, planetamt[0]/planetmax[0],KYLW,KLTYLW,
+			curplanet->qatmos,KYLW,KLTYLW,curplanet->qsect,KYLW);
+	}
+}
+//printf("\nTransWarp power = 766 hops");
+//Planetary Defense Shielding Power Level = 200
+//TransPort power
+//Interdictor?
 free(buffer);
 free(pname);
 free(ptype);
@@ -1538,43 +1694,42 @@ free(owner);
 
 void print_citadel_help()
 {
-	printf("\n%s+===================================+",KGRN);
-	printf("\n%s|                                   |",KGRN);
-	printf("\n%s| %s<%sA%s> %sTake all Products%s                |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sC%s> %sEnter Citadel%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sD%s> %sDisplay Planet%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sM%s> %sChange Military Levels%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sO%s> %sClaim Ownership of this Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sP%s> %sChange Population Levels%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sS%s> %sLoad/Unload Colonists%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sT%s> %sTake or Leave Products%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sZ%s> %sTry to Destroy Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s+============================================================+",KGRN);
+	printf("\n%s|                                                            |",KGRN);
+	printf("\n%s| %s<%sB%s> %sTransporter Control%s      %s<%sN%s> %sInterdictor Control%s       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sC%s> %sEngage Ships's Computer%s  %s<%sP%s> %sPlanetary Transwarp%s       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sD%s> %sDisplay Traders here%s     %s<%sR%s> %sRemain here overnight%s     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sE%s> %sExchange Ships%s           %s<%sS%s> %sScan the sector%s           |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sG%s> %sShield Generator Control%s %s<%sT%s> %sTreasury fund transfers%s   |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sI%s> %sYour Personal Info%s       %s<%sU%s> %sUpgrade Citadel%s           |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sL%s> %sQ-Cannon Levels%s          %s<%sT%s> %sEvict other Traders%s       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sM%s> %sMilitary Reaction Levels%s %s<%sX%s> %sCorporation Menu%s          |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 
-	printf("\n%s|                                   |",KGRN);
-	printf("\n%s| %s<%s!%s> %sPlanet Help%s                |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
-	printf("\n%s| %s<%sQ%s> %sLeave this Planet%s           |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
-	printf("\n%s+===================================+",KGRN);
+	printf("\n%s|                                                            |",KGRN);
+	printf("\n%s| %s<%s!%s> %sCitadel Help%s             %s<%sQ%s> %sLeave the Citadel%s         |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+;
+	printf("\n%s+============================================================+",KGRN);
 
 }
 
 void print_planet_help()
 {
-	printf("\n%s+===================================+",KGRN);
-	printf("\n%s|                                   |",KGRN);
-	printf("\n%s| %s<%sA%s> %sTake all Products%s                |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sC%s> %sEnter Citadel%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sD%s> %sDisplay Planet%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sM%s> %sChange Military Levels%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s+=========================================+",KGRN);
+	printf("\n%s|                                         |",KGRN);
+	printf("\n%s| %s<%sA%s> %sTake all Products%s                   |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sC%s> %sEnter Citadel%s                       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sD%s> %sDisplay Planet%s                      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sM%s> %sChange Military Levels%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 	printf("\n%s| %s<%sO%s> %sClaim Ownership of this Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 	printf("\n%s| %s<%sP%s> %sChange Population Levels%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sS%s> %sLoad/Unload Colonists%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sT%s> %sTake or Leave Products%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sZ%s> %sTry to Destroy Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sS%s> %sLoad/Unload Colonists%s               |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sT%s> %sTake or Leave Products%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sZ%s> %sTry to Destroy Planet%s               |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 
-	printf("\n%s|                                   |",KGRN);
-	printf("\n%s| %s<%s!%s> %sPlanet Help%s                |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
-	printf("\n%s| %s<%sQ%s> %sLeave this Planet%s           |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
-	printf("\n%s+===================================+",KGRN);
+	printf("\n%s|                                         |",KGRN);
+	printf("\n%s| %s<%s!%s> %sPlanet Help%s                         |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sLeave this Planet%s                   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+=========================================+",KGRN);
 
 }
 

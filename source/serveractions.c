@@ -418,6 +418,7 @@ void processcommand (char *buffer, struct msgcommand *data)
             strcpy(buffer, "BAD: Moving you can't do that!\n");
             return;
         }
+		  strcpy(buffer, "BAD: This should never be seen!");
 		  //Check other flags here
 		  if (curplayer->sector == 0)
 				cursector = sectors[ships[curplayer->ship - 1]->location - 1];
