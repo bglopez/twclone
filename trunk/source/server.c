@@ -72,9 +72,7 @@ main (int argc, char *argv[])
   char buffer[BUFF_SIZE];
 
 
-  char *usageinfo = "Usage: server [options]
-    Options:-p < integer >
-    the port number the server will listen on (Default 1234) \ n ";
+  char *usageinfo = "Usage: server [options]\n    Options:-p < integer >\n    the port number the server will listen on (Default 1234) \n";
   port = DEFAULT_PORT;
   opterr = 0;
 
