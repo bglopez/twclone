@@ -263,10 +263,10 @@ processcommand (char *buffer, struct msgcommand *data)
     case ct_playerinfo:
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
       if (intransit (data))
-	{
-	  strcpy (buffer, "BAD: Moving you can't do that\n");
-	  return;
-	}
+		{
+	  		strcpy (buffer, "BAD: Moving you can't do that\n");
+	  		return;
+		}
       buildplayerinfo (data->to, buffer);
       break;
     case ct_shipinfo:
@@ -466,8 +466,12 @@ builddescription (int sector, char *buffer, int playernum)
   int linknum = 1;
   struct list *element;
   int p = 0;
+  enum planettype curtype;
+  char ptype[5]="\0";
+  char pname[BUFF_SIZE];
 
   buffer[0] = '\0';
+  strcpy(pname, "\0");
   addint (buffer, sector, ':', BUFF_SIZE);
 
   //This is safe b/c no sector has no warps
@@ -536,16 +540,56 @@ builddescription (int sector, char *buffer, int playernum)
       do
 		{
 	   	if (p != 0)
-				addint (buffer, p, ',', BUFF_SIZE);
+			{
+				addint(buffer, p, ',', BUFF_SIZE);
+				addstring(buffer, pname, ',', BUFF_SIZE);
+				addstring(buffer, ptype, ',', BUFF_SIZE);
+			}
 	   	p = ((struct planet *) element->item)->num;
+			strcpy(pname, ((struct planet *)element->item)->name);
+			curtype = ((struct planet *)element->item)->type;
+			strcpy(ptype, "M");
+			switch (curtype)
+			{
+				case TERRA:
+					strcpy(ptype, "M");
+					break;
+				case M:
+					strcpy(ptype, "M");
+					break;
+				case L:
+					strcpy(ptype, "L");
+					break;
+				case O:
+					strcpy(ptype, "O");
+					break;
+				case K:
+					strcpy(ptype, "K");
+					break;
+				case H:
+					strcpy(ptype, "H");
+					break;
+				case U:
+					strcpy(ptype, "U");
+					break;
+				case C:
+					strcpy(ptype, "C");
+					break;
+				default:
+					break;
+			}
 			element = element->listptr;
 		}
       while (element != NULL);
       if (p != 0)
-			addint (buffer, p, ':', BUFF_SIZE);
+		{
+			addint (buffer, p, ',', BUFF_SIZE);
+			addstring(buffer, pname, ',', BUFF_SIZE);
+			addstring(buffer, ptype, ':', BUFF_SIZE);
+		}
       else
 			addstring (buffer, "", ':', BUFF_SIZE);
-    }
+	 }
 
 /*
  *This works but for testing purposes I'm taking it out
@@ -946,8 +990,7 @@ buildshipinfo (int shipnum, char *buffer)
 
 }
 
-void
-buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
+void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 {
 
   buffer[0] = '\0';

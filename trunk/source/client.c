@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.15 $
- * Last Modified: $Date: 2002-06-29 22:14:33 $
+ * $Revision: 1.16 $
+ * Last Modified: $Date: 2002-07-01 01:40:45 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.15 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-29 22:14:33 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.16 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-07-01 01:40:45 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -847,6 +847,7 @@ getsectorinfo (int sockid, struct sector *cursector)
 	    	{
 	      	tempplayer = popint (temp, ",");
 	      	curplanet->name = NULL;
+				curplanet->type = NULL;
 	      	curplanet->next = NULL;
 	      	tempplayer = popint (tempbuf, ",");	//For wierd
 	      	if (strncmp (temp, tempbuf, 5) != 0)	//Data corruption 

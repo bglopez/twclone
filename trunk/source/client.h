@@ -123,6 +123,7 @@ struct planet
 {
 	int number;
 	char *name;
+	char *type;
 	struct planet *next;
 };
 
