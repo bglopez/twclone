@@ -1436,8 +1436,7 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
 }
 
 /**************** WORKING *************************/
-void
-buildnewplanet (struct player *curplayer, char *planetname, int sector)
+void buildnewplanet (struct player *curplayer, char *planetname, int sector)
 {
     int i, p_num = 0, p_sec, p_type;
     char *p_name, *p_owner;
@@ -1456,14 +1455,14 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector)
 
     p_type = (int) (NUMBER_OF_PLANET_TYPES * rand () / RAND_MAX + 1.0);
     strcpy (p_name, planetname);
-    planets[p_num] = (struct planet *) malloc (sizeof (struct planet *));
-    planets[p_num]->num = p_num;
-    planets[p_num]->name = (char *) malloc (strlen (p_name) * sizeof (char));
+    planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet *));
+    planets[p_num-1]->num = p_num;
+    planets[p_num-1]->name = (char *) malloc (strlen (p_name) * sizeof (char));
     //planets[p_num]->owner =  (char *) malloc (strlen (p_owner) * sizeof (char));
-    planets[p_num]->name = p_name;
-    planets[p_num]->owner = curplayer->number;
+    planets[p_num-1]->name = p_name;
+    planets[p_num-1]->owner = curplayer->number;
     //planets[p_num]->ownertype = p_ownertype;
-    planets[p_num]->type = p_type;
+    planets[p_num-1]->type = p_type;
 
     /* The above is wrong! The planet init reads the player number as a
        ** planet type. Need to modify the bigbang to to insert a planet type at
@@ -1472,9 +1471,11 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector)
        ** Still for the moment it works and inserts a planet.
      */
 
-    curplayer->sector = sector;
-    insert_planet (planets[p_num], sectors[curplayer->sector],
-                   curplayer->number);
+    //curplayer->sector = sector; //For some reason this causes problems
+	 //Put int ships[curplayer->ship - 1]->location = sector;
+	 //ships[curplayer->ship - 1]->location = sector;
+    insert_planet (planets[p_num-1], 
+		sectors[ships[curplayer->ship - 1]->location - 1], curplayer->number);
 }
 
 /*****************************************/
