@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.34 $
- * Last Modified: $Date: 2003-11-13 00:45:01 $
+ * $Revision: 1.35 $
+ * Last Modified: $Date: 2003-11-13 05:08:54 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.34 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-13 00:45:01 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.35 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-13 05:08:54 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1843,8 +1843,7 @@ getyes (char *answer)
 /* This function deals with real time messages
    * Currently Only dealing with moving
  */
-void
-getmessages (char *buffer)
+void getmessages (char *buffer)
 {
     char temp[10];
     char name[50];

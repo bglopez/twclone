@@ -272,7 +272,7 @@ init_shiptypeinfo ()
   shiptypes[13].planet = 1;
   shiptypes[13].photons = 0;
 
-  strcpy (shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser\x1B[0m");
+  strcpy (shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser\x1B[0;0m");
   shiptypes[14].basecost = 539000;
   shiptypes[14].maxattack = 15000;
   shiptypes[14].initialholds = 10;
