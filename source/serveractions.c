@@ -309,7 +309,10 @@ void builddescription(int sector, char *buffer, int playernum)
   addint(buffer, sectors[sector - 1]->sectorptr[linknum - 1]->number, ':', BUFF_SIZE);
 
   addstring(buffer, sectors[sector - 1]->beacontext, ':', BUFF_SIZE);
-  addstring(buffer, sectors[sector - 1]->nebulae, ':', BUFF_SIZE);
+  if (strlen(sectors[sector-1]->nebulae) == 0 || strlen(sectors[sector-1]->nebulae) == 1)
+		addstring(buffer, "", ':', BUFF_SIZE);
+  else
+		addstring(buffer, sectors[sector - 1]->nebulae, ':', BUFF_SIZE);
   if (sectors[sector - 1]->portptr != NULL)
   {
      if (sectors[sector - 1]->portptr->invisible == 0)
