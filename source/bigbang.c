@@ -136,7 +136,7 @@ main (int argc, char **argv)
   FILE *file;
   FILE *planetfile;
   struct sector *secptr;
-  char *terraInfo = "1:1:terra:c:The Federation:1:\n";
+  char *terraInfo = "1:1:terra:c:The Federation:-1:\n";
   char *randomPlanetInfo;
   int ferringhiSector;
 
@@ -276,7 +276,7 @@ main (int argc, char **argv)
   for (x = 0; x < numSectors; x++)
     sectorlist[x]->number = x + 1;
 
-  printf ("Creating fedspace...");
+  printf ("Creating Fedspace...");
   /*  Sets up Fed Space */
   for (x = 0; x < 10; x++)
     {
@@ -410,7 +410,7 @@ main (int argc, char **argv)
   printf ("done.\n");
 
 
-  printf ("Creating ferringhi home sector...");
+  printf ("Creating Ferringhi home sector...");
   ferringhiSector = randomnum (21, (numSectors-1));
   sectorlist[ferringhiSector]->beacontext = "Ferringhi";
   sectorlist[ferringhiSector]->nebulae = "Ferringhi";
@@ -419,7 +419,7 @@ main (int argc, char **argv)
   printf ("Creating planets...");
   planetfile = fopen ("./planets.data", "w");
   fprintf (planetfile,terraInfo );
-  fprintf(planetfile, "%d:%d:Ferringhi:c:Ferringhi:1:\n", 2, ferringhiSector);
+  fprintf(planetfile, "%d:%d:Ferringhi:c:Ferringhi:-2:\n", 2, ferringhiSector);
   randomPlanetInfo = malloc (sizeof(strNameLength));
   if (numRandomPlanets > 0)
     {
@@ -438,7 +438,7 @@ main (int argc, char **argv)
 
   printf ("done.\n");
 
-  printf ("Saving Planets to file...");
+  printf ("Saving planets to file...");
   (void) fclose (planetfile);
   printf ("done.\n");
 
