@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef PLAYER_INTERACTION_H
 #define PLAYER_INTERACTION_H
 
+#include <signal.h>
+
 struct connectinfo
 {
   int sockid;
@@ -29,6 +31,7 @@ struct connectinfo
 };
 
 void *handle_player (void *threadinfo);
+int catchpipes(char *inbuff);
 void *makeplayerthreads (void *threadinfo);
 
 #endif
