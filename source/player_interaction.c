@@ -200,6 +200,7 @@ handle_player (void *threadinfo)
 	}
       else if (strncmp (inbuffer, "GENESIS", 7) == 0 && loggedin)
 	{
+	  strcpy (data.name, name);	//badstuff will happen
 	  data.command = ct_genesis;
 	  commandgood = 1;
 	}
