@@ -30,12 +30,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   Then all of item is copied to list, and then another delimiter is added
 */
 
-void addstring(char *list, char *item, char delimiter, int maxlistsize);
+void addstring (char *list, char *item, char delimiter, int maxlistsize);
 
 /*
   Works the same as above.
 */
-void addint(char *list, int num, char delimiter, int maxlistsize);
+void addint (char *list, int num, char delimiter, int maxlistsize);
 
 /*
   popstring
@@ -47,11 +47,11 @@ void addint(char *list, int num, char delimiter, int maxlistsize);
   copied into item.  Upon returning, list will have everything in 
   item, and the delimiter removed
 */
-void popstring(char *list, char *item, char *delimiters, int maxitemsize);
+void popstring (char *list, char *item, char *delimiters, int maxitemsize);
 
 /*
   works the same way as popstring
 */
-int popint(char *list, char *delimiters);
+int popint (char *list, char *delimiters);
 
 #endif

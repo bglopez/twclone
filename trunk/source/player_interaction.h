@@ -28,8 +28,7 @@ struct connectinfo
   int msgidout;
 };
 
-void *handle_player(void *threadinfo);
-void *makeplayerthreads(void *threadinfo);
+void *handle_player (void *threadinfo);
+void *makeplayerthreads (void *threadinfo);
 
 #endif
-

@@ -84,7 +84,8 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
       if ((curplayer->turns <= 0)
-	  || (curplayer->turns < shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
+	  || (curplayer->turns <
+	      shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
 	{
 	  //if(move_player(curplayer, data, buffer) < 0) 
 	  //{
@@ -263,10 +264,10 @@ processcommand (char *buffer, struct msgcommand *data)
     case ct_playerinfo:
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
       if (intransit (data))
-		{
-	  		strcpy (buffer, "BAD: Moving you can't do that\n");
-	  		return;
-		}
+	{
+	  strcpy (buffer, "BAD: Moving you can't do that\n");
+	  return;
+	}
       buildplayerinfo (data->to, buffer);
       break;
     case ct_shipinfo:
@@ -294,16 +295,17 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
       if (curplayer->sector == 0)
-		{
-			sendtosector(ships[curplayer->ship - 1]->location, curplayer->number, -2);
-		}
+	{
+	  sendtosector (ships[curplayer->ship - 1]->location,
+			curplayer->number, -2);
+	}
       else
-		{
-			sendtosector(curplayer->sector, curplayer->number, -2);
-		}
-      saveplayer(curplayer->number, "./players.data");
-      saveship(curplayer->ship, "./ships.data");
-      strcpy(buffer, "OK\n");
+	{
+	  sendtosector (curplayer->sector, curplayer->number, -2);
+	}
+      saveplayer (curplayer->number, "./players.data");
+      saveship (curplayer->ship, "./ships.data");
+      strcpy (buffer, "OK\n");
       curplayer->loggedin = 0;
       break;
     case ct_portinfo:
@@ -450,7 +452,8 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
 
-      buildnewplanet (curplayer, data->buffer, (int) ships[curplayer->ship - 1]->location );
+      buildnewplanet (curplayer, data->buffer,
+		      (int) ships[curplayer->ship - 1]->location);
       break;
     default:
       //fprintf(stderr, "processcommand: Got a bogus command\n");
@@ -467,11 +470,11 @@ builddescription (int sector, char *buffer, int playernum)
   struct list *element;
   int p = 0;
   enum planettype curtype;
-  char ptype[5]="\0";
+  char ptype[5] = "\0";
   char pname[BUFF_SIZE];
 
   buffer[0] = '\0';
-  strcpy(pname, "\0");
+  strcpy (pname, "\0");
   addint (buffer, sector, ':', BUFF_SIZE);
 
   //This is safe b/c no sector has no warps
@@ -491,15 +494,16 @@ builddescription (int sector, char *buffer, int playernum)
   if (sectors[sector - 1]->portptr != NULL)
     {
       if (sectors[sector - 1]->portptr->invisible == 0)
-		{
-	  		addstring (buffer, sectors[sector - 1]->portptr->name, ':', BUFF_SIZE);
-			addint (buffer, sectors[sector - 1]->portptr->type, ':', BUFF_SIZE);
-		}
+	{
+	  addstring (buffer, sectors[sector - 1]->portptr->name, ':',
+		     BUFF_SIZE);
+	  addint (buffer, sectors[sector - 1]->portptr->type, ':', BUFF_SIZE);
+	}
       else
-		{
-	  		addstring (buffer, "", ':', BUFF_SIZE);
-	  		addstring (buffer, "", ':', BUFF_SIZE);
-		}
+	{
+	  addstring (buffer, "", ':', BUFF_SIZE);
+	  addstring (buffer, "", ':', BUFF_SIZE);
+	}
     }
   else
     {
@@ -512,23 +516,23 @@ builddescription (int sector, char *buffer, int playernum)
   else
     {
       do
-		{
-	  	if (((struct player *) element->item)->number != playernum)
+	{
+	  if (((struct player *) element->item)->number != playernum)
 	    {
 	      if (p != 0)
-				addint (buffer, p, ',', BUFF_SIZE);
+		addint (buffer, p, ',', BUFF_SIZE);
 	      p = ((struct player *) element->item)->number;
 	    }
-		element = element->listptr;
-		}
+	  element = element->listptr;
+	}
       while (element != NULL);
       if (p != 0)
-			addint (buffer, p, ':', BUFF_SIZE);
+	addint (buffer, p, ':', BUFF_SIZE);
       else
-			addstring (buffer, "", ':', BUFF_SIZE);
+	addstring (buffer, "", ':', BUFF_SIZE);
     }
-  addstring(buffer, "", ':', BUFF_SIZE);  /* # of fighters goes here */
-  addstring(buffer, "", ':', BUFF_SIZE);  /* Mode of fighters goes here */
+  addstring (buffer, "", ':', BUFF_SIZE);	/* # of fighters goes here */
+  addstring (buffer, "", ':', BUFF_SIZE);	/* Mode of fighters goes here */
   /* Now comes planets! */
   p = 0;
   element = NULL;
@@ -538,58 +542,58 @@ builddescription (int sector, char *buffer, int playernum)
   else
     {
       do
-		{
-	   	if (p != 0)
-			{
-				addint(buffer, p, ',', BUFF_SIZE);
-				addstring(buffer, pname, ',', BUFF_SIZE);
-				addstring(buffer, ptype, ',', BUFF_SIZE);
-			}
-	   	p = ((struct planet *) element->item)->num;
-			strcpy(pname, ((struct planet *)element->item)->name);
-			curtype = ((struct planet *)element->item)->type;
-			strcpy(ptype, "M");
-			switch (curtype)
-			{
-				case TERRA:
-					strcpy(ptype, "M");
-					break;
-				case M:
-					strcpy(ptype, "M");
-					break;
-				case L:
-					strcpy(ptype, "L");
-					break;
-				case O:
-					strcpy(ptype, "O");
-					break;
-				case K:
-					strcpy(ptype, "K");
-					break;
-				case H:
-					strcpy(ptype, "H");
-					break;
-				case U:
-					strcpy(ptype, "U");
-					break;
-				case C:
-					strcpy(ptype, "C");
-					break;
-				default:
-					break;
-			}
-			element = element->listptr;
-		}
+	{
+	  if (p != 0)
+	    {
+	      addint (buffer, p, ',', BUFF_SIZE);
+	      addstring (buffer, pname, ',', BUFF_SIZE);
+	      addstring (buffer, ptype, ',', BUFF_SIZE);
+	    }
+	  p = ((struct planet *) element->item)->num;
+	  strcpy (pname, ((struct planet *) element->item)->name);
+	  curtype = ((struct planet *) element->item)->type;
+	  strcpy (ptype, "M");
+	  switch (curtype)
+	    {
+	    case TERRA:
+	      strcpy (ptype, "M");
+	      break;
+	    case M:
+	      strcpy (ptype, "M");
+	      break;
+	    case L:
+	      strcpy (ptype, "L");
+	      break;
+	    case O:
+	      strcpy (ptype, "O");
+	      break;
+	    case K:
+	      strcpy (ptype, "K");
+	      break;
+	    case H:
+	      strcpy (ptype, "H");
+	      break;
+	    case U:
+	      strcpy (ptype, "U");
+	      break;
+	    case C:
+	      strcpy (ptype, "C");
+	      break;
+	    default:
+	      break;
+	    }
+	  element = element->listptr;
+	}
       while (element != NULL);
       if (p != 0)
-		{
-			addint (buffer, p, ',', BUFF_SIZE);
-			addstring(buffer, pname, ',', BUFF_SIZE);
-			addstring(buffer, ptype, ':', BUFF_SIZE);
-		}
+	{
+	  addint (buffer, p, ',', BUFF_SIZE);
+	  addstring (buffer, pname, ',', BUFF_SIZE);
+	  addstring (buffer, ptype, ':', BUFF_SIZE);
+	}
       else
-			addstring (buffer, "", ':', BUFF_SIZE);
-	 }
+	addstring (buffer, "", ':', BUFF_SIZE);
+    }
 
 /*
  *This works but for testing purposes I'm taking it out
@@ -761,7 +765,8 @@ findautoroute (int from, int to, char *buffer)
   end of the autopilot stuff (but probably not the end of junk ;)
 */
 
-void saveplayer (int pnumb, char *filename)
+void
+saveplayer (int pnumb, char *filename)
 {
   char *intptr = (char *) malloc (10);
   char *buffer = (char *) malloc (BUFF_SIZE);
@@ -773,8 +778,8 @@ void saveplayer (int pnumb, char *filename)
   strcpy (intptr, "\0");
   strcpy (stufftosave, "\0");
 
-  sprintf(intptr, "%d:", pnumb - 1);
-  sprintf(stufftosave, "%d:", pnumb);
+  sprintf (intptr, "%d:", pnumb - 1);
+  sprintf (stufftosave, "%d:", pnumb);
   addstring (stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
   addstring (stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
   addint (stufftosave, players[pnumb - 1]->sector, ':', BUFF_SIZE);
@@ -795,13 +800,14 @@ void saveplayer (int pnumb, char *filename)
     {
       fprintf (stderr, "\nsaveplayer: No playerfile! Saving to new one!");
       if ((pnumb - 1) != 0)
-		{
-	  		fprintf (stderr, "\nsaveplayer: Player is not player 1 for new save file!");
-	  		free (intptr);
-	  		free (buffer);
-	  		free (stufftosave);
-	 	 	return;
-		}
+	{
+	  fprintf (stderr,
+		   "\nsaveplayer: Player is not player 1 for new save file!");
+	  free (intptr);
+	  free (buffer);
+	  free (stufftosave);
+	  return;
+	}
       playerfile = fopen (filename, "w");
       fprintf (playerfile, "%s", stufftosave);
       fclose (playerfile);
@@ -811,27 +817,27 @@ void saveplayer (int pnumb, char *filename)
       return;
     }
   if (pnumb == 1)
-  {
-		fprintf(playerfile, "%s", stufftosave);
-		fclose(playerfile);
-		free(intptr);
-		free(buffer);
-		free(stufftosave);
-		return;
-  }
-  while (strncmp(buffer, intptr, strlen(intptr)) != 0)
+    {
+      fprintf (playerfile, "%s", stufftosave);
+      fclose (playerfile);
+      free (intptr);
+      free (buffer);
+      free (stufftosave);
+      return;
+    }
+  while (strncmp (buffer, intptr, strlen (intptr)) != 0)
     {
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-			return;
+	return;
     }
-  fprintf(playerfile, "%s", stufftosave);
-  fflush(playerfile);
-  fclose(playerfile);
-  free(intptr);
-  free(buffer);
-  free(stufftosave);
+  fprintf (playerfile, "%s", stufftosave);
+  fflush (playerfile);
+  fclose (playerfile);
+  free (intptr);
+  free (buffer);
+  free (stufftosave);
 }
 
 void
@@ -862,19 +868,19 @@ saveship (int snumb, char *filename)
   addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
   len = strlen (stufftosave);
   for (loop = 1; loop <= 99 - len; loop++)	//This puts a buffer of space in the save
-    strcat(stufftosave, " ");	//file so things don't get overwritten
-  strcat(stufftosave, "\n");	//when saving.
+    strcat (stufftosave, " ");	//file so things don't get overwritten
+  strcat (stufftosave, "\n");	//when saving.
 
   playerfile = fopen (filename, "r+");
   if (playerfile == NULL)
     {
       fprintf (stderr, "\nsaveship: No ship file! Saving to new one!");
       if ((snumb - 1) != 0)
-		{
-	  		fprintf (stderr, "\nsaveship: Ship is not #1 for new save file!");
-	  		exit (-1);
-		}
-		playerfile = fopen (filename, "w");
+	{
+	  fprintf (stderr, "\nsaveship: Ship is not #1 for new save file!");
+	  exit (-1);
+	}
+      playerfile = fopen (filename, "w");
       fprintf (playerfile, "%s", stufftosave);
       fclose (playerfile);
       free (intptr);
@@ -883,26 +889,26 @@ saveship (int snumb, char *filename)
       return;
     }
   if (snumb == 1)
-  {
-		fprintf(playerfile, "%s", stufftosave);
-		fclose(playerfile);
-		free(intptr);
-		free(buffer);
-		free(stufftosave);
-		return;
-  }
-  while (strncmp(buffer, intptr, strlen(intptr)) != 0)
+    {
+      fprintf (playerfile, "%s", stufftosave);
+      fclose (playerfile);
+      free (intptr);
+      free (buffer);
+      free (stufftosave);
+      return;
+    }
+  while (strncmp (buffer, intptr, strlen (intptr)) != 0)
     {
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-			return;
+	return;
     }
-  fprintf(playerfile, "%s", stufftosave);
-  fclose(playerfile);
-  free(intptr);
-  free(buffer);
-  free(stufftosave);
+  fprintf (playerfile, "%s", stufftosave);
+  fclose (playerfile);
+  free (intptr);
+  free (buffer);
+  free (stufftosave);
 
 }
 
@@ -990,7 +996,8 @@ buildshipinfo (int shipnum, char *buffer)
 
 }
 
-void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
+void
+buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 {
 
   buffer[0] = '\0';
@@ -1326,9 +1333,9 @@ trading (struct player *curplayer, struct port *curport, char *buffer,
 
 /**************** WORKING *************************/
 void
-buildnewplanet (struct player *curplayer, char *planetname, int sector )
+buildnewplanet (struct player *curplayer, char *planetname, int sector)
 {
-  int i, p_num=0, p_sec, p_type;
+  int i, p_num = 0, p_sec, p_type;
   char *p_name, *p_owner;
   char p_ownertype = 'p', dummy;
   p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
@@ -1338,7 +1345,7 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector )
     {
       if (planets[i] == NULL)
 	{
-	  p_num = i+1;
+	  p_num = i + 1;
 	  break;
 	}
     }
@@ -1355,15 +1362,17 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector )
   planets[p_num]->type = p_type;
 
   /* The above is wrong! The planet init reads the player number as a
-  ** planet type. Need to modify the bigbang to to insert a planet type at
-  ** in place of number, and then use the "dummy" value to be the owner number
-  **
-  ** Still for the moment it works and inserts a planet.
-  */
+     ** planet type. Need to modify the bigbang to to insert a planet type at
+     ** in place of number, and then use the "dummy" value to be the owner number
+     **
+     ** Still for the moment it works and inserts a planet.
+   */
 
   curplayer->sector = sector;
-  insert_planet(planets[p_num], sectors[curplayer->sector] , curplayer->number);
+  insert_planet (planets[p_num], sectors[curplayer->sector],
+		 curplayer->number);
 }
+
 /*****************************************/
 
 void

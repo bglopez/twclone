@@ -1,6 +1,6 @@
 /* -*- C -*-
-   $Id: getopt.h,v 1.1 2002-06-19 02:16:28 npsimons Exp $
-   Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
+   $Id: getopt.h,v 1.2 2002-07-14 00:00:25 npsimons Exp $
+   Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

@@ -42,12 +42,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define MAX_CIDADEL_LEVEL 7
 
 struct port
-{ 
+{
   int number;
-  char *name;   //I don't know what else to put in here
+  char *name;			//I don't know what else to put in here
   int location;
-  int maxproduct[3]; //0 for ore, 1 organics, 2 for equipment
-  int product[3];    //Same as above
+  int maxproduct[3];		//0 for ore, 1 organics, 2 for equipment
+  int product[3];		//Same as above
   unsigned long credits;
   int type;
   unsigned short invisible;
@@ -73,28 +73,28 @@ struct port
 struct player
 {
   int number;
-  char *name;  
+  char *name;
   char *passwd;
-  int sector;      /* If the player is in a ship this is 0 */
-  int ship;        /* And this specifies what ship number he's in */
+  int sector;			/* If the player is in a ship this is 0 */
+  int ship;			/* And this specifies what ship number he's in */
   int experience;
   int alignment;
   int turns;
   int credits;
-  int lastprice;   /* Last price offered by a port. */
-  int firstprice;  /* first price offered by a port */
-  unsigned short intransit;  /* Is the player moving? */
+  int lastprice;		/* Last price offered by a port. */
+  int firstprice;		/* first price offered by a port */
+  unsigned short intransit;	/* Is the player moving? */
   long beginmove;		/* At what time the player began moving */
-  struct realtimemessage *messages; /* Holds realtime messages */
-  int movingto;				 /* What sector the player is moving to */
-  unsigned short loggedin;  /* This is not in the file */
-  unsigned short ported;    /* Neither is this */
+  struct realtimemessage *messages;	/* Holds realtime messages */
+  int movingto;			/* What sector the player is moving to */
+  unsigned short loggedin;	/* This is not in the file */
+  unsigned short ported;	/* Neither is this */
 };
 
 struct realtimemessage
 {
-	struct realtimemessage *nextmessage;
-	char *message;
+  struct realtimemessage *nextmessage;
+  char *message;
 };
 
 /* It is in this order in universe.data */
@@ -102,46 +102,46 @@ struct ship
 {
   int number;
   char *name;
-  int type;           /* Index + 1 of shipinfo array */
-  int location;        
+  int type;			/* Index + 1 of shipinfo array */
+  int location;
   int fighters;
   int shields;
   int holds;
   int colonists;
   int equipment;
   int organics;
-  int ore;           /* poopy, can't remember then name */
+  int ore;			/* poopy, can't remember then name */
   int owner;
 };
 
 enum planettype
 {
-  TERRA, /* 
-	 ** Special case since terra has almost 
-	 ** limitless supply of colonists. 
-	 */
-  M, /* Earth type 
-     ** 
-     */
-  L, /* Mountainous 
-     ** F=2,o=5,e=20
-     */
-  O, /* Oceanic 
-     ** f=20,o=2,100
-     */
-  K, /* Desert Wasteland 
-     ** f=2,o=100,e=500
-     */
-  H, /* Volcanic 
-     ** f=1,o=N/A,e=500
-     */
-  U, /* Gaseous 
-     ** f=N/A,o=N/A,e=N/A
-     */
-  C  /* Glacial/Ice  */
+  TERRA,			/* 
+				   ** Special case since terra has almost 
+				   ** limitless supply of colonists. 
+				 */
+  M,				/* Earth type 
+				   ** 
+				 */
+  L,				/* Mountainous 
+				   ** F=2,o=5,e=20
+				 */
+  O,				/* Oceanic 
+				   ** f=20,o=2,100
+				 */
+  K,				/* Desert Wasteland 
+				   ** f=2,o=100,e=500
+				 */
+  H,				/* Volcanic 
+				   ** f=1,o=N/A,e=500
+				 */
+  U,				/* Gaseous 
+				   ** f=N/A,o=N/A,e=N/A
+				 */
+  C				/* Glacial/Ice  */
 };
 
-struct planetType_struct 
+struct planetType_struct
 {
   char *typeDescription;
   char *typeName;
@@ -150,12 +150,12 @@ struct planetType_struct
   int citadelUpgradeOrganics[MAX_CIDADEL_LEVEL];
   int citadelUpgradeEquipment[MAX_CIDADEL_LEVEL];
   int citadelUpgradeColonist[MAX_CIDADEL_LEVEL];
-  int maxColonist[2]; /* max colonist in ore,organics,equp */
+  int maxColonist[2];		/* max colonist in ore,organics,equp */
   int fighters;
-  int fuelProduction;   
-  int organicsProduction;  
-  int equipmentProduction;  
-  int fighterProduction;   
+  int fuelProduction;
+  int organicsProduction;
+  int equipmentProduction;
+  int fighterProduction;
   float breeding;
 };
 
@@ -165,17 +165,17 @@ struct planet
 {
   int num;
   char *name;
-  int sector;   //What sector its in!
+  int sector;			//What sector its in!
   enum planettype type;
   planetClass *pClass;
   int owner;
   /*char ownertype; */
   /*char *corp; /* Don't think this is needed since owner should be corp # or player # */
   struct citadel *ctd;
-  int fuelColonist; /* Amount of people assigned (All go to fuel by default) */
-  int organicsColonist; /* Amount of people assigned */
-  int equimentColonist; /* Amount of people assigned */
-  int fuel;	/* Amount actually on the planet. */
+  int fuelColonist;		/* Amount of people assigned (All go to fuel by default) */
+  int organicsColonist;		/* Amount of people assigned */
+  int equimentColonist;		/* Amount of people assigned */
+  int fuel;			/* Amount actually on the planet. */
   int organics;
   int equipment;
   int fighters;
@@ -184,13 +184,13 @@ struct planet
 struct citadel
 {
   int level;
-  float upgradePercent; /* how far along your upgrade is */ 
-  int planetaryShields; /* number of planetary shields */
-  int qCannonSector; /* Value percent to shoot sector with Q-Cannon */
-  int qCannonAtmosphere; /* Value percent to shoot atmosphere with Q-Cannon */
-  int militaryReactionLevel; /* like is says on the tin */
-  int shields; /* number of planetary shields */
-  int treasuryFunds; 
+  float upgradePercent;		/* how far along your upgrade is */
+  int planetaryShields;		/* number of planetary shields */
+  int qCannonSector;		/* Value percent to shoot sector with Q-Cannon */
+  int qCannonAtmosphere;	/* Value percent to shoot atmosphere with Q-Cannon */
+  int militaryReactionLevel;	/* like is says on the tin */
+  int shields;			/* number of planetary shields */
+  int treasuryFunds;
 };
 
 enum listtype
@@ -210,29 +210,22 @@ struct list
 
 /* It is in this order in universe.data */
 struct sector
-{	
-  int number;                   /* Stores the sector number */
-  struct sector *sectorptr[MAX_WARPS_PER_SECTOR];  /* sector pointers to other sectors */
-  char *beacontext;             /* Test of a Beacon, NULL, if there is no beacon */
-  char *nebulae;             /* I guess this stores the name, I dont know */
-  struct list *playerlist[2];  /* The list of players in the sector */
-  struct port *portptr;          /* Pointer to ports in the sector */
-  struct list *planets;      /* Pointer to list of planets in sector */
+{
+  int number;			/* Stores the sector number */
+  struct sector *sectorptr[MAX_WARPS_PER_SECTOR];	/* sector pointers to other sectors */
+  char *beacontext;		/* Test of a Beacon, NULL, if there is no beacon */
+  char *nebulae;		/* I guess this stores the name, I dont know */
+  struct list *playerlist[2];	/* The list of players in the sector */
+  struct port *portptr;		/* Pointer to ports in the sector */
+  struct list *planets;		/* Pointer to list of planets in sector */
 };
 
 
-int init_universe(char *filename, struct sector ***array);
-int verify_universe(struct sector **array, int sectorcount);
-int verify_sector_links(struct sector *test);
-void init_playerinfo(char *filename);
-void init_shipinfo(char *filename);
-void init_portinfo(char *filename);
-void init_planetClassification(void);
+int init_universe (char *filename, struct sector ***array);
+int verify_universe (struct sector **array, int sectorcount);
+int verify_sector_links (struct sector *test);
+void init_playerinfo (char *filename);
+void init_shipinfo (char *filename);
+void init_portinfo (char *filename);
+void init_planetClassification (void);
 #endif
-
-
-
-
-
-
-

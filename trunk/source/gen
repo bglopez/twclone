@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
 # -*- Shell-script -*-
-# $Id: gen,v 1.1 2002-06-15 02:27:51 npsimons Exp $
-# Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
+# $Id: gen,v 1.2 2002-07-14 00:00:25 npsimons Exp $
+# Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,16 +19,24 @@
 #
 # Alternatively, the GPL can be found at 
 # http://www.gnu.org/copyleft/gpl.html
-#
-# Generate files from automake/autoconf and associated utils.
-# Only run this if you are a developer/know what you are doing.
 
 set -e
-#cvs update -d -P -R
+
+cvs update -d -P -R
+
+find . -iname "*.[h,c]" -exec indent -gnu '{}' \;
+
 aclocal --verbose
+#automake --add-missing --copy --force-missing --verbose
 automake --add-missing --copy --verbose
 autoheader
 autoconf
-#./configure --prefix=/usr/local
-#make
+
+./configure --prefix=/usr/local
+make
+
+make maintainer-clean
+
+cvs2cl --utc --separate-header --day-of-week --revisions --tags \
+	--branches --prune --usermap AUTHORS
 

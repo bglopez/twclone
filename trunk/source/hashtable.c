@@ -107,7 +107,7 @@ void *
 insert (const char *symbol, enum listtype type, struct list *hash_table[],
 	int hash_length)
 {
-  void *item=NULL;
+  void *item = NULL;
 
   switch (type)
     {

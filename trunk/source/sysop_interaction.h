@@ -21,6 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef SYSOP_INTERACTION_H
 #define SYSOP_INTERACTION_H
 
-void *getsysopcommands(void *msgidptr);
+void *getsysopcommands (void *msgidptr);
 
 #endif

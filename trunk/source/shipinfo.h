@@ -18,14 +18,14 @@ struct sp_shipinfo
   unsigned short twarp;
   int transportrange;
   int maxshields;
-  int offense;          //This needs to be divided by 10 before use 
-  int defense;          //This needs to be divided by 10 before use 
+  int offense;			//This needs to be divided by 10 before use 
+  int defense;			//This needs to be divided by 10 before use 
   int beacons;
   unsigned short holo;
   unsigned short planet;
   unsigned short photons;
 };
 
-void init_shiptypeinfo();
+void init_shiptypeinfo ();
 
 #endif
