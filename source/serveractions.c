@@ -100,16 +100,16 @@ void processcommand (char *buffer, struct msgcommand *data)
         //}
         while (linknum < MAX_WARPS_PER_SECTOR)
         {
-            if (sectors
-                    [(curplayer->sector ==
-                      0) ? ships[curplayer->ship - 1]->location -
-                     1 : (curplayer->sector - 1)]->sectorptr[linknum] == NULL)
+				fflush(stderr);
+				
+            if (sectors[(curplayer->sector == 0) 
+							? ships[curplayer->ship - 1]->location - 1 
+							: (curplayer->sector - 1)]->sectorptr[linknum] == NULL)
                 break;
             else
-                if (sectors
-                        [(curplayer->sector ==
-                          0) ? ships[curplayer->ship - 1]->location -
-                         1 : (curplayer->sector - 1)]->sectorptr[linknum++]->number ==
+                if (sectors[(curplayer->sector == 0) 
+							? ships[curplayer->ship - 1]->location - 1 
+							: (curplayer->sector - 1)]->sectorptr[linknum++]->number ==
                         data->to)
                 {
                     fprintf (stderr, "processcommand: Move was successfull\n");
@@ -117,19 +117,16 @@ void processcommand (char *buffer, struct msgcommand *data)
                     {
                         sendtosector (ships[curplayer->ship - 1]->location,
                                       curplayer->number, -1,0);
-                        curplayer =
-                            delete (curplayer->name, player,
-                                    sectors[ships[curplayer->ship - 1]->location -
+                        curplayer = delete (curplayer->name, player,
+                            sectors[ships[curplayer->ship - 1]->location -
                                             1]->playerlist, 1);
                         ships[curplayer->ship - 1]->location = data->to;
                     }
                     else
                     {
-                        sendtosector (curplayer->sector, curplayer->number
-													 , -1,0);
-                        curplayer =
-                            delete (curplayer->name, player,
-                                    sectors[curplayer->sector - 1]->playerlist, 1);
+                        sendtosector(curplayer->sector, curplayer->number,-1,0);
+                        curplayer = delete (curplayer->name, player,
+                           sectors[curplayer->sector - 1]->playerlist, 1);
                         curplayer->sector = data->to;
                     }
                     //Put realtime so and so warps in/out of the sector here.
@@ -153,10 +150,9 @@ void processcommand (char *buffer, struct msgcommand *data)
 
                 }
         }
-        findautoroute ((curplayer->sector ==
-                        0) ? ships[curplayer->ship -
-                                   1]->location : (curplayer->sector), data->to,
-                       buffer);
+        findautoroute ((curplayer->sector == 0) 
+						? ships[curplayer->ship - 1]->location 
+						: (curplayer->sector), data->to, buffer);
         break;
     case ct_login:
         fprintf (stderr, "processcommand: Got a login command\n");
@@ -1162,24 +1158,27 @@ void findautoroute (int from, int to, char *buffer)
         }
         if (shortest == 0)
         {
-            break;
+            done = 1;
         }
-        //Use that sector to calculate paths
-        i = shortest;
-        //Make a list of all adjacent sectors;
-        for (counter = 0; counter < MAX_WARPS_PER_SECTOR; counter++)
-        {
+		  else
+		  {
+        	//Use that sector to calculate paths
+        	i = shortest;
+        	//Make a list of all adjacent sectors;
+        	for (counter = 0; counter < MAX_WARPS_PER_SECTOR; counter++)
+        	{
             if (sectors[i - 1]->sectorptr[counter] != NULL)
                 sectorlist[counter] = sectors[i - 1]->sectorptr[counter]->number;
             else
                 sectorlist[counter] = 0;
-        }
-        //now using j as the sector under consideration
+        	}
+		  }
+        //now using i as the sector under consideration
         for (counter = 0; counter < MAX_WARPS_PER_SECTOR; counter++)
         {
             if (sectorlist[counter] == 0)
-                break;
-            if (length[sectorlist[counter]] > (length[i] + 1))
+                counter = MAX_WARPS_PER_SECTOR + 1;
+				else if (length[sectorlist[counter]] > (length[i] + 1))
             {
                 length[sectorlist[counter]] = length[i] + 1;
                 prev[sectorlist[counter]] = i;
@@ -2683,45 +2682,37 @@ int move_player (struct player *p, struct msgcommand *data, char *buffer)
     fprintf (stderr, "processcommand: Got a Move command\n");
 
     //I'm assuming that this will short circuit
-    if (((p =
-                (struct player *) find (data->name, player, symbols,
-                                        HASH_LENGTH)) == NULL)
+    if (((p = (struct player *) find (data->name, player, symbols, 
+								HASH_LENGTH)) == NULL)
             || ((p->sector != 0) ? p->sector : (ships[p->ship - 1]->location) ==
                 data->to) || data->to > sectorcount)
         return -1;
-    if ((p->turns <= 0)
-            || (p->turns < shiptypes[ships[p->ship - 1]->type - 1]->turns))
+    if ((p->turns <= 0) || 
+		 (p->turns < shiptypes[ships[p->ship - 1]->type - 1]->turns))
         return -1;
 
     while (linknum < MAX_WARPS_PER_SECTOR)
     {
-        if (sectors
-                [(p->sector ==
-                  0) ? ships[p->ship - 1]->location - 1 : (p->sector -
-                          1)]->
-                sectorptr[linknum] == NULL)
+        if (sectors[(p->sector == 0) 
+					? ships[p->ship - 1]->location - 1 : 
+					(p->sector - 1)]->sectorptr[linknum] == NULL)
             break;
         else
-            if (sectors
-                    [(p->sector ==
-                      0) ? ships[p->ship - 1]->location - 1 : (p->sector -
-                              1)]->
-                    sectorptr[linknum++]->number == data->to)
+            if (sectors[(p->sector == 0) 
+					? ships[p->ship - 1]->location - 1 : 
+					(p->sector - 1)]->sectorptr[linknum++]->number == data->to)
             {
                 fprintf (stderr, "processcommand: Move was successfull\n");
                 if (p->sector == 0)
                 {
-                    p =
-                        delete (p->name, player,
-                                sectors[ships[p->ship - 1]->location - 1]->playerlist,
-                                1);
+                    p = delete (p->name, player, 
+							sectors[ships[p->ship - 1]->location - 1]->playerlist,1);
                     ships[p->ship - 1]->location = data->to;
                 }
                 else
                 {
-                    p =
-                        delete (p->name, player, sectors[p->sector - 1]->playerlist,
-                                1);
+                    p = delete (p->name, player, 
+								sectors[p->sector - 1]->playerlist, 1);
                     p->sector = data->to;
                 }
                 //Put realtime so and so warps in/out of the sector here.
@@ -2733,6 +2724,8 @@ int move_player (struct player *p, struct msgcommand *data, char *buffer)
                 return data->to;
             }
     }
+	 fprintf(stderr, "processcommand: Building autoroute.");
+	 fflush(stderr);
     findautoroute ((p->sector ==
                     0) ? ships[p->ship - 1]->location : (p->sector), data->to,
                    buffer);

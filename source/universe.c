@@ -96,6 +96,9 @@ init_universe (char *filename, struct sector ***array)
         pos = len;
 
         (*array)[sectornum - 1]->number = sectornum;
+		  //make sure all of the sector links are null
+		  for ( i = 0; i < MAX_WARPS_PER_SECTOR; i++)
+				(*array)[sectornum - 1]->sectorptr[i] = NULL;
 
         sctptrcount = 0;
 
@@ -133,10 +136,10 @@ init_universe (char *filename, struct sector ***array)
             (*array)[sectornum - 1]->sectorptr[sctptrcount] = NULL;
         /*copy the beacon info over */
         if (strncmp (buffer, ":", 1) != 0)
-        {			/* This is in case there are is no nebulaes since popstring doesn't
-      			   * differentiate between ":<stuff>: and <stuff>: It thinks that its 
-      			   * the same thing.
-      				 */
+        {	/* This is in case there are is no nebulaes since popstring doesn't
+      		 * differentiate between ":<stuff>: and <stuff>: It thinks that its 
+      		 * the same thing.
+      		 */
             popstring (buffer, temp, ":", BUFF_SIZE);
             (*array)[sectornum - 1]->beacontext =
                 (char *) malloc (strlen (temp) + 1);
