@@ -41,6 +41,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define NUMBER_OF_PLANET_TYPES 8
 #define MAX_CIDADEL_LEVEL 7
 
+//Here go flags for ships
+#define S_INTRANSIT = 1;
+#define S_PORTED = 2;
+#define S_STARDOCK = 4;
+#define S_PLANET = 8;
+#define S_CITADEL = 16;
+//And now for player flags
+#define P_LOGGEDIN = 1;
+#define P_STARDOCK = 2;
+#define P_COMMISIONED = 4;
+
 struct port
 {
   int number;
@@ -82,6 +93,7 @@ struct player
   int turns;
   unsigned long credits;
   unsigned long bank_balance;
+  int flags;
   //int credits;
   //int bank_balance;
   int lastprice;		/* Last price offered by a port. */
@@ -91,7 +103,6 @@ struct player
   struct realtimemessage *messages;	/* Holds realtime messages */
   int movingto;			/* What sector the player is moving to */
   unsigned short loggedin;	/* This is not in the file */
-  unsigned short ported;	/* Neither is this */
 };
 
 struct realtimemessage
@@ -115,6 +126,7 @@ struct ship
   int organics;
   int ore;			/* poopy, can't remember then name */
   int owner;
+  int flags;
 };
 
 enum planettype
