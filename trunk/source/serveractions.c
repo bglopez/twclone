@@ -84,8 +84,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	  return;
 	}
       if ((curplayer->turns <= 0)
-	  || (curplayer->turns <
-	      shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
+	  || (curplayer->turns < shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
 	{
 	  //if(move_player(curplayer, data, buffer) < 0) 
 	  //{
@@ -452,11 +451,16 @@ processcommand (char *buffer, struct msgcommand *data)
 	}
 
       /* Insert planet and assign player as the owner */
+      //<<<<<<< serveractions.c
+      /* planet,sector,owner */
+      buildnewplanet (curplayer, data->buffer, (int) ships[curplayer->ship - 1]->location );
+      //insert_planet(struct planet *p, struct sector *s, curplayer);
+      //=======
       /* planet,sector,owner */
       buildnewplanet (curplayer, data->buffer, (int) curplayer->sector);
       //insert_planet(struct planet *p, struct sector *s, curplayer);
+      //>>>>>>> 1.24
       break;
-
     default:
       //fprintf(stderr, "processcommand: Got a bogus command\n");
       strcpy (buffer, "BAD\n");

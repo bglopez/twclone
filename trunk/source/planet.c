@@ -53,12 +53,14 @@ init_planets (char *filename, struct sector *secarray[])
 int
 insert_planet(struct planet *p, struct sector *s, int playernumber)
 {
+
   struct list *p_list;
   if (s == NULL)
     {
       fprintf (stderr, "insert_planet on NULL sector, yo\n");
       return -1;
     }
+
   p_list = s->planets;
   while (p_list != NULL)
     p_list = p_list->listptr;
@@ -69,6 +71,7 @@ insert_planet(struct planet *p, struct sector *s, int playernumber)
   fprintf (stdout, "\t-planet number %d (%s) inserted in sector %d\n", p->num,
 	   p->name, s->number);
   return s->number;
+
 }
 
 /*
