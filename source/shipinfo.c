@@ -1,6 +1,5 @@
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include "shipinfo.h"
 #include "common.h"
@@ -56,16 +55,16 @@ void init_shiptypeinfo (char *filename)
 {
 	int index=0;
 	FILE *shipfile=NULL;
-	char buffer[BUFF_SIZE];
+	char *buffer;
 	int done=0;
 
+	buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	if (buffer==NULL)
+	{
+		fprintf(stderr, "init_shiptypeinfo: Can't allocate mem for buffer!");
+	}
 	shiptypes = (struct sp_shipinfo **)
 			  malloc(sizeof(struct sp_shipinfo *)*configdata->ship_type_count);
-	if (shiptypes == NULL);
-	{
-		fprintf(stderr, "init_shiptypeinfo: Not enough memory!\n");
-		exit(-1);
-	}
 	shipfile = fopen(filename, "r");
 	if (shipfile==NULL)
 	{
