@@ -133,6 +133,10 @@ struct planet
   struct planet *next;
   int credits;
   int mrl;
+  int colonists;
+  int ore;
+  int organics;
+  int equipment;
   int fighters;
   int level;
   int qsect;
@@ -163,6 +167,7 @@ void print_bank_help();
 void do_stardock_menu(int sockid, struct player *curplayer);
 int do_planet_select(int sockid, struct player *curplayer, struct sector *cursector);
 int do_planet_menu(int sockid, struct player *curplayer);
+void citadelupgrade(int sockid, struct planet *curplanet);
 int do_citadel_menu(int sockid, struct player *curplayer, struct planet *curplanet);
 void treasury(int sockid, struct player *curplayer, int pcredits);
 void change_stuff(int sockid, struct player *curplayer, int type);

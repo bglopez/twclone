@@ -215,6 +215,7 @@ struct citadel
   int transporterlvl;
   int interdictor;
   float upgradePercent;		/* how far along your upgrade is */
+  int upgradestart;
 };
 
 enum listtype
