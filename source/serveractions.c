@@ -443,7 +443,7 @@ processcommand (char *buffer, struct msgcommand *data)
         	}
  			if (intransit (data))
         	{
-            strcpy (buffer, "BAD: Can't port while moving!\n");
+            strcpy (buffer, "BAD: Can't Do stardock stuff while moving!\n");
             return;
         	}
         	if (curplayer->sector == 0)
@@ -467,6 +467,9 @@ processcommand (char *buffer, struct msgcommand *data)
             strcpy (buffer, data->buffer);
             switch (data->pcommand)
             {
+					case p_balance:
+					   bank_balance(buffer, curplayer);
+						break;
 					case p_deposit:
 						bank_deposit(buffer, curplayer);
 						break;
@@ -676,6 +679,7 @@ void bank_deposit(char *buffer, struct player *curplayer)
 	int request=0;
 
 	request= popint(buffer, ":");
+	fprintf(stderr, "bank_deposit: Player requesting (%d)\n", request);
 
 	if (request > curplayer->credits)
 	{
@@ -686,7 +690,16 @@ void bank_deposit(char *buffer, struct player *curplayer)
 	{
 		curplayer->credits = curplayer->credits - request;
 		curplayer->bank_balance = curplayer->bank_balance + request;
+		strcpy(buffer, "OK:Depsoit complete!");
 	}
+	return;
+}
+
+void bank_balance(char *buffer, struct player *curplayer)
+{
+	int balance;
+	strcpy(buffer, ":");
+	addint(buffer, curplayer->bank_balance, ':', BUFF_SIZE);
 	return;
 }
 
@@ -694,6 +707,7 @@ void bank_withdrawl(char *buffer, struct player *curplayer)
 {
 	int request=0;
 
+	request=popint(buffer, ":");
 	if (curplayer->bank_balance < request)
 	{
 		strcpy(buffer, "BAD: Not enough credits in account.");
@@ -703,11 +717,12 @@ void bank_withdrawl(char *buffer, struct player *curplayer)
 	{
 		curplayer->bank_balance = curplayer->bank_balance - request;
 		curplayer->credits = curplayer->credits + request;
+		strcpy(buffer, "Ok: Withdrawl complete!");
 	}
 	return;
 }
-void
-whosonline (char *buffer)
+
+void whosonline (char *buffer)
 {
     int playernum = 1;
     struct player *curplayer;
