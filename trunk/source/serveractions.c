@@ -172,6 +172,21 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         curplayer->loggedin = 1;
 		  curplayer->flags = curplayer->flags | P_LOGGEDIN;
+		  if ((ships[curplayer->ship - 1]->flags & S_CITADEL) == S_CITADEL)
+		  {
+				ships[curplayer->ship - 1]->flags = 
+					ships[curplayer->ship - 1]->flags & (S_MAX ^ S_CITADEL);
+				if ((ships[curplayer->ship - 1]->flags & S_PLANET) != S_PLANET)
+				{
+					ships[curplayer->ship - 1]->flags = 
+						ships[curplayer->ship - 1]->flags & (S_MAX ^ S_PLANET);
+					ships[curplayer->ship - 1]->onplanet = 0;
+               insertitem(curplayer, player,
+             sectors[planets[ships[curplayer->ship - 1]->onplanet - 1]->sector - 1]->playerlist, 1);
+					ships[curplayer->ship - 1]->onplanet = 0;
+				}
+		  }
+
         if (curplayer->sector == 0)
         {
             builddescription (ships[curplayer->ship - 1]->location, buffer,
@@ -350,6 +365,16 @@ void processcommand (char *buffer, struct msgcommand *data)
 					 (ships[curplayer->ship - 1]->flags | S_PLANET);
 				sendtosector(cursector->number, curplayer->number, 5, data->to);
 				ships[curplayer->ship - 1]->onplanet = data->to;
+            if (curplayer->sector == 0)
+            {
+               delete (curplayer->name, player,
+             sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
+            }
+            else
+            {
+               delete (curplayer->name, player, 
+							sectors[curplayer->sector - 1]->playerlist, 1);
+            }
 				strcpy(buffer, "OK: Landing on planet!");
 		  }
 		  else
@@ -357,6 +382,29 @@ void processcommand (char *buffer, struct msgcommand *data)
 				strcpy(buffer, "BAD: You're already on a planet!");
 		  }
 		  break;
+	 case ct_onplanet:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy(buffer, "BAD: Moving you can't do that!\n");
+            return;
+        }
+		  if (ships[curplayer->ship - 1]->onplanet != 0)
+		  {
+				strcpy(buffer, ":1:");
+		  }
+		  else
+		  {
+				strcpy(buffer, ":0:");
+		  }
+		  break;
+
 	 case ct_planet:
         if ((curplayer =
                     (struct player *) find (data->name, player, symbols,
@@ -508,6 +556,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 					sendtosector(cursector->number, curplayer->number, -5, 
 							ships[curplayer->ship - 1]->onplanet);
 					ships[curplayer->ship - 1]->onplanet = 0;
+					insertitem(curplayer, player, cursector->playerlist,1);
 				}
 				break;
 			default:
