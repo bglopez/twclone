@@ -1,7 +1,6 @@
-# Makefile.in generated automatically by automake 1.5 from Makefile.am.
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-# Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -11,10 +10,8 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-@SET_MAKE@
-
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.3 2002-06-19 02:16:28 npsimons Exp $
+# $Id: Makefile.in,v 1.4 2002-06-21 10:51:59 rdearman Exp $
 # Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -33,6 +30,7 @@
 #
 # Alternatively, the GPL can be found at 
 # http://www.gnu.org/copyleft/gpl.html
+
 
 SHELL = @SHELL@
 
@@ -54,9 +52,13 @@ infodir = @infodir@
 mandir = @mandir@
 includedir = @includedir@
 oldincludedir = /usr/include
+
+DESTDIR =
+
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
+
 top_builddir = .
 
 ACLOCAL = @ACLOCAL@
@@ -65,11 +67,11 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
-INSTALL_HEADER = $(INSTALL_DATA)
 transform = @program_transform_name@
+
 NORMAL_INSTALL = :
 PRE_INSTALL = :
 POST_INSTALL = :
@@ -85,6 +87,7 @@ DEPDIR = @DEPDIR@
 EXEEXT = @EXEEXT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 ISODATE = @ISODATE@
+MAKEINFO = @MAKEINFO@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
@@ -174,404 +177,385 @@ test_server_SOURCES = \
 	common.h \
 	test_server.c
 
-subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = autoconf.h
-CONFIG_CLEAN_FILES =
-bin_PROGRAMS = bigbang$(EXEEXT) client$(EXEEXT) server$(EXEEXT) \
-	test_client$(EXEEXT) test_server$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+CONFIG_CLEAN_FILES = 
+PROGRAMS =  $(bin_PROGRAMS)
 
-am_bigbang_OBJECTS = bigbang.$(OBJEXT) config.$(OBJEXT) getopt.$(OBJEXT) \
-	namegen.$(OBJEXT) parse.$(OBJEXT) planet.$(OBJEXT)
-bigbang_OBJECTS = $(am_bigbang_OBJECTS)
-bigbang_LDADD = $(LDADD)
-bigbang_DEPENDENCIES =
-bigbang_LDFLAGS =
-am_client_OBJECTS = client.$(OBJEXT) common.$(OBJEXT) parse.$(OBJEXT)
-client_OBJECTS = $(am_client_OBJECTS)
-client_LDADD = $(LDADD)
-client_DEPENDENCIES =
-client_LDFLAGS =
-am_server_OBJECTS = boxmuller.$(OBJEXT) common.$(OBJEXT) \
-	config.$(OBJEXT) hashtable.$(OBJEXT) maint.$(OBJEXT) \
-	msgqueue.$(OBJEXT) parse.$(OBJEXT) planet.$(OBJEXT) \
-	player_interaction.$(OBJEXT) server.$(OBJEXT) \
-	serveractions.$(OBJEXT) shipinfo.$(OBJEXT) \
-	sysop_interaction.$(OBJEXT) universe.$(OBJEXT)
-server_OBJECTS = $(am_server_OBJECTS)
-server_LDADD = $(LDADD)
-server_DEPENDENCIES =
-server_LDFLAGS =
-am_test_client_OBJECTS = common.$(OBJEXT) test_client.$(OBJEXT)
-test_client_OBJECTS = $(am_test_client_OBJECTS)
-test_client_LDADD = $(LDADD)
-test_client_DEPENDENCIES =
-test_client_LDFLAGS =
-am_test_server_OBJECTS = common.$(OBJEXT) test_server.$(OBJEXT)
-test_server_OBJECTS = $(am_test_server_OBJECTS)
-test_server_LDADD = $(LDADD)
-test_server_DEPENDENCIES =
-test_server_LDFLAGS =
 
-DEFS = @DEFS@
-DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/bigbang.Po $(DEPDIR)/boxmuller.Po \
-@AMDEP_TRUE@	$(DEPDIR)/client.Po $(DEPDIR)/common.Po \
-@AMDEP_TRUE@	$(DEPDIR)/config.Po $(DEPDIR)/getopt.Po \
-@AMDEP_TRUE@	$(DEPDIR)/hashtable.Po $(DEPDIR)/maint.Po \
-@AMDEP_TRUE@	$(DEPDIR)/msgqueue.Po $(DEPDIR)/namegen.Po \
-@AMDEP_TRUE@	$(DEPDIR)/parse.Po $(DEPDIR)/planet.Po \
-@AMDEP_TRUE@	$(DEPDIR)/player_interaction.Po $(DEPDIR)/server.Po \
-@AMDEP_TRUE@	$(DEPDIR)/serveractions.Po $(DEPDIR)/shipinfo.Po \
-@AMDEP_TRUE@	$(DEPDIR)/sysop_interaction.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_client.Po $(DEPDIR)/test_server.Po \
-@AMDEP_TRUE@	$(DEPDIR)/universe.Po
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+bigbang_OBJECTS =  bigbang.o config.o getopt.o namegen.o parse.o \
+planet.o
+bigbang_LDADD = $(LDADD)
+bigbang_DEPENDENCIES = 
+bigbang_LDFLAGS = 
+client_OBJECTS =  client.o common.o parse.o
+client_LDADD = $(LDADD)
+client_DEPENDENCIES = 
+client_LDFLAGS = 
+server_OBJECTS =  boxmuller.o common.o config.o hashtable.o maint.o \
+msgqueue.o parse.o planet.o player_interaction.o server.o \
+serveractions.o shipinfo.o sysop_interaction.o universe.o
+server_LDADD = $(LDADD)
+server_DEPENDENCIES = 
+server_LDFLAGS = 
+test_client_OBJECTS =  common.o test_client.o
+test_client_LDADD = $(LDADD)
+test_client_DEPENDENCIES = 
+test_client_LDFLAGS = 
+test_server_OBJECTS =  common.o test_server.o
+test_server_LDADD = $(LDADD)
+test_server_DEPENDENCIES = 
+test_server_LDFLAGS = 
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(bigbang_SOURCES) $(client_SOURCES) $(server_SOURCES) \
-	$(test_client_SOURCES) $(test_server_SOURCES)
-DATA = $(pkgdata_DATA)
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DATA =  $(pkgdata_DATA)
 
-DIST_COMMON = README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-	Makefile.am Makefile.in NEWS TODO aclocal.m4 autoconf.h.in \
-	config.guess config.sub configure configure.in depcomp \
-	install-sh missing mkinstalldirs
+DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
+Makefile.am Makefile.in TODO aclocal.m4 autoconf.h.in config.guess \
+config.sub configure configure.in install-sh missing mkinstalldirs
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+DEP_FILES =  .deps/bigbang.P .deps/boxmuller.P .deps/client.P \
+.deps/common.P .deps/config.P .deps/getopt.P .deps/hashtable.P \
+.deps/maint.P .deps/msgqueue.P .deps/namegen.P .deps/parse.P \
+.deps/planet.P .deps/player_interaction.P .deps/server.P \
+.deps/serveractions.P .deps/shipinfo.P .deps/sysop_interaction.P \
+.deps/test_client.P .deps/test_server.P .deps/universe.P
 SOURCES = $(bigbang_SOURCES) $(client_SOURCES) $(server_SOURCES) $(test_client_SOURCES) $(test_server_SOURCES)
+OBJECTS = $(bigbang_OBJECTS) $(client_OBJECTS) $(server_OBJECTS) $(test_client_OBJECTS) $(test_server_OBJECTS)
 
-all: autoconf.h
-	$(MAKE) $(AM_MAKEFLAGS) all-am
-
+all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
-$(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
-	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  Makefile
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
-	cd $(top_builddir) && \
-	  CONFIG_HEADERS= CONFIG_LINKS= \
-	  CONFIG_FILES=$@ $(SHELL) ./config.status
+.SUFFIXES: .S .c .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile
 
-$(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
-	$(SHELL) ./config.status --recheck
-$(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
-	cd $(srcdir) && $(AUTOCONF)
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 $(ACLOCAL_M4):  configure.in 
-	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
 autoconf.h: stamp-h
 	@if test ! -f $@; then \
 		rm -f stamp-h; \
 		$(MAKE) stamp-h; \
 	else :; fi
 stamp-h: $(srcdir)/autoconf.h.in $(top_builddir)/config.status
-	@rm -f stamp-h stamp-hT
-	@echo timestamp > stamp-hT 2> /dev/null
 	cd $(top_builddir) \
 	  && CONFIG_FILES= CONFIG_HEADERS=autoconf.h \
 	     $(SHELL) ./config.status
-	@mv stamp-hT stamp-h
-$(srcdir)/autoconf.h.in:  $(srcdir)/./stamp-h.in
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/autoconf.h.in: $(srcdir)/stamp-h.in
 	@if test ! -f $@; then \
-		rm -f $(srcdir)/./stamp-h.in; \
-		$(MAKE) $(srcdir)/./stamp-h.in; \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
 	else :; fi
-$(srcdir)/./stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	@rm -f $(srcdir)/./stamp-h.in $(srcdir)/./stamp-h.inT
-	@echo timestamp > $(srcdir)/./stamp-h.inT 2> /dev/null
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOHEADER)
-	@mv $(srcdir)/./stamp-h.inT $(srcdir)/./stamp-h.in
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
+
+mostlyclean-hdr:
+
+clean-hdr:
 
 distclean-hdr:
 	-rm -f autoconf.h
+
+maintainer-clean-hdr:
+
+mostlyclean-binPROGRAMS:
+
+clean-binPROGRAMS:
+	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+distclean-binPROGRAMS:
+
+maintainer-clean-binPROGRAMS:
+
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo $$p1|sed '$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/$$f; \
+	  if test -f $$p; then \
+	    echo "  $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	     $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 
 uninstall-binPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
+	list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-bigbang$(EXEEXT): $(bigbang_OBJECTS) $(bigbang_DEPENDENCIES) 
-	@rm -f bigbang$(EXEEXT)
-	$(LINK) $(bigbang_LDFLAGS) $(bigbang_OBJECTS) $(bigbang_LDADD) $(LIBS)
-client$(EXEEXT): $(client_OBJECTS) $(client_DEPENDENCIES) 
-	@rm -f client$(EXEEXT)
-	$(LINK) $(client_LDFLAGS) $(client_OBJECTS) $(client_LDADD) $(LIBS)
-server$(EXEEXT): $(server_OBJECTS) $(server_DEPENDENCIES) 
-	@rm -f server$(EXEEXT)
-	$(LINK) $(server_LDFLAGS) $(server_OBJECTS) $(server_LDADD) $(LIBS)
-test_client$(EXEEXT): $(test_client_OBJECTS) $(test_client_DEPENDENCIES) 
-	@rm -f test_client$(EXEEXT)
-	$(LINK) $(test_client_LDFLAGS) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
-test_server$(EXEEXT): $(test_server_OBJECTS) $(test_server_DEPENDENCIES) 
-	@rm -f test_server$(EXEEXT)
-	$(LINK) $(test_server_LDFLAGS) $(test_server_OBJECTS) $(test_server_LDADD) $(LIBS)
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
 
 mostlyclean-compile:
-	-rm -f *.$(OBJEXT) core *.core
+	-rm -f *.o core *.core
+
+clean-compile:
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/bigbang.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/boxmuller.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/getopt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/hashtable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/maint.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/msgqueue.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/namegen.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/parse.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/planet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/player_interaction.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/server.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/serveractions.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/shipinfo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/sysop_interaction.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_server.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/universe.Po@am__quote@
+maintainer-clean-compile:
 
-distclean-depend:
-	-rm -rf $(DEPDIR)
+bigbang: $(bigbang_OBJECTS) $(bigbang_DEPENDENCIES)
+	@rm -f bigbang
+	$(LINK) $(bigbang_LDFLAGS) $(bigbang_OBJECTS) $(bigbang_LDADD) $(LIBS)
 
-.c.o:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+client: $(client_OBJECTS) $(client_DEPENDENCIES)
+	@rm -f client
+	$(LINK) $(client_LDFLAGS) $(client_OBJECTS) $(client_LDADD) $(LIBS)
 
-.c.obj:
-@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(COMPILE) -c `cygpath -w $<`
-CCDEPMODE = @CCDEPMODE@
-uninstall-info-am:
+server: $(server_OBJECTS) $(server_DEPENDENCIES)
+	@rm -f server
+	$(LINK) $(server_LDFLAGS) $(server_OBJECTS) $(server_LDADD) $(LIBS)
+
+test_client: $(test_client_OBJECTS) $(test_client_DEPENDENCIES)
+	@rm -f test_client
+	$(LINK) $(test_client_LDFLAGS) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
+
+test_server: $(test_server_OBJECTS) $(test_server_DEPENDENCIES)
+	@rm -f test_server
+	$(LINK) $(test_server_LDFLAGS) $(test_server_OBJECTS) $(test_server_LDADD) $(LIBS)
+
 install-pkgdataDATA: $(pkgdata_DATA)
 	@$(NORMAL_INSTALL)
 	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
 	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(INSTALL_DATA) $$d$$p $(DESTDIR)$(pkgdatadir)/$$f"; \
-	  $(INSTALL_DATA) $$d$$p $(DESTDIR)$(pkgdatadir)/$$f; \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  fi; fi; \
 	done
 
 uninstall-pkgdataDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " rm -f $(DESTDIR)$(pkgdatadir)/$$f"; \
-	  rm -f $(DESTDIR)$(pkgdatadir)/$$f; \
+	list='$(pkgdata_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(pkgdatadir)/$$p; \
 	done
 
 tags: TAGS
 
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
-	mkid -fID $$unique $(LISP)
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
 
-TAGS:  $(HEADERS) $(SOURCES) autoconf.h.in $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
+TAGS:  $(HEADERS) $(SOURCES) autoconf.h.in $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '    { files[$$0] = 1; } \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
 	       END { for (i in files) print i; }'`; \
 	test -z "$(ETAGS_ARGS)autoconf.h.in$$unique$(LISP)$$tags" \
-	  || etags $(ETAGS_ARGS) $$tags autoconf.h.in $$unique $(LISP)
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags autoconf.h.in $$unique $(LISP) -o $$here/TAGS)
 
-GTAGS:
-	here=`CDPATH=: && cd $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
+mostlyclean-tags:
+
+clean-tags:
 
 distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
+	-rm -f TAGS ID
 
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
+maintainer-clean-tags:
 
-top_distdir = .
-# Avoid unsightly `./'.
 distdir = $(PACKAGE)-$(VERSION)
-
-GZIP_ENV = --best
-
-distdir: $(DISTFILES)
-	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
-	mkdir $(distdir)
-	@for file in $(DISTFILES); do \
-	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
-	    $(mkinstalldirs) "$(distdir)/$$dir"; \
-	  fi; \
-	  if test -d $$d/$$file; then \
-	    cp -pR $$d/$$file $(distdir) \
-	    || exit 1; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || cp -p $$d/$$file $(distdir)/$$file \
-	    || exit 1; \
-	  fi; \
-	done
-	-find $(distdir) -type d ! -perm -777 -exec chmod a+rwx {} \; -o \
-	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
-	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
-	  ! -type d ! -perm -444 -exec $(SHELL) $(install_sh) -c -m a+r {} {} \; \
-	|| chmod -R a+r $(distdir)
-dist: distdir
-	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
+top_distdir = $(distdir)
 
 # This target untars the dist file and tries a VPATH configuration.  Then
 # it guarantees that the distribution is self-contained by making another
 # tarfile.
 distcheck: dist
-	-chmod -R a+w $(distdir) > /dev/null 2>&1; rm -rf $(distdir)
-	GZIP=$(GZIP_ENV) gunzip -c $(distdir).tar.gz | $(AMTAR) xf -
-	chmod -R a-w $(distdir); chmod a+w $(distdir)
+	-rm -rf $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	chmod a-w $(distdir)
-	dc_install_base=`CDPATH=: && cd $(distdir)/=inst && pwd` \
-	  && cd $(distdir)/=build \
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
 	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
 	  && $(MAKE) $(AM_MAKEFLAGS) check \
 	  && $(MAKE) $(AM_MAKEFLAGS) install \
 	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
-	  && $(MAKE) $(AM_MAKEFLAGS) uninstall \
-	  && (test `find $$dc_install_base -type f -print | wc -l` -le 1 \
-	     || (echo "Error: files left after uninstall" 1>&2; \
-	         exit 1) ) \
-	  && $(MAKE) $(AM_MAKEFLAGS) dist \
-	  && $(MAKE) $(AM_MAKEFLAGS) distclean \
-	  && rm -f $(distdir).tar.gz \
-	  && (test `find . -type f -print | wc -l` -eq 0 \
-	     || (echo "Error: files left after distclean" 1>&2; \
-	         exit 1) )
-	-chmod -R a+w $(distdir) > /dev/null 2>&1; rm -rf $(distdir)
-	@echo "$(distdir).tar.gz is ready for distribution" | \
-	  sed 'h;s/./=/g;p;x;p;x'
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
+	-rm -rf $(distdir)
+	@banner="$(distdir).tar.gz is ready for distribution"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
+dist: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+dist-all: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(DATA) autoconf.h
+installcheck-am:
+installcheck: installcheck-am
+all-recursive-am: autoconf.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
-installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(pkgdatadir)
-
-install: install-am
+install-exec-am: install-binPROGRAMS
 install-exec: install-exec-am
+
+install-data-am: install-pkgdataDATA
 install-data: install-data-am
-uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
-
-installcheck: installcheck-am
+install: install-am
+uninstall-am: uninstall-binPROGRAMS uninstall-pkgdataDATA
+uninstall: uninstall-am
+all-am: Makefile $(PROGRAMS) $(DATA) autoconf.h
+all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	  `test -z '$(STRIP)' || \
-	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(pkgdatadir)
+
+
 mostlyclean-generic:
 
 clean-generic:
 
 distclean-generic:
-	-rm -f Makefile $(CONFIG_CLEAN_FILES) stamp-h stamp-h[0-9]*
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-	@echo "This command is intended for maintainers to use"
-	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
-
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
-
-dist-all: distdir
-	$(AMTAR) chof - $(distdir) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
-	-chmod -R a+w $(distdir) >/dev/null 2>&1; rm -rf $(distdir)
-distclean: distclean-am
-	-rm -f config.status config.cache config.log
-distclean-am: clean-am distclean-compile distclean-depend \
-	distclean-generic distclean-hdr distclean-tags
-
-dvi: dvi-am
-
-dvi-am:
-
-info: info-am
-
-info-am:
-
-install-data-am: install-pkgdataDATA
-
-install-exec-am: install-binPROGRAMS
-
-install-info: install-info-am
-
-install-man:
-
-installcheck-am:
-
-maintainer-clean: maintainer-clean-am
-
-maintainer-clean-am: distclean-am maintainer-clean-generic
+mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS \
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+clean-am:  clean-hdr clean-binPROGRAMS clean-compile clean-tags \
+		clean-depend clean-generic mostlyclean-am
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
-	uninstall-pkgdataDATA
+clean: clean-am
 
-.PHONY: GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic dist dist-all distcheck distclean \
-	distclean-compile distclean-depend distclean-generic \
-	distclean-hdr distclean-tags distdir dvi dvi-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-man install-pkgdataDATA install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am uninstall-pkgdataDATA
+distclean-am:  distclean-hdr distclean-binPROGRAMS distclean-compile \
+		distclean-tags distclean-depend distclean-generic \
+		clean-am
+
+distclean: distclean-am
+	-rm -f config.status
+
+maintainer-clean-am:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+	-rm -f config.status
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
+maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile uninstall-pkgdataDATA install-pkgdataDATA tags \
+mostlyclean-tags distclean-tags clean-tags maintainer-clean-tags \
+distdir mostlyclean-depend distclean-depend clean-depend \
+maintainer-clean-depend info-am info dvi-am dvi check check-am \
+installcheck-am installcheck all-recursive-am install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

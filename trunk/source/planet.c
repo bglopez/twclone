@@ -51,7 +51,7 @@ init_planets (char *filename, struct sector *secarray[])
  *	-1 if called with a NULL sector
 */
 int
-insert_planet (struct planet *p, struct sector *s)
+insert_planet (struct planet *p, struct sector *s, int owner)
 {
   struct list *p_list;
   if (s == NULL)

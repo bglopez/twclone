@@ -43,12 +43,12 @@ processcommand (char *buffer, struct msgcommand *data)
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Intransit!");
+	  strcpy (buffer, "BAD: Intransit!\n");
 	  return;
 	}
       if (curplayer->sector == 0)
@@ -73,12 +73,12 @@ processcommand (char *buffer, struct msgcommand *data)
 	      sector : (ships[curplayer->ship - 1]->location) == data->to)
 	  || data->to > sectorcount)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Already moving!");
+	  strcpy (buffer, "BAD: Already moving!\n");
 	  return;
 	}
       if ((curplayer->turns <= 0)
@@ -87,7 +87,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	{
 	  //if(move_player(curplayer, data, buffer) < 0) 
 	  //{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       //}
@@ -140,7 +140,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	      curplayer->intransit = 1;
 	      curplayer->movingto = data->to;
 	      curplayer->beginmove = begin.tv_sec;
-	      strcpy (buffer, "OK: Now moving");
+	      strcpy (buffer, "OK: Now moving\n");
 	      return;
 
 	    }
@@ -159,7 +159,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	  || (strcmp (curplayer->name, data->name) != 0)
 	  || (strcmp (curplayer->passwd, data->passwd) != 0))
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       curplayer->loggedin = 1;
@@ -183,7 +183,7 @@ processcommand (char *buffer, struct msgcommand *data)
 				     HASH_LENGTH)) == NULL)
 	{
 	  //fprintf(stderr, "processcommand: player %s already exists\n", data->name);
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       curplayer->passwd = (char *) malloc (strlen (data->passwd) + 1);
@@ -216,14 +216,14 @@ processcommand (char *buffer, struct msgcommand *data)
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (curplayer->messages != NULL)
 	{			//This handles the realtime messages
 	  fprintf (stderr, "\nprocesscommand: Lookie we have messages!");
 	  curmessage = curplayer->messages;
-	  strcpy (buffer, "OK:");
+	  strcpy (buffer, "OK:\n");
 	  strcat (buffer, curmessage->message);
 	  curplayer->messages = curmessage->nextmessage;
 	  free (curmessage->message);
@@ -239,19 +239,19 @@ processcommand (char *buffer, struct msgcommand *data)
 	    builddescription (curplayer->sector, buffer, curplayer->number);
 	}
       else
-	strcpy (buffer, "OK: Still in Transit");
+	strcpy (buffer, "OK: Still in Transit\n");
       break;
     case ct_fedcomm:
       if ((curplayer =
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Moving you can't do that");
+	  strcpy (buffer, "BAD: Moving you can't do that\n");
 	  return;
 	}
       fedcommlink (curplayer->number, data->buffer);
@@ -263,7 +263,7 @@ processcommand (char *buffer, struct msgcommand *data)
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Moving you can't do that");
+	  strcpy (buffer, "BAD: Moving you can't do that\n");
 	  return;
 	}
       buildplayerinfo (data->to, buffer);
@@ -272,7 +272,7 @@ processcommand (char *buffer, struct msgcommand *data)
       //fprintf(stderr, "processcommand: Got a shipinfo command\n");
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Moving you can't do that");
+	  strcpy (buffer, "BAD: Moving you can't do that\n");
 	  return;
 	}
       buildshipinfo (data->to, buffer);
@@ -284,12 +284,12 @@ processcommand (char *buffer, struct msgcommand *data)
 				   HASH_LENGTH)) == NULL)
 	{
 	  //fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Can't quit while moving!");
+	  strcpy (buffer, "BAD: Can't quit while moving!\n");
 	  return;
 	}
       if (curplayer->sector == 0)
@@ -302,7 +302,7 @@ processcommand (char *buffer, struct msgcommand *data)
 		}
       saveplayer(curplayer->number, "./players.data");
       saveship(curplayer->ship, "./ships.data");
-      strcpy(buffer, "OK");
+      strcpy(buffer, "OK\n");
       curplayer->loggedin = 0;
       break;
     case ct_portinfo:
@@ -310,12 +310,12 @@ processcommand (char *buffer, struct msgcommand *data)
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Moving can't do that!");
+	  strcpy (buffer, "BAD: Moving can't do that!\n");
 	  return;
 	}
       if (curplayer->sector == 0)
@@ -326,7 +326,7 @@ processcommand (char *buffer, struct msgcommand *data)
 			   portptr->number, buffer);
 	  else
 	    {
-	      strcpy (buffer, "BAD");
+	      strcpy (buffer, "BAD\n");
 	      return;
 	    }
 	}
@@ -337,7 +337,7 @@ processcommand (char *buffer, struct msgcommand *data)
 			   buffer);
 	  else
 	    {
-	      strcpy (buffer, "BAD");
+	      strcpy (buffer, "BAD\n");
 	      return;
 	    }
 	}
@@ -365,12 +365,12 @@ processcommand (char *buffer, struct msgcommand *data)
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       if (intransit (data))
 	{
-	  strcpy (buffer, "BAD: Can't port while moving!");
+	  strcpy (buffer, "BAD: Can't port while moving!\n");
 	  return;
 	}
       if (curplayer->sector == 0)
@@ -425,7 +425,7 @@ processcommand (char *buffer, struct msgcommand *data)
 	}
       else
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       break;
@@ -434,14 +434,27 @@ processcommand (char *buffer, struct msgcommand *data)
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
 	{
-	  strcpy (buffer, "BAD");
+	  strcpy (buffer, "BAD\n");
 	  return;
 	}
       buildtotalinfo (curplayer->number, buffer, data);
       break;
+    case ct_genesis:
+      strcpy (buffer, "Got GENESIS REQUEST\n");
+      if ((curplayer =
+	   (struct player *) find (data->name, player, symbols,
+				   HASH_LENGTH)) == NULL)
+	{
+	  strcpy (buffer, "BAD\n");
+	  return;
+	}
+      
+      /* Insert planet and assign player as the owner */
+      break;
+
     default:
       //fprintf(stderr, "processcommand: Got a bogus command\n");
-      strcpy (buffer, "BAD");
+      strcpy (buffer, "BAD\n");
     }
   return;
 }
