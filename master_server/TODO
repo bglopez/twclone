@@ -36,7 +36,7 @@ Tournament Mode  : Off
 - Need to add the ability for the server to load information from the
   XML data files on startup.
 
-- Need to make sure that servers who which have not reported a status
+- Need to make sure that servers which have not reported a status
   after X amount of time are removed from the listing.
 
 
