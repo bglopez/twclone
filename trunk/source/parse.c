@@ -66,7 +66,7 @@ void popstring(char *list, char *item, char *delimiters, int maxitemsize)
   int pos = 0, len = 0, x;
 
   //fprintf(stderr, "popstring: list='%s', item='%s', delimiters='%s', maxitemsize='%d'\n",
-  //	  list, item, delimiters, maxitemsize);
+  	 // list, item, delimiters, maxitemsize);
 
   if (strcspn(list, delimiters) == 0 && strlen(list) > 0 )
     pos++;
