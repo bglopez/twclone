@@ -421,6 +421,6 @@ void makeports()
 		sector=randomnum(0,NUMSECTORS-1);
 		while (sectorlist[sector]->portptr != NULL)
 			sector=randomnum(0,NUMSECTORS-1);
-		portlist[loop]->location = sector;
+		portlist[loop]->location = sector+1;
 	}
 }
