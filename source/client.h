@@ -149,6 +149,7 @@ int printsector (struct sector *cursector);
 int movesector (char *holder, int sockid, int current,
 		struct sector *cursector);
 int dologin (int sockid);
+void dogenesis(int sockid, struct player *curplayer);
 char *prompttype (enum prompts type, int sector_or_porttype, int sockid);
 int getyes (char *answer);
 void psinfo (int sockid, int pnumb, struct player *p);

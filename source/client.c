@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.52 $
- * Last Modified: $Date: 2004-01-20 05:35:44 $
+ * $Revision: 1.53 $
+ * Last Modified: $Date: 2004-01-21 03:55:24 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.52 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-20 05:35:44 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.53 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-21 03:55:24 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -208,6 +208,10 @@ int main (int argc, char *argv[])
                     getmyinfo (sockid, curplayer);
                     printmyinfo (curplayer);
                     break;
+					 case 'u':
+					 case 'U':
+						  dogenesis(sockid, curplayer);
+						  break;
 					 case 'l':
 					 case 'L':
 						  sector = getsectorinfo(sockid, cursector);
@@ -1695,7 +1699,7 @@ void citadelupgrade(int sockid, struct planet *curplanet)
 		sendinfo(sockid, buffer);
 		recvinfo(sockid, buffer);
 	}
-	if (curplanet->colonists < colonists)
+	if (curplanet->colonists*1000 < colonists)
 	{
 		printf("\n%sYou need %s%d%s Colonists to build a citadel.", KGRN, KLTYLW,
 							 colonists, KGRN);
@@ -3174,6 +3178,39 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
     input = malloc (10 * sizeof (char));
     read (0, input, 10);		//Get 10 characters from stdin!
     return input;
+}
+
+void dogenesis(int sockid, struct player *curplayer)
+{
+	char *name = (char *)malloc(sizeof(char)*50);
+	char *typename = (char *)malloc(sizeof(char)*50);
+	char *type = (char *)malloc(sizeof(char)*50);
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int counter;
+	char ch;
+
+	strcpy(buffer, "\0");
+	strcpy(name, "\0");
+	strcpy(buffer, "GENESIS Blorp:0:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	popstring(buffer, type, ":", BUFF_SIZE);
+	popstring(buffer, typename, ":", BUFF_SIZE);
+	printf("\n%sYou have created a Class %s%s%s, %s%s%s type planet.", KGRN, KCYN
+						 , type, KGRN, KYLW, typename, KGRN);
+	printf("\n%sWhat would you like to call it?", KGRN);
+	printf("\n%s> ", KMAG);
+	counter = 0;
+	while ((ch=getchar())!='\n')
+	{
+		name[counter] = ch;
+		counter++;
+	}
+	strcpy(buffer, "GENESIS ");
+	addstring(buffer, name, ':', BUFF_SIZE);
+	addint(buffer, 1, ':', BUFF_SIZE);
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
 }
 
 int dologin (int sockid)

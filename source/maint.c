@@ -88,6 +88,15 @@ background_maint (void *threadinfo)
 			{
 				if (planets[loop]!=NULL)
 				{
+					if (planets[loop]->citdl->upgradestart != 0)
+					{
+						if ((curtime - planets[loop]->citdl->upgradestart) > 
+								(planets[loop]->pClass->citadelUpgradeTime[planets[loop]->citdl->level]*(24*3600)))
+						{
+							planets[loop]->citdl->upgradestart = 0;
+							planets[loop]->citdl->level = planets[loop]->citdl->level + 1;
+						}
+					}
 					planets[loop]->fuel = planets[loop]->fuel +
 				(planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction)/24;
 					
@@ -154,6 +163,15 @@ background_maint (void *threadinfo)
 			{
 				if (planets[loop]!=NULL)
 				{
+					if (planets[loop]->citdl->upgradestart != 0)
+					{
+						if ((curtime - planets[loop]->citdl->upgradestart) > 
+								(planets[loop]->pClass->citadelUpgradeTime[planets[loop]->citdl->level]*(24*3600)))
+						{
+							planets[loop]->citdl->upgradestart = 0;
+							planets[loop]->citdl->level = planets[loop]->citdl->level + 1;
+						}
+					}
 					planets[loop]->fuel = planets[loop]->fuel +
 				(planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction) % 24;
 					
