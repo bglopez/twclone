@@ -44,7 +44,8 @@ struct player *players[MAX_PLAYERS];
 struct ship *ships[MAX_SHIPS];
 struct port *ports[MAX_PORTS];
 struct config *configdata;
-time_t *starttime, *curtime;
+time_t *timeptr;
+time_t starttime;
 
 int main(int argc, char *argv[])
 {
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
   struct msgcommand data;
   char buffer[BUFF_SIZE];
 
-  time(starttime);
+  starttime = time(timeptr);
   //reading the port to run on from the command line
   if (argc > 1)
     {

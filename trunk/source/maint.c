@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 #include "msgqueue.h"
 #include "common.h"
+#include "serveractions.h"
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
@@ -37,27 +38,56 @@ extern struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 extern struct ship *ships[MAX_SHIPS];
 extern struct port *ports[MAX_PORTS];
 extern struct config *configdata;
-
+extern time_t starttime;
 extern int sectorcount;
-extern time_t *starttime, *curtime; 
+
+time_t *timeptr;
 
 void *background_maint(void *threadinfo)
 {
-   //int msgidin = ((struct connectinfo *)threadinfo)->msgidin;
-	struct msgcommand data;
-	char buffer[BUFF_SIZE];
-						 
+	time_t curtime;
+	struct tm *timenow;
+	int lastregen=-1;
+	int lastday=-1;
+	int loop=0;
+
 	free(threadinfo);
 
 	while (1)
 	{
-   	time(curtime);
+   	curtime = time(timeptr);
+		timenow = localtime(&curtime);
+		if (lastregen == -1)
+			lastregen = timenow->tm_hour;
+		if (lastday == -1)
+			lastday = timenow->tm_yday;
    	if ((curtime - starttime)% configdata->autosave * 60) //Autosave
      		saveall();
-   	if ((curtime - starttime)% 3600 == 0)
-      	;//Regen turns; Needs to check system time
-   	if ((curtime - starttime)% 86400 == 0)
-      	;//Regen fractional turns leftover Needs to check system time
+   	if ((timenow->tm_hour == lastregen+1) || ((timenow->tm_hour == 0) && (lastregen==23)))
+		{
+			lastregen=timenow->tm_hour;
+			fprintf(stderr, "\nRegen turns by the hour!");
+			loop=0;
+			while(players[loop]!=NULL)
+			{
+				players[loop]->turns = players[loop]->turns + configdata->turnsperday/24;
+				if (players[loop]->turns > configdata->turnsperday)
+					players[loop]->turns = configdata->turnsperday;
+				loop++;
+			}
+		}
+   	if ((timenow->tm_yday == lastday+1) || ((timenow->tm_yday == 0) && (lastday==365)))
+		{
+			lastday=timenow->tm_yday;
+			fprintf(stderr, "\nRegen leftover turns!");
+   		while(players[loop]!=NULL)
+			{
+				players[loop]->turns = players[loop]->turns + configdata->turnsperday%24;
+				if (players[loop]->turns > configdata->turnsperday)
+					players[loop]->turns = configdata->turnsperday;
+				loop++;
+			}
+		}
   		if ((curtime - starttime)% configdata->processinterval == 0)
    	{
 			//Process real time stuff?
