@@ -47,8 +47,6 @@ void saveshiptypeinfo(char *filename)
 		fprintf(shipfile, "%s", stufftosave);
 	}
 	fclose(shipfile);
-	free(stufftosave);
-
 }
 
 void init_shiptypeinfo (char *filename)

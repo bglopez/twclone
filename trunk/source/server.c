@@ -217,11 +217,27 @@ int main (int argc, char *argv[])
         sendmesg (msgidout, buffer, senderid);
         senderid = getdata (msgidin, &data, 0);
 	 }
+	 printf("\nSaving all ports ...");
+	 fflush(stdout);
     saveallports ("ports.data");
+	 printf("Done!");
+	 printf("\nSaving planets ...");
+	 fflush(stdout);
 	 saveplanets("planets.data");
+	 printf("Done!");
+	 printf("\nSaving ship types ...");
+	 fflush(stdout);
 	 saveshiptypeinfo("shiptypes.data");
+	 printf("Done!");
+	 printf("\nSaving planet types ...");
+	 fflush(stdout);
 	 save_planetinfo("planettypes.data");
+	 printf("Done!");
+	 printf("\nSaving configuration data ...");
+	 fflush(stdout);
 	 saveconfig("config.data");
+	 printf("Done!");
+	 fflush(stdout);
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
     //when we're done, clean up the msg queues
