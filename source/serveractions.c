@@ -1255,9 +1255,16 @@ void findautoroute (int from, int to, char *buffer)
         (unsigned short *) malloc ((sectorcount + 1) * sizeof (unsigned short));
     int shortest = 0, done = 0, i = 0, j = 0, counter = 0;
     int sectorlist[MAX_WARPS_PER_SECTOR];
-    int backpath[30] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    int backpath[100] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                        };
     char temp[50];
 	 int nodefrom = innode(from);
