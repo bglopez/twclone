@@ -86,6 +86,9 @@ int numNodes = NUMNODES;
 int strNameLength = 25;
 
 int numRandomPlanets = 0;
+/* This is because of random memory corruption in the configdata */
+
+int maxWarps = 0;
 
 /*  THESE ARE THE SET-IN-STONE FEDSPACE LINKS */
 /*  DON'T EVEN THINK ABOUT TOUCHING THESE... */
@@ -123,7 +126,7 @@ int warpsfull (int sector);
 int numwarps (int sector);
 int innode(int sector);
 void makeports ();
-void sectorsort (struct sector *base[configdata->maxwarps], int elements);
+void sectorsort (struct sector *base[maxWarps], int elements);
 extern char *randomname (char *name);
 extern char *consellationName (char *name);
 extern void init_usedNames ();
@@ -227,9 +230,6 @@ main (int argc, char **argv)
         exit (0);
     }
 	 
-    maxjumpsize = (int) (numSectors * ((double) percentJump / 100));
-
-    randsectornum = (int *) malloc ((numSectors - 11) * sizeof (int));
     tmpname = malloc (sizeof (strNameLength));
 
     /*  Seed our randomizer */
@@ -240,12 +240,20 @@ main (int argc, char **argv)
     /*  Reading config.data file for config data (Duh...) */
     printf ("\nReading in config.data...");
     (void) init_config ("config.data");
+	 maxWarps = configdata->maxwarps;
     printf ("done.\n");
 
     printf ("Creating sector array...");
 
-    sectorlist = malloc (numSectors * sizeof (struct sector *));
-	 bigsectorlist = malloc(numSectors * sizeof(struct sector *));
+    sectorlist = (struct sector **)
+				malloc (numSectors * sizeof (struct sector *));
+	 bigsectorlist = (struct sector **)
+				malloc(numSectors * sizeof(struct sector *));
+	 for (x = 0; x < numSectors; x++)
+	 {
+		sectorlist[x] = NULL;
+		bigsectorlist[x] = NULL;
+	 }
 	 
     sectors = sectorlist;
 
@@ -255,25 +263,33 @@ main (int argc, char **argv)
     {
         portlist[x] = NULL;
     }
-    printf ("done.\n");
+    printf ("done.\n\n");
 
 	 totalsectors = numSectors;
-	 numSectors = numSectors/numNodes;
-
     for (counter = 1; counter <= numNodes; counter++)
     {
-
+	 	  numSectors = totalsectors/numNodes;
 		  if ((counter == numNodes) && ((totalsectorsdone + numSectors) < totalsectors))
 		  {
 				numSectors = totalsectors - totalsectorsdone;
 		  }
+		  if (numNodes != 1)
+		  	fprintf(stderr, "Now creating a node with %d sectors in it!\n", numSectors);
 		  if (counter != 1)
 		  {
 				numSectors = numSectors + 10;
 		  }
+		  
+    	  maxjumpsize = (int) (numSectors * ((double) percentJump / 100));
+    	  randsectornum = (int *) malloc ((numSectors - 11) * sizeof (int));
+
     	  for (x = 0; x < numSectors; x++)
 	 	  {
         	sectorlist[x] = malloc (sizeof (struct sector));
+			for (y=0; y <= maxWarps; y++)
+			{
+				sectorlist[x]->sectorptr[y] = NULL;
+			}
 	 	  }	
         /*  Fills in the randsectornum array with numbers 10 to (numsectors - 1) */
         for (x = 0; x < numSectors - 10; x++)
@@ -340,10 +356,11 @@ main (int argc, char **argv)
         printf ("done.\n");
 
         printf ("Setting up the max warp sectors...");
+		  fflush(stdout);
         /*  Sets up rest of links for the maxwarp sectors (the meat and potatoes) */
         for (x = 0; x < maxjumpsize; x++)
         {
-            for (y = freewarp (x); y < configdata->maxwarps; y++)
+            for (y = freewarp (x); y < maxWarps; y++)
             {
                 randint = randomnum (1, 100);
                 jumpsize = randjump (maxTunnel);
@@ -376,6 +393,7 @@ main (int argc, char **argv)
             }
         }
         printf ("done.\n");
+		  fflush(stdout);
 
         for (x = 0; x < maxjumpsize; x++)
         {
@@ -426,27 +444,35 @@ main (int argc, char **argv)
             }
         }
         printf ("done.\n");
-		  for (x=0; x < numSectors; x++)
+		  fflush(stdout);
+		  if (counter == 1)
 		  {
-			if (x + totalsectorsdone >= totalsectors)
-			{
-				x = numSectors+1;
-			}
-			else
-			{
-			if (counter == 1)
-			{
+		  	for (x=0; x < numSectors ; x++)
+		  	{
 				bigsectorlist[x + totalsectorsdone] = sectorlist[x];
-			}
-			else
-			{
-				if (x < 10) //Make sure links to fedspace are dealt with correctly
-					sectorlist[x]->number = sectorlist[x]->number + totalsectorsdone;
-				sectorlist[x+10]->number = sectorlist[x+10]->number - 10;
-				bigsectorlist[x + totalsectorsdone] = sectorlist[x+10];
-			}
-			bigsectorlist[x + totalsectorsdone]->number = 
+				//fprintf(stderr, "Linking sector %d to sector %d\n", x+totalsectorsdone+1, x+1);
+				bigsectorlist[x + totalsectorsdone]->number = 
 					  bigsectorlist[x + totalsectorsdone]->number + totalsectorsdone;
+		  	}
+		  }
+		  else
+		  {
+			for (x=0; x < (numSectors - 10); x++)
+			{
+				if (x + totalsectorsdone >= totalsectors)
+				{
+				x = numSectors+12;
+				}
+				else
+				{
+					if (x < 10) //Make sure links to fedspace are dealt with correctly
+						sectorlist[x]->number = sectorlist[x]->number + totalsectorsdone;
+					//fprintf(stderr,"Linking sector %d to sector %d numSectors is %d x is %d\n", x+11, x+totalsectorsdone+1, numSectors, x);
+					sectorlist[x+10]->number = sectorlist[x+10]->number - 10;
+					bigsectorlist[x + totalsectorsdone] = sectorlist[x+10];
+					bigsectorlist[x + totalsectorsdone]->number = 
+					  bigsectorlist[x + totalsectorsdone]->number + totalsectorsdone;
+				}
 			}
 		  }
 		  if (counter == 1)
@@ -463,10 +489,35 @@ main (int argc, char **argv)
 	 }
 	 sectorlist = bigsectorlist;
 	 numSectors = totalsectors;
+	 for (counter=0; counter < numSectors; counter++)
+	 {
+		if (sectorlist[counter] == NULL)
+		{
+			//fprintf(stderr, "Sector %d is null!\n", counter+1);
+			sectorlist[counter] = (struct sector *)malloc(sizeof(struct sector));
+			sectorlist[counter]->portptr = NULL;
+			for (x=0; x< maxWarps; x++)
+				sectorlist[counter]->sectorptr[x] = NULL;
+			sectorlist[counter]->sectorptr[0] = sectorlist[0];
+		}
+		else 
+		{
+			if (sectorlist[counter]->portptr != NULL)
+				sectorlist[counter]->portptr = NULL;
+			if (sectorlist[counter]->sectorptr[0] == NULL)
+			{
+				//fprintf(stderr, "\nSector %d has no warps!\n", counter+1);
+				fflush(stderr);
+				sectorlist[counter]->sectorptr[0] = sectorlist[0];
+			}
+		}
+	 }
 
     printf ("Creating %d ports...", numPorts);
+	 fflush(stdout);
     makeports ();
     printf ("done.\n");
+	 fflush(stdout);
 
 
     printf ("Creating Ferringhi home sector...");
@@ -544,13 +595,13 @@ main (int argc, char **argv)
     {
         sprintf (fileline, "%d", (x + 1));
         fileline = strcat (fileline, ":");
-        for (y = 0; y < numwarps (x); y++)
+        for (y = 0; y < numwarps(x); y++)
         {
-            secptr = sectorlist[x]->sectorptr[y];
-            sprintf (tempstr, "%d", secptr->number);
-            fileline = strcat (fileline, tempstr);
-            if (y + 1 != numwarps (x))
-                fileline = strcat (fileline, ",");
+           	secptr = sectorlist[x]->sectorptr[y];
+           	sprintf (tempstr, "%d", secptr->number);
+           	fileline = strcat (fileline, tempstr);
+				if ((y+1) < numwarps(x))
+           		fileline = strcat (fileline, ",");
         }
         fileline = strcat (fileline, ":");
         /* Adds in names for sectors */
@@ -618,8 +669,7 @@ compsec (const void *cmp1, const void *cmp2)
     return 0;
 }
 
-int
-randjump (int maxjumplen)
+int randjump (int maxjumplen)
 {
     if (maxjumplen > 2)
     {
@@ -669,13 +719,14 @@ secjump (int from, int to)
         sectorlist[from]->sectorptr[y] = sectorlist[to];
 }
 
-int
-freewarp (int sector)
+int freewarp (int sector)
 {
     int x;
-    for (x = 0; x < configdata->maxwarps; x++)
+    for (x = 0; x < maxWarps; x++)
+	 {
         if (sectorlist[sector]->sectorptr[x] == NULL)
             return x;
+	 }
     return -1;
 }
 
@@ -712,12 +763,11 @@ int numwarps (int sector)
 {
     int x = freewarp (sector);
     if (x == -1)
-        return configdata->maxwarps;
+        return maxWarps;
     return x;
 }
 
-void
-sectorsort (struct sector *base[configdata->maxwarps], int elements)
+void sectorsort (struct sector *base[maxWarps], int elements)
 {
     struct sector *holdersector;
     int x = 0;
@@ -883,11 +933,13 @@ makeports ()
 				{
             	sector = randomnum (0, numSectors - 1);
             	while (sectorlist[sector]->portptr != NULL)
-                	sector = randomnum (0, NUMSECTORS - 1);
+                	sector = randomnum (0, numSectors - 1);
             	portlist[loop]->location = sector + 1;
 				}
 				else if ((loop > 3) && (loop <= numNodes+3))
 				{
+					//fprintf(stderr, "Inserting type 10 port into node %d\n", loop-3);
+					fflush(stdout);
 					sector = randomnum(0, numSectors - 1);
 					curnode = innode(sector+1);
 					while ((curnode != (loop-3)))
@@ -902,7 +954,8 @@ makeports ()
 				}
 				else
 				{
-            	sector = randomnum (0, numSectors - 1);
+            	//fprintf(stderr, "looking to place port %d in a sector\n", loop+1);
+					sector = randomnum (0, numSectors - 1);
             	while (sectorlist[sector]->portptr != NULL)
                 	sector = randomnum (0, NUMSECTORS - 1);
             	portlist[loop]->location = sector + 1;
