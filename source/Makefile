@@ -15,7 +15,7 @@
 
 
 # -*- makefile -*-
-# $Id: Makefile,v 1.12 2002-06-13 15:49:29 rdearman Exp $
+# $Id: Makefile,v 1.13 2002-06-14 15:58:24 rdearman Exp $
 # Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ CC = gcc
 DEPDIR = .deps
 EXEEXT = 
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-ISODATE = 2002-06-12
+ISODATE = 2002-06-14
 OBJEXT = o
 PACKAGE = twclone
 VERSION = 0.0.1

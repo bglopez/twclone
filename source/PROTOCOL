@@ -111,6 +111,20 @@ for the types of messages
 -----------------------------------------------------------
 -----------------------------------------------------------
 
+USE <planet name>
+USE response
+:Planet Number:Owner:Sector:Planet Type:Planet Name:
+
+LAND <planet number>
+:GRANTED:Planet Name:Planet Owner:Colonist Fuel:Colonist Ore:Colonist Equipment:Figthers:Cidadel Level:
+
+or if not players planet or player not allowed to land
+LAND <planet number>
+:REFUSED:Fighter Damage:Q-Cannon damage:Inderdiction Level:
+
+
+PLANET <UPGRADE,MOVE_COLONIST,QCANNON,FIGHTER>
+
 minor thread commands:
 ----------------------
 These will all be encapsulated in a data structure, so no need for a protocol
@@ -118,3 +132,4 @@ These will all be encapsulated in a data structure, so no need for a protocol
 major thread responses:
 -----------------------
 These will always be the buffer that is to be passed back to the client.
+
