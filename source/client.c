@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.30 $
- * Last Modified: $Date: 2003-10-24 01:36:42 $
+ * $Revision: 1.31 $
+ * Last Modified: $Date: 2003-10-29 23:57:51 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.30 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-24 01:36:42 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.31 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-29 23:57:51 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1314,6 +1314,8 @@ void doporting (int sockid, struct player *curplayer)
                     offered = popint (buffer, ":");
                     accepted = popint (buffer, ":");
                     xpgained = popint (buffer, ":");
+						  if (accepted == -1)
+							accepted = 1;
                 }
                 while (!accepted);
                 if (xpgained > 0)
@@ -1356,7 +1358,7 @@ void doporting (int sockid, struct player *curplayer)
             printf ("\n%sHow many holds of %s%s do you want to buy [%s%d%s]? ",
                     KMAG, pnames[counter], KMAG, KLTYLW, testholds, KMAG);
             scanf ("%d", &holds);
-            if (holds > 0)
+            if (holds > 0 && (curplayer->pship->emptyholds >= holds))
             {
                 printf ("\n%sAgreed, %s%d%s units.", KLTCYN, KLTYLW, holds,
                         KLTCYN);
@@ -1390,6 +1392,8 @@ void doporting (int sockid, struct player *curplayer)
                     offered = popint (buffer, ":");
                     accepted = popint (buffer, ":");
                     xpgained = popint (buffer, ":");
+						  if (accepted == -1)
+								accepted = 1;
                 }
                 while (!accepted);
                 if (xpgained > 0)
