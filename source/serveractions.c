@@ -356,110 +356,91 @@ void builddescription(int sector, char *buffer, int playernum)
 /*
   This is the auto pilot stuff, it is junk, and needs to be rewritten
 */
+/* I'm commenting out all of this old junk just in case it's needed again.
+   -Eryndil 4/9/2002
+	All of it's deleted now since it's bad junk!
+*/
 
 void findautoroute(int from, int to, char *buffer)
 {
-  int *beenthere = (int *)malloc(sectorcount * sizeof(int));
-  int x, done = 0;
-  int depth = 1;
-  char temp[15]; //should be more than enough
-
-  for (x = 0; x < sectorcount; x++)
-    beenthere[x] = 0;
-  
-  beenthere[from - 1] = depth;
-
-  //do the beginning part of the search
-  while(done == 0)
-    {
-      depth++;
-      for (x = 0; x < sectorcount; x++)
-	if (beenthere[x] == depth - 1)
-	  if (checkall(x + 1, to, depth, beenthere))
-	    {
-	      done = 1;
-	      break;
-	    }
-
-    }
-  
-  //  for (x = 0; x < sectorcount; x++)
-  //  fprintf (stderr, "findautoroute: %d %d\n", x+1, beenthere[x]);
-  
-  free(beenthere);
-  beenthere = (int *)malloc(depth * sizeof(int));
-  
-  buildsectorlist(from, to, depth - 1, beenthere);
-
-  fprintf(stderr, "findautoroute: ");
-  //for (x = 0; x < depth; x++)
-  //  fprintf (stderr, "%d, ", beenthere[x]);
-  //fprintf(stderr, "\n");
-
-  sprintf(buffer, ":%d,", beenthere[depth - 1]);
-  for (x = depth - 2; x >= 0; x--)
-    {
-      sprintf(temp, "%d,", beenthere[x]);
-      strcat(buffer, temp);
-    }
-
-  buffer[strlen(buffer) - 1] = ':';
-
-  return;
-}
-
-int checkall(int from, int to, int depth, int *beenthere)
-{
-  int linknum = 0;
-
-  //fprintf(stderr, "checkall: entering with depth %d, from %d, to %d\n",
-  //	  depth, from, to);
-
-  while (linknum < MAX_WARPS_PER_SECTOR && sectors[from - 1]->sectorptr[linknum] != NULL)
-    {
-      if (beenthere[sectors[from - 1]->sectorptr[linknum]->number - 1] == 0)
-	beenthere[sectors[from - 1]->sectorptr[linknum]->number - 1] = depth;
-
-      if (sectors[from - 1]->sectorptr[linknum]->number == to)
+   int *length = (int *)malloc((sectorcount+1)*sizeof(int));
+	int *prev = (int *)malloc((sectorcount+1)*sizeof(int));
+	unsigned short *marked = (unsigned short *)malloc((sectorcount+1)*sizeof(unsigned short));
+	unsigned short *unmarked = (unsigned short *)malloc((sectorcount+1)*sizeof(unsigned short));
+	int shortest=0, done=0, i=0, j=0, counter=0;
+	int sectorlist[MAX_WARPS_PER_SECTOR];
+	int backpath[30] = {0,0,0,0,0,0,0,0,0,0,
+			  				  0,0,0,0,0,0,0,0,0,0,
+							  0,0,0,0,0,0,0,0,0,0};
+	char temp[50];
+	
+	for(i=0; i<=sectorcount; i++)
 	{
-	  //fprintf(stderr, "checkall: exiting with status 0\n");
-	  return 1;
+		length[i]=65536;
+		prev[i]=0;
+		marked[i]=0;
+		unmarked[i]=1;
 	}
+	length[from] = 0;
+	while(!done)
+	{
+		shortest=0;
+   	//Find sector with shortest hops to it thats unmarked
+		for (counter=1; counter<=sectorcount; counter++)
+		{
+			if ((length[counter]< length[shortest]) && (unmarked[counter]==1))
+					  shortest=counter;
+		}
+		if (shortest==0)
+		{
+			break;
+		}
+		//Use that sector to calculate paths
+		i = shortest;
+		//Make a list of all adjacent sectors;
+		for (counter=0;counter<MAX_WARPS_PER_SECTOR; counter++)
+		{
+			if(sectors[i-1]->sectorptr[counter]!=NULL)
+				sectorlist[counter]=sectors[i-1]->sectorptr[counter]->number;
+			else
+				sectorlist[counter]=0;
+		}
+		//now using j as the sector under consideration
+		for(counter=0;counter<MAX_WARPS_PER_SECTOR; counter++)
+		{
+			if (sectorlist[counter] == 0)
+					  break;
+			if (length[sectorlist[counter]] > (length[i]+1))
+			{
+				length[sectorlist[counter]]= length[i]+1;
+				prev[sectorlist[counter]]=i;
+			}
+		}
+		marked[i]=1;
+		unmarked[i]=0;
+	}
+	//Now we have the shortest path. Using Dijkistra's Algorithm!
+	//Now to make the list!
+	counter=1;
+	backpath[0]=prev[to];
+	while(prev[backpath[counter-1]]!=from)
+	{
+	   backpath[counter]=prev[backpath[counter-1]];
+		counter++;
+	}	
+	sprintf(buffer, ":%d", from);
+	for(j=counter-1;j>=0;j--)
+	{
+		sprintf(temp, ",%d", backpath[j]);
+		strcat(buffer, temp);
+	}
+	sprintf(temp, ",%d:", to);
+	strcat(buffer, temp);
 
-      linknum++;
-    }
-
-  //fprintf(stderr, "checkall: exiting with status 0\n");
-  return 0;
-}
-
-//The sectors here as input are the game sectors, not the internal sectors
-int buildsectorlist(int from, int to, int depth, int *beenthere)
-{
-  int linknum = 0;
-
-  //fprintf(stderr, "buildsectorlist: entering with depth %d, from %d, to %d\n",
-  //	  depth, from, to);
-
-  if (depth < 0)
-    return 0;
-
-  beenthere[depth] = from;
-
-  if (from == to)
-    return 1;
-
-  while (linknum < MAX_WARPS_PER_SECTOR && sectors[from - 1]->sectorptr[linknum] != NULL)
-    if (buildsectorlist(sectors[from - 1]->sectorptr[linknum++]->number, 
-			to, depth - 1, beenthere) == 1)
-      {
-	fprintf(stderr, "buildsectorlist: exiting with status 1\n");
-	return 1;
-      }
-
-  //fprintf(stderr, "buildsectorlist: exiting with status 0\n");
-
-  return 0;
+	free(length);
+	free(prev);
+	free(marked);
+	free(unmarked);
 }
 
 /*
