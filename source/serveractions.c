@@ -859,7 +859,7 @@ findautoroute (int from, int to, char *buffer)
 void
 saveplayer (int pnumb, char *filename)
 {
-    char *intptr = (char *) malloc (10);
+    char *intptr = (char *) malloc (50);
     char *buffer = (char *) malloc (BUFF_SIZE);
     char *stufftosave = (char *) malloc (BUFF_SIZE);
     FILE *playerfile;
@@ -878,8 +878,12 @@ saveplayer (int pnumb, char *filename)
     addint (stufftosave, players[pnumb - 1]->experience, ':', BUFF_SIZE);
     addint (stufftosave, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
     addint (stufftosave, players[pnumb - 1]->turns, ':', BUFF_SIZE);
-    addint (stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
-	 addint(stufftosave, players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
+    //addint (stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	 sprintf(intptr, "%ld", players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
+	 //addint(stufftosave, players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
+	 sprintf(intptr, "%ld", players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
+	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
     len = strlen (stufftosave);
 
     for (loop = 1; loop <= 199 - len; loop++)
@@ -1093,6 +1097,9 @@ buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 {
 
     buffer[0] = '\0';
+	 char tempbuff[50];
+
+	 tempbuff[0]='\0';
 
     addint (buffer, players[pnumb - 1]->number, ':', BUFF_SIZE);
     addstring (buffer, players[pnumb - 1]->name, ':', BUFF_SIZE);
@@ -1100,7 +1107,9 @@ buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
     addint (buffer, players[pnumb - 1]->experience, ':', BUFF_SIZE);
     addint (buffer, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
     addint (buffer, players[pnumb - 1]->turns, ':', BUFF_SIZE);
-    addint (buffer, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+    //addint (buffer, players[pnumb - 1]->credits, ':', BUFF_SIZE);
+	 sprintf(tempbuff, "%ld\0", players[pnumb - 1]->credits);
+	 addstring(buffer, tempbuff, ':', BUFF_SIZE);
     addint (buffer, ships[players[pnumb - 1]->ship - 1]->number, ':',
             BUFF_SIZE);
     addstring (buffer, ships[players[pnumb - 1]->ship - 1]->name, ':',
