@@ -17,6 +17,9 @@ player_interaction.o : parse.h common.h msgqueue.h player_interaction.h player_i
 sysop_interaction.o : common.h msgqueue.h player_interaction.h sysop_interaction.h sysop_interaction.c
 	gcc $(FLAGS) -c -o sysop_interaction.o sysop_interaction.c
 
+maint.o : universe.h config.h shipinfo.h hashtable.o msgqueue.h common.h maint.h maint.c 
+	gcc $(FLAGS) -c -o maint.o maint.c
+
 hashtable.o : universe.h hashtable.h hashtable.c
 	gcc $(FLAGS) -c -o hashtable.o hashtable.c
 
@@ -32,8 +35,8 @@ serveractions.o : shipinfo.h common.h parse.h msgqueue.h universe.h hashtable.h 
 config.o : common.h parse.h config.h config.c
 	gcc $(FLAGS) -c -o config.o config.c
 	
-server : server.c common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o
-	gcc $(FLAGS) -lm -o server server.c -lpthread common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o
+server : server.c common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o maint.o
+	gcc $(FLAGS) -lm -o server server.c -lpthread common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o maint.o
 
 client : client.c common.o client.h ansi.h common.h parse.h
 	gcc $(FLAGS) -lm -o client client.c common.o parse.o 

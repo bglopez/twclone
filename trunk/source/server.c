@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
   init_playerinfo("players.data");
   printf(" Done!\n");
   
-  printf("Reading in port informatino from 'ports.data'...");
+  printf("Reading in port information from 'ports.data'...");
   fflush(stdout);
   init_portinfo("ports.data");
   printf(" Done!\n");
@@ -137,6 +137,18 @@ int main(int argc, char *argv[])
       exit(-1);
     }
   printf("Accepting connections!\n");
+  
+  printf("Initializing background maintenance...");
+  fflush(stdout);
+  threadinfo = (struct connectinfo *)malloc(sizeof(struct connectinfo));
+  threadinfo->msgidin = msgidin;
+  threadinfo->msgidout = msgidout;
+  if (pthread_create(&threadid, NULL, background_maint, (void *) threadinfo) != 0)
+    {
+      perror("Unable to Create Backgroud Thread");
+      exit(-1);
+    }
+  printf("Done!\n");
 
   threadinfo = (struct connectinfo *)malloc(sizeof(struct connectinfo));
   threadinfo->msgidin = msgidin;
@@ -152,21 +164,6 @@ int main(int argc, char *argv[])
   senderid = getdata(msgidin, &data, 0);
   while(data.command != ct_quit || senderid != threadid)  //Main game loop
     {
-      time(curtime);
-      if ((curtime - starttime)% configdata->autosave * 60) //Autosave
-	      saveall();
-      if ((curtime - starttime)% 3600 == 0)
-	      ;//Regen turns;
-      if ((curtime - starttime)% 86400 == 0)
-	      ;//Regen fractional turns leftover
-      if ((curtime - starttime)% configdata->processinterval == 0)
-      {
-	//Process real time stuff?
-      }
-      if ((curtime - starttime)% 3*configdata->processinterval == 0)
-      {
-	//Alien movement here.
-      }
       processcommand(buffer, &data);
       sendmsg(msgidout, buffer, senderid);
       senderid = getdata(msgidin, &data, 0);
