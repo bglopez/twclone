@@ -82,7 +82,7 @@ void* listen_thread(void *arg)
 	}
 	pthread_exit(0);
 }
-
+   
 void* player_login(void *arg)
 {
 	struct connection *cn = (struct connection*)arg;

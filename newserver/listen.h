@@ -13,7 +13,7 @@ struct connection {
         struct pollfd ufds;
         void *ibuff[MAX_IBUFFSIZE];
         int ibuff_len;
-		void *player_info;		// this would be a pointer to the actual plr.
+	void *player_info;		// this would be a pointer to the actual plr.
 };
 
 void init_listen_thread(pthread_t *tid);

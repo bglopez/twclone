@@ -12,7 +12,8 @@
 
 void* backend_thread(void *arg);
 
-void init_backend_thread(pthread_t *tid){
+void init_backend_thread(pthread_t *tid)
+{
 	fprintf(stderr, "starting backend thread...\n");
 //	pthread_create(tid, NULL, backend_thread, NULL);
 }

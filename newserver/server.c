@@ -5,6 +5,7 @@
 
 int main(){
 	pthread_t console_id, listen_id, backend_id;
+
 	init_listen_thread(&listen_id);
 	init_backend_thread(&backend_id);
 	init_console();	
