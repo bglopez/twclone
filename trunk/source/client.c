@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.21 $
- * Last Modified: $Date: 2002-11-03 07:49:46 $
+ * $Revision: 1.22 $
+ * Last Modified: $Date: 2002-11-03 07:58:34 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.21 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:49:46 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.22 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:58:34 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -192,10 +192,15 @@ main (int argc, char *argv[])
 		case 'p':
 		case 'P':
 		  ptype = pt_port;
+		  sector = getsectorinfo (sockid, cursector);
 		  if (cursector->ports->type == 0)
 		  {
 			printf("Porting at Class 0 Ports currently unavailable");
 			break;
+		  }
+		  if (cursector->ports == NULL)
+		  {
+				printf("There's no port in this sector!");
 		  }
 		  mickey = prompttype (ptype, 0, sockid);
 		  switch (*(mickey + 0))
@@ -760,10 +765,10 @@ getsectorinfo (int sockid, struct sector *cursector)
       popstring (buffer + position, tempbuf, ":", MAX_NAME_LENGTH);
       strncat (nebulae, tempbuf, length);
       if (strncmp (tempbuf, "Uncharted Space", 15) == 0)
-	{
-	  strcpy (nebulae, KBLU);
-	  strcat (nebulae, "uncharted space");
-	}
+		{
+	  		strcpy (nebulae, KBLU);
+	  		strcat (nebulae, "uncharted space");
+		}
     }
   if ((length = strcspn (buff + position, ":")) == 0)	//If no port
     {
@@ -774,6 +779,7 @@ getsectorinfo (int sockid, struct sector *cursector)
     popstring (buffer + position, portname, ":", MAX_NAME_LENGTH);
   if ((length = strcspn (buff + position, ":")) == 0)	//If no port!
     {
+		cursector->ports = NULL;
       porttype = 10;
       position++;
     }
@@ -788,18 +794,24 @@ getsectorinfo (int sockid, struct sector *cursector)
   if (strlen (portname) != 0)
     {
       if ((curport = (struct port *) malloc (sizeof (struct port))) != NULL)
-	{
-	  curport->name = (char *) malloc (strlen (portname) + 1);
-	  strncpy (curport->name, portname, strlen (portname) + 1);
-	  if (porttype != 10)
-	    curport->type = porttype;
-	  cursector->ports = curport;
-	}
+		{
+	  		curport->name = (char *) malloc (strlen (portname) + 1);
+	  		strncpy (curport->name, portname, strlen (portname) + 1);
+	  		if (porttype != 10)
+	    		curport->type = porttype;
+			else
+			{
+				free(curport->name);
+				free(curport);
+				curport=NULL;
+			}
+	  		cursector->ports = curport;
+		}
       else
-	{
-	  printf ("\nUnable to allocate memory");
-	  return (cursector->number);
-	}
+		{
+	  		printf ("\nUnable to allocate memory");
+	  		return (cursector->number);
+		}
     }
   if ((length = strcspn (buff + position, ":")) == 0)	//If no players
     {
