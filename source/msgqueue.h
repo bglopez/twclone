@@ -120,9 +120,11 @@ struct msgcommand
 };
 
 int init_msgqueue ();
+void clean_msgqueues(int msgidin, int msgidout, char *filename);
 long getmsg (int msgid, char *buffer, long mtype);
 void sendmsg (int msgid, char *buffer, long mtype);
 void senddata (int msgid, struct msgcommand *data, long mtype);
 long getdata (int msgid, struct msgcommand *data, long mtype);
+
 
 #endif
