@@ -32,17 +32,16 @@ struct config
   int startingholds;
   int processinterval;		//How often stuff is processed
   int autosave;			//Save every some odd minutes
-  /*
-  int MAX_PLAYERS;
-  int MAX_SHIPS;
-  int MAX_PORTS;
-  int MAX_PLANETS;
-  int MAX_TOTAL_PLANETS;
-  int MAX_SAFE_PLANETS;
-  int MAX_CITADEL_LEVEL;
-  int NUMBER_OF_PLANET_TYPES;
-  int MAX_SHIP_NAME_LENGTH;
-  int SHIP_TYPE_COUNT;*/
+  int max_players;
+  int max_ships;
+  int max_ports;
+  int max_planets;
+  int max_total_planets;
+  int max_safe_planets;
+  int max_citadel_level;
+  int number_of_planet_types;
+  int max_ship_name_length;
+  int ship_type_count;
 };
 
 int init_config (char *filename);

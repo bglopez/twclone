@@ -19,7 +19,7 @@
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
 extern struct player *players[MAX_PLAYERS];
-extern struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
+extern struct sp_shipinfo **shiptypes;
 extern struct ship *ships[MAX_SHIPS];
 extern struct port *ports[MAX_PORTS];
 extern struct planet *planets[MAX_TOTAL_PLANETS];
@@ -86,7 +86,7 @@ processcommand (char *buffer, struct msgcommand *data)
         }
         if ((curplayer->turns <= 0)
                 || (curplayer->turns <
-                    shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
+                    shiptypes[ships[curplayer->ship - 1]->type - 1]->turns))
         {
             //if(move_player(curplayer, data, buffer) < 0)
             //{
@@ -869,13 +869,13 @@ int intransit (struct msgcommand *data)
     if (curplayer->intransit == 1)
     {
         if ((end.tv_sec - curplayer->beginmove) >=
-                (shiptypes[ships[curplayer->ship - 1]->type - 1].turns)*WARP_WAIT)
+                (shiptypes[ships[curplayer->ship - 1]->type - 1]->turns)*WARP_WAIT)
         {
             curplayer->intransit = 0;
             curplayer->beginmove = 0;
             curplayer->turns =
                 curplayer->turns - shiptypes[ships[curplayer->ship - 1]->type -
-                                             1].turns;
+                                             1]->turns;
             insertitem (curplayer, player,
                         sectors[curplayer->movingto - 1]->playerlist, 1);
             sendtosector (curplayer->movingto, curplayer->number, 1);
@@ -1235,7 +1235,7 @@ buildshipinfo (int shipnum, char *buffer)
     }
     addint (buffer, ships[shipnum - 1]->owner, ':', BUFF_SIZE);
     addstring (buffer, ships[shipnum - 1]->name, ':', BUFF_SIZE);
-    addstring (buffer, shiptypes[ships[shipnum - 1]->type - 1].name, ':',
+    addstring (buffer, shiptypes[ships[shipnum - 1]->type - 1]->name, ':',
                BUFF_SIZE);
     addint (buffer, ships[shipnum - 1]->fighters, ':', BUFF_SIZE);
     addint (buffer, ships[shipnum - 1]->shields, ':', BUFF_SIZE);
@@ -1265,7 +1265,7 @@ buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
     addstring (buffer, ships[players[pnumb - 1]->ship - 1]->name, ':',
                BUFF_SIZE);
     addstring (buffer,
-               shiptypes[ships[players[pnumb - 1]->ship - 1]->type - 1].name,
+               shiptypes[ships[players[pnumb - 1]->ship - 1]->type - 1]->name,
                ':', BUFF_SIZE);
     addint (buffer, ships[players[pnumb - 1]->ship - 1]->fighters, ':',
             BUFF_SIZE);
@@ -1286,7 +1286,7 @@ buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
         addint (buffer, ships[players[pnumb - 1]->ship - 1]->location, ':',
                 BUFF_SIZE);
     addint (buffer,
-            shiptypes[ships[players[pnumb - 1]->ship - 1]->type - 1].turns, ':',
+            shiptypes[ships[players[pnumb - 1]->ship - 1]->type - 1]->turns, ':',
             BUFF_SIZE);
 
 
@@ -1352,14 +1352,14 @@ void priceship(char *buffer, struct player *curplayer)
 	int total = 0;
 	
 	curship = ships[curplayer->ship - 1];
-	holds_to_sell = curship->holds - shiptypes[curship->type - 1].initialholds;
+	holds_to_sell = curship->holds - shiptypes[curship->type - 1]->initialholds;
 	//Taken from do_ship_upgrade
 	price_holds = base_hold_price*holds_to_sell + 
-		hold_increment*holds_to_sell*shiptypes[curship->type -1].initialholds;
+		hold_increment*holds_to_sell*shiptypes[curship->type -1]->initialholds;
 
-	total = total + multiplier*(float)shiptypes[curship->type -1].basecost;
+	total = total + multiplier*(float)shiptypes[curship->type -1]->basecost;
 	strcpy(temp, "Ship Basecost,");
-	addint(temp, multiplier*(float)shiptypes[curship->type - 1].basecost
+	addint(temp, multiplier*(float)shiptypes[curship->type - 1]->basecost
 		  , ':', BUFF_SIZE);
 	if (curship->holds != 0)
 	{
@@ -1395,8 +1395,8 @@ void listships(char *buffer)
 	int index=0;
 	for(index=0;index<=SHIP_TYPE_COUNT-1;index++)
 	{
-		addstring(buffer, shiptypes[index].name, ',', BUFF_SIZE);
-		addint(buffer, shiptypes[index].basecost, ':', BUFF_SIZE);
+		addstring(buffer, shiptypes[index]->name, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->basecost, ':', BUFF_SIZE);
 	}
 }
 
@@ -1417,7 +1417,7 @@ void buyship(char *buffer, struct player *curplayer)
 		strcpy(buffer, "BAD: You can't man a new ship w/o selling the current one.");
 		return;
 	}
-	if (curplayer->credits < shiptypes[type - 1].basecost)
+	if (curplayer->credits < shiptypes[type - 1]->basecost)
 	{
 		strcpy(buffer, "BAD: You don't have enough credits!");
 		return;
@@ -1462,7 +1462,7 @@ void buyship(char *buffer, struct player *curplayer)
 	curship->location = curplayer->sector;
 	curship->type = type;
 	curship->fighters = 0;
-	curship->holds = shiptypes[type -1].initialholds;
+	curship->holds = shiptypes[type -1]->initialholds;
 	curship->colonists = 0;
 	curship->equipment = 0;
 	curship->organics = 0;
@@ -1484,7 +1484,7 @@ void buyship(char *buffer, struct player *curplayer)
 		insertitem(curship, ship, sectors[curship->location]->shiplist, 1);
 		strcpy(buffer, "OK: You own an unmanned ship in this sector");
 	}
-	curplayer->credits = curplayer->credits - shiptypes[type -1].basecost;
+	curplayer->credits = curplayer->credits - shiptypes[type -1]->basecost;
 	return;
 }
 
@@ -1531,9 +1531,9 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 			holds = amount;
 			if (buying==1)
 			{
-				if ((curship->holds + amount) > shiptypes[curship->type - 1].maxholds)
+				if ((curship->holds + amount) > shiptypes[curship->type - 1]->maxholds)
 				{
-					holds = shiptypes[curship->type - 1].maxholds - curship->holds;
+					holds = shiptypes[curship->type - 1]->maxholds - curship->holds;
 				}
 			}
 			break;
@@ -1541,9 +1541,9 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 			shields = amount;
 			if (buying==1)
 			{
-				if ((curship->shields + amount) > shiptypes[curship->type - 1].maxshields)
+				if ((curship->shields + amount) > shiptypes[curship->type - 1]->maxshields)
 				{
-					shields = shiptypes[curship->type - 1].maxshields - curship->shields;
+					shields = shiptypes[curship->type - 1]->maxshields - curship->shields;
 				}
 			}
 			break;
@@ -1551,9 +1551,9 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 			fighters = amount;
 			if (buying==1)
 			{
-				if ((curship->fighters + amount) > shiptypes[curship->type - 1].maxfighters)
+				if ((curship->fighters + amount) > shiptypes[curship->type - 1]->maxfighters)
 				{
-					fighters = shiptypes[curship->type - 1].maxfighters - curship->fighters;
+					fighters = shiptypes[curship->type - 1]->maxfighters - curship->fighters;
 				}
 			}
 			break;
@@ -1563,24 +1563,24 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 			fighters = amount;
 			if (buying==1)
 			{
-				if ((curship->holds + amount) > shiptypes[curship->type - 1].maxholds)
+				if ((curship->holds + amount) > shiptypes[curship->type - 1]->maxholds)
 				{
-					holds = shiptypes[curship->type - 1].maxholds - curship->holds;
+					holds = shiptypes[curship->type - 1]->maxholds - curship->holds;
 				}
-				if ((curship->shields + amount) > shiptypes[curship->type - 1].maxshields)
+				if ((curship->shields + amount) > shiptypes[curship->type - 1]->maxshields)
 				{
-					shields = shiptypes[curship->type - 1].maxshields - curship->shields;
+					shields = shiptypes[curship->type - 1]->maxshields - curship->shields;
 				}
-				if ((curship->fighters + amount) > shiptypes[curship->type - 1].maxfighters)
+				if ((curship->fighters + amount) > shiptypes[curship->type - 1]->maxfighters)
 				{
-					fighters = shiptypes[curship->type - 1].maxfighters - curship->fighters;
+					fighters = shiptypes[curship->type - 1]->maxfighters - curship->fighters;
 				}
 			}
 			else if(buying==2)
 			{
-				holds = min(curplayer->credits/(base_hold_price + hold_increment*curship->holds), shiptypes[curship->type - 1].maxholds - curship->holds);
-				fighters = min(curplayer->credits/price_per_fighter, shiptypes[curship->type - 1].maxfighters - curship->fighters);
-				shields = min(curplayer->credits/price_per_shield, shiptypes[curship->type - 1].maxshields - curship->shields);
+				holds = min(curplayer->credits/(base_hold_price + hold_increment*curship->holds), shiptypes[curship->type - 1]->maxholds - curship->holds);
+				fighters = min(curplayer->credits/price_per_fighter, shiptypes[curship->type - 1]->maxfighters - curship->fighters);
+				shields = min(curplayer->credits/price_per_shield, shiptypes[curship->type - 1]->maxshields - curship->shields);
 			}
 			break;
 		default:
@@ -2058,7 +2058,7 @@ move_player (struct player *p, struct msgcommand *data, char *buffer)
                 data->to) || data->to > sectorcount)
         return -1;
     if ((p->turns <= 0)
-            || (p->turns < shiptypes[ships[p->ship - 1]->type - 1].turns))
+            || (p->turns < shiptypes[ships[p->ship - 1]->type - 1]->turns))
         return -1;
 
     while (linknum < MAX_WARPS_PER_SECTOR)
@@ -2094,7 +2094,7 @@ move_player (struct player *p, struct msgcommand *data, char *buffer)
                 }
                 //Put realtime so and so warps in/out of the sector here.
                 //Need to put towing into this later
-                p->turns = p->turns - shiptypes[ships[p->ship - 1]->type - 1].turns;
+                p->turns = p->turns - shiptypes[ships[p->ship - 1]->type - 1]->turns;
                 insertitem (p, player, sectors[data->to - 1]->playerlist, 1);
                 builddescription (data->to, buffer, p->number);
 
