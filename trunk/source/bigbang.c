@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <getopt.h>
 #include "config.h"
 #include "universe.h"
 
@@ -160,6 +161,7 @@ main (int argc, char **argv)
     /* This has to be taken out because of the knockon affect it was having with the rest of the program.
        -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
      */
+
     opterr = 0;
 
 /*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
@@ -227,7 +229,7 @@ main (int argc, char **argv)
 
   /*  Reading config.data file for config data (Duh...) */
   printf ("\nReading in config.data...");
-  init_config ("config.data");
+  (void) init_config ("config.data");
   printf ("done.\n");
 
   printf ("Creating sector array...");
@@ -437,7 +439,7 @@ main (int argc, char **argv)
   printf ("done.\n");
 
   printf ("Saving Planets to file...");
-  close (planetfile);
+  (void) fclose (planetfile);
   printf ("done.\n");
 
 
@@ -506,7 +508,7 @@ main (int argc, char **argv)
 	       (long int) portlist[x]->credits, portlist[x]->type,
 	       (int) portlist[x]->invisible);
       fileline = strcat (fileline, ":");
-      len = strlen (fileline);
+      len = (int) strlen (fileline);
       for (y = 0; y <= 99 - len; y++)
 	strcat (fileline, " ");
       strcat (fileline, "\n");
@@ -630,7 +632,7 @@ sectorsort (struct sector *base[configdata->maxwarps], int elements)
       return;
 
     }
-  while (1)
+  while (1 != 0) /* instead of while (1) : gets rid of splint warning */
     {
       alldone = 1;
       for (x = 0; x < (elements / 2 - 1 + elements % 2); x++)
@@ -652,10 +654,10 @@ sectorsort (struct sector *base[configdata->maxwarps], int elements)
 	      base[2 * x - 1] = base[2 * x];
 	      base[2 * x] = holdersector;
 	    }
-	  else if (alldone)
+	  else if (alldone != 0)
 	    done = 1;
 	}
-      if (done)
+      if (done != 0)
 	break;
     }
 }
