@@ -1,0 +1,268 @@
+2002-06-10 Monday 18:59  rdearman
+
+	* common.c (1.6): Added <stdlib.h> to get rid of lint errors.
+
+2002-06-10 Monday 18:55  rdearman
+
+	* TODO (1.1): Added a small TODO file for future enhancements. Just
+	so that we don't forget them.
+
+2002-06-10 Monday 15:31  eryndil
+
+	* planets.data (1.4), players.data (1.9), ports.data (1.8),
+	ships.data (1.7), universe.data (1.8): Removed extra .data files.
+
+2002-06-10 Monday 13:35  rdearman
+
+	* bigbang.c (1.11), planets.data (1.3), ports.data (1.7),
+	universe.data (1.7): Corrected some errors detected by lint.
+
+2002-06-10 Monday 11:50  rdearman
+
+	* Makefile (1.11), bigbang.c (1.10), planet.c (1.3), planets.data
+	(1.2), ports.data (1.6), server.c (1.8), universe.data (1.6):
+	Included random planet generation and ferringhi homeworld.
+
+2002-06-10 Monday 09:39  rdearman
+
+	* bigbang.c (1.9), boxmuller.c (1.2), client.c (1.10), common.c
+	(1.5), config.c (1.2), hashtable.c (1.2), maint.c (1.4), msgqueue.c
+	(1.2), namegen.c (1.2), parse.c (1.3), planet.c (1.2),
+	player_interaction.c (1.4), ports.data (1.5), server.c (1.7),
+	serveractions.c (1.18), shipinfo.c (1.3), sysop_interaction.c
+	(1.3), test_client.c (1.2), test_server.c (1.2), universe.c (1.7),
+	universe.data (1.5): Ran code through indent. Added Ferringhi
+	sector to universe.
+
+2002-06-10 Monday 06:42  eryndil
+
+	* bigbang.c (1.8), players.data (1.8), ships.data (1.6): Fixed the
+	sorting issue in bigbang
+
+2002-06-09 Sunday 20:43  rdearman
+
+	* namegen.c (1.1), namegen.h (1.1): Random name generation files.
+
+2002-06-09 Sunday 20:10  rdearman
+
+	* Makefile (1.10), bigbang.c (1.7), ports.data (1.4), universe.data
+	(1.4): Added random name generation for sectors and for ports.
+	Seems to have had a knockon affect, gives Seg Fault.
+	
+	Reads past last sector.
+
+2002-06-08 Saturday 23:44  eryndil
+
+	* INSTALL (1.1), README (1.1): Addition of install and readme files
+
+2002-06-08 Saturday 23:35  eryndil
+
+	* PROTOCOL (1.3), client.c (1.9), client.h (1.7), msgqueue.h (1.3),
+	serveractions.c (1.17), serveractions.h (1.7): Added Fed Comm link
+	and listing whos online
+
+2002-06-08 Saturday 23:35  eryndil
+
+	* player_interaction.c (1.3): Added in Fed Comm link and showing
+	whos online
+
+2002-06-08 Saturday 13:16  rdearman
+
+	* Makefile (1.9): Changed "make clean" so that it would remove old
+	core dumps as well.
+
+2002-06-08 Saturday 13:11  rdearman
+
+	* bigbang.c (1.6), ports.data (1.3), universe.data (1.3): Made
+	modifications to the bigbang universe generator which will allow
+	user to define thier own settings.
+
+2002-06-05 Wednesday 16:38  eryndil
+
+	* bigbang.c (1.5): Fixed minor error in port creation
+
+2002-06-04 Tuesday 19:40  eryndil
+
+	* client.c (1.8): Added a note for new players
+
+2002-06-04 Tuesday 19:40  eryndil
+
+	* serveractions.c (1.16): Fixed a minor bug with messages
+
+2002-06-04 Tuesday 19:32  eryndil
+
+	* maint.c (1.3), players.data (1.7), server.c (1.6),
+	serveractions.c (1.15), serveractions.h (1.6): Added saving of
+	ports when quitting.
+
+2002-06-04 Tuesday 15:36  eryndil
+
+	* serveractions.c (1.14), universe.c (1.6): Added error checking to
+	saving
+
+2002-05-29 Wednesday 00:31  eryndil
+
+	* Makefile (1.8), common.c (1.4), common.h (1.4), maint.c (1.2),
+	players.data (1.6), ports.data (1.2), server.c (1.5), ships.data
+	(1.5): Players regen turns per hour now.
+
+2002-05-28 Tuesday 00:44  eryndil
+
+	* bigbang.c (1.4), serveractions.c (1.13), universe.c (1.5),
+	universe.h (1.4): Added random ports to bigbang. Plus minor bug
+	fixes
+
+2002-05-24 Friday 20:01  eryndil
+
+	* Makefile (1.7), maint.c (1.1), maint.h (1.2), players.data (1.5),
+	server.c (1.4), ships.data (1.4), sysop_interaction.c (1.2): Added
+	basis for maintenance thread to regen turns and etc..
+
+2002-05-23 Thursday 17:21  eryndil
+
+	* players.data (1.4), serveractions.c (1.12), ships.data (1.3):
+	Fixed player and ship saving.
+
+2002-05-10 Friday 20:09  eryndil
+
+	* maint.h (1.1), server.c (1.3): Beginnings of a timing thread
+
+2002-05-09 Thursday 04:34  eryndil
+
+	* players.data (1.3), serveractions.c (1.11), ships.data (1.2): Got
+	saving working... added a large amount of white space to each line
+
+2002-05-09 Thursday 03:56  eryndil
+
+	* client.c (1.7), common.c (1.3), common.h (1.3), serveractions.c
+	(1.10), serveractions.h (1.5): Added Saving, slightly broken.
+
+2002-04-26 Friday 03:40  eryndil
+
+	* PROTOCOL (1.2), client.c (1.6), client.h (1.6), serveractions.c
+	(1.9), serveractions.h (1.4): Fixed up the server and client so
+	that realtime messages work!
+
+2002-04-26 Friday 01:34  eryndil
+
+	* serveractions.c (1.8), serveractions.h (1.3), universe.c (1.4),
+	universe.h (1.3): Added beginnings of realtime messages, slightly
+	broken.
+
+2002-04-24 Wednesday 22:00  eryndil
+
+	* client.c (1.5), client.h (1.5), msgqueue.h (1.2),
+	player_interaction.c (1.2), serveractions.c (1.7), serveractions.h
+	(1.2), universe.c (1.3), universe.h (1.2): Fixed lagging the server
+	when players are warping. Added an update command that for now
+	tells the player if they're still warping or not.  Autowarping in
+	client is broken until I rewrite it.
+
+2002-04-17 Wednesday 21:14  missinlnk
+
+	* bigbang.c (1.3): Moved a lot of code into functions, cleaned up
+	some of the nastier bits, and incorportated a couple of functions
+	from existing code in the project.
+
+2002-04-17 Wednesday 21:14  missinlnk
+
+	* Makefile (1.6): Added 2 object files bigbang.c needs to compile
+	correctly now
+
+2002-04-10 Wednesday 21:42  eryndil
+
+	* Makefile (1.5): Messed up on Makefile.. oops!
+
+2002-04-10 Wednesday 21:29  eryndil
+
+	* serveractions.c (1.6): This is where I fixed the newline.. oops!
+
+2002-04-10 Wednesday 21:29  eryndil
+
+	* client.h (1.4), parse.c (1.2), universe.c (1.2), universe.data
+	(1.2): Added an extra sector for testing, changed maxsectors in
+	client to 5000
+
+2002-04-10 Wednesday 18:05  eryndil
+
+	* client.c (1.4), serveractions.c (1.5): Changed the path finding
+	algorithm to use Dijkistra's Algorithm.  Tested it for 500 sector
+	finds shortest path in a very short time.
+
+2002-04-09 Tuesday 17:05  eryndil
+
+	* Makefile (1.4): Forgot some more makefile stuff
+
+2002-04-09 Tuesday 17:02  eryndil
+
+	* Makefile (1.3), client.h (1.3): Changed the makefile so bigbang
+	compiles
+
+2002-04-05 Friday 21:34  missinlnk
+
+	* bigbang.c (1.2): Updated universe creation to create universe
+	layouts more like the orig TW.	Weighted the tun/de lengths for
+	more shorter ones to happen and reduced the chances for one way
+	jumps and dead ends
+
+2002-03-12 Tuesday 04:30  missinlnk
+
+	* bigbang.c (1.1): Beginnings of universe creation.  Only creates
+	sectors and warps so far.
+
+2001-06-17 Sunday 01:25  eryndil
+
+	* Makefile (1.2), common.c (1.2), common.h (1.2), config.c (1.1),
+	config.data (1.1), config.h (1.1), players.data (1.2), server.c
+	(1.2), serveractions.c (1.4): Added in some basic configuration
+	stuff, as well as timeing for saving, but saveing still isn't fully
+	in yet.
+
+2001-06-16 Saturday 20:36  eryndil
+
+	* client.c (1.3), client.h (1.2), serveractions.c (1.3), shipinfo.c
+	(1.2), shipinfo.h (1.2): Fixed misc bugs and added a debug option
+	to the client for testing server output while using the client.
+
+2001-06-16 Saturday 06:04  eryndil
+
+	* client.c (1.2), serveractions.c (1.2): Fixed some porting bugs
+
+2001-05-22 Tuesday 19:24  eryndil
+
+	* twclone.tar.gz (1.2): Removed an extra file that accidentally got
+	included
+
+2001-04-29 Sunday 02:28  eryndil
+
+	* LICENSE (1.1), Makefile (1.1), PROTOCOL (1.1), ansi.h (1.1),
+	boxmuller.c (1.1), client.c (1.1), client.h (1.1), common.c (1.1),
+	common.h (1.1), hashtable.c (1.1), hashtable.h (1.1), msgqueue.c
+	(1.1), msgqueue.h (1.1), parse.c (1.1), parse.h (1.1), planet.c
+	(1.1), planet.h (1.1), planets.data (1.1), player_interaction.c
+	(1.1), player_interaction.h (1.1), players.data (1.1), portinfo.h
+	(1.1), ports.data (1.1), server.c (1.1), serveractions.c (1.1),
+	serveractions.h (1.1), shipinfo.c (1.1), shipinfo.h (1.1),
+	ships.data (1.1), sysop_interaction.c (1.1), sysop_interaction.h
+	(1.1), test_client.c (1.1), test_server.c (1.1), twclone.tar.gz
+	(1.1), universe.c (1.1), universe.data (1.1), universe.h (1.1):
+	Initial revision
+
+2001-04-29 Sunday 02:28  eryndil
+
+	* LICENSE (1.1.1.1), Makefile (1.1.1.1), PROTOCOL (1.1.1.1), ansi.h
+	(1.1.1.1), boxmuller.c (1.1.1.1), client.c (1.1.1.1), client.h
+	(1.1.1.1), common.c (1.1.1.1), common.h (1.1.1.1), hashtable.c
+	(1.1.1.1), hashtable.h (1.1.1.1), msgqueue.c (1.1.1.1), msgqueue.h
+	(1.1.1.1), parse.c (1.1.1.1), parse.h (1.1.1.1), planet.c
+	(1.1.1.1), planet.h (1.1.1.1), planets.data (1.1.1.1),
+	player_interaction.c (1.1.1.1), player_interaction.h (1.1.1.1),
+	players.data (1.1.1.1), portinfo.h (1.1.1.1), ports.data (1.1.1.1),
+	server.c (1.1.1.1), serveractions.c (1.1.1.1), serveractions.h
+	(1.1.1.1), shipinfo.c (1.1.1.1), shipinfo.h (1.1.1.1), ships.data
+	(1.1.1.1), sysop_interaction.c (1.1.1.1), sysop_interaction.h
+	(1.1.1.1), test_client.c (1.1.1.1), test_server.c (1.1.1.1),
+	twclone.tar.gz (1.1.1.1), universe.c (1.1.1.1), universe.data
+	(1.1.1.1), universe.h (1.1.1.1) (utags: start): Import of the
+	source code. I hope this works
+
