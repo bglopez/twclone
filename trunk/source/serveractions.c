@@ -1,3 +1,5 @@
+#include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +36,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 {
     struct player *curplayer;
     struct port *curport;
+	 struct planet *curplanet;
 	 struct sector *cursector;
     struct realtimemessage *curmessage;
     float fsectorcount = (float) sectorcount;	//For rand() stuff in newplayer
@@ -344,7 +347,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  if ((ships[curplayer->ship - 1]->flags & S_PLANET) != S_PLANET)
 		  {
 		  		ships[curplayer->ship - 1]->flags =
-					 ships[curplayer->ship - 1]->flags | S_PLANET;
+					 (ships[curplayer->ship - 1]->flags | S_PLANET);
 				sendtosector(cursector->number, curplayer->number, 5, data->to);
 				ships[curplayer->ship - 1]->onplanet = data->to;
 				strcpy(buffer, "OK: Landing on planet!");
@@ -382,12 +385,11 @@ void processcommand (char *buffer, struct msgcommand *data)
 				strcpy(buffer, "BAD: Not on a planet!");
 				return;
 		  }
+		  strcpy(buffer, data->buffer);
+		  curplanet = planets[ships[curplayer->ship - 1]->onplanet - 1];
 		  switch(data->plcommand)
 		  {
 			case pl_display:
-				fprintf(stderr,"processcommand: building planet info for (%d)\n",
-						ships[curplayer->ship - 1]->onplanet);
-				fflush(stderr);
 				totalplanetinfo(ships[curplayer->ship - 1]->onplanet, buffer);
 				break;
 			case pl_ownership:
@@ -395,22 +397,107 @@ void processcommand (char *buffer, struct msgcommand *data)
 			case pl_destroy:
 				break;
 			case pl_take:
+				planettake(buffer, curplayer);
 				break;
 			case pl_leave:
+				planetleave(buffer, curplayer);
 				break;
 			case pl_citadel:
+				if (curplanet->citdl->level == 0)
+				{
+					strcpy(buffer, "BAD: You need a citadel to do that!");
+					break;
+				}
+				if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					ships[curplayer->ship - 1]->flags = 
+						(ships[curplayer->ship - 1]->flags | S_CITADEL);
+				}
+				strcpy(buffer, "OK: Entering Citadel!");
+				break;
+			case pl_upgrade:
+				planetupgrade(buffer,
+					planets[ships[curplayer->ship- 1]->onplanet-1]);
 				break;
 			case pl_rest:
+				if (curplanet->citdl->level == 0)
+				{
+					strcpy(buffer, "BAD: You need a citadel to do that!");
+					break;
+				}
+				else if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					strcpy(buffer, "BAD: You have to be in a citadel to do that!");
+				}
+				else
+				{
+					curplayer->loggedin = 0;
+		  			curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
+		  			saveplayer(curplayer->number, "./players.data");
+        			saveship(curplayer->ship, "./ships.data");
+        			strcpy(buffer, "OK\n");
+					close(data->sockid);
+					//pthread_kill(data->threadid, SIGUSR1);
+				}
 				break;
 			case pl_militarylvl:
+				if (curplanet->citdl->level < 2)
+				{
+					strcpy(buffer, "BAD: You need a better citadel to do that!");
+					break;
+				}
+				else if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					strcpy(buffer, "BAD: You have to be in a citadel to do that!");
+				}
+
 				break;
 			case pl_qcannon:
+				if (curplanet->citdl->level < 3)
+				{
+					strcpy(buffer, "BAD: You need a better citadel to do that!");
+					break;
+				}
+				else if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					strcpy(buffer, "BAD: You have to be in a citadel to do that!");
+				}
 				break;
 			case pl_evict:
+				if (curplanet->citdl->level == 0)
+				{
+					strcpy(buffer, "BAD: You need a citadel to do that!");
+					break;
+				}
+				else if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					strcpy(buffer, "BAD: You have to be in a citadel to do that!");
+				}
 				break;
 			case pl_swap:
+				if (curplanet->citdl->level == 0)
+				{
+					strcpy(buffer, "BAD: You need a citadel to do that!");
+					break;
+				}
+				else if ((ships[curplayer->ship - 1]->flags & S_CITADEL) 
+						  != S_CITADEL)
+				{
+					strcpy(buffer, "BAD: You have to be in a citadel to do that!");
+				}
 				break;
 			case pl_cquit:
+				if ((ships[curplayer->ship - 1]->flags & S_CITADEL) == S_CITADEL)
+				{
+					ships[curplayer->ship - 1]->flags = 
+						ships[curplayer->ship - 1]->flags & (S_MAX ^ S_CITADEL);
+					strcpy(buffer, "OK: Leaving Citadel");
+				}
 				break;
 			case pl_quit:
 				if ((ships[curplayer->ship - 1]->flags & S_PLANET) == S_PLANET)
@@ -1296,6 +1383,347 @@ void saveallports ()
 
 }
 
+void planettake(char *buffer, struct player *curplayer)
+{
+	struct planet *curplanet;
+	struct ship *curship;
+	int amt;
+	int choice;
+	int emptyholds;
+
+	choice = popint(buffer, ":");
+	amt = popint(buffer, ":");
+	curship = ships[curplayer->ship - 1];
+	curplanet = planets[curship->onplanet - 1];
+	emptyholds = curship->holds - curship->ore -curship->organics 
+			  -curship->equipment - curship->colonists;
+	if (emptyholds < 0)
+	{
+		strcpy(buffer, "BAD: Ship has negative emptyholds!");
+		fprintf(stderr, "planettake: Ship (%d) has negative emptyholds!",
+							 curship->number);
+		return;
+	}
+	else if (emptyholds == 0)
+	{
+		strcpy(buffer, "BAD: You don't have any empty holds!");
+		return;
+	}	
+	//For choices
+	//0 ore, 1 org, 2 equip, 3 col in ore, 4 col in org, 5 col in equip
+	//6 figs, 7 creds, 8 shields
+	switch(choice)
+	{
+		case 0:
+			if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->fuel)
+			{
+				strcpy(buffer, "BAD: Not enough ore on planet!");
+				return;
+			}
+			curplanet->fuel = curplanet->fuel - amt;
+			curship->ore = curship->ore + amt;
+			break;
+		case 1:
+				if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->organics)
+			{
+				strcpy(buffer, "BAD: Not enough organics on planet!");
+				return;
+			}
+			curplanet->organics = curplanet->organics - amt;
+			curship->organics = curship->organics + amt;
+			break;
+		case 2:
+			if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->equipment)
+			{
+				strcpy(buffer, "BAD: Not enough equipment on planet!");
+				return;
+			}
+			curplanet->equipment = curplanet->equipment - amt;
+			curship->equipment = curship->equipment + amt;
+			break;
+		case 3:
+			if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->fuelColonist)
+			{
+				strcpy(buffer, "BAD: Not enough ore Colonists on planet!");
+				return;
+			}
+			curplanet->fuelColonist = curplanet->fuelColonist - amt;
+			curship->colonists = curship->colonists + amt;
+			break;
+		case 4:
+				if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->organicsColonist)
+			{
+				strcpy(buffer, "BAD: Not enough organic colonists on planet!");
+				return;
+			}
+			curplanet->organicsColonist = curplanet->organicsColonist - amt;
+			curship->colonists = curship->colonists + amt;
+			break;
+		case 5:
+			if (amt > emptyholds)
+			{
+				strcpy(buffer, "BAD: You don't have enought empty holds!");
+				return;
+			}
+			if (amt > curplanet->equipmentColonist)
+			{
+				strcpy(buffer, "BAD: Not enough equipment colonists on planet!");
+				return;
+			}
+			curplanet->equipmentColonist = curplanet->equipmentColonist - amt;
+			curship->colonists = curship->colonists + amt;
+			break;
+		case 6:
+			if (amt > (shiptypes[curship->type - 1]->maxfighters - curship->fighters))
+			{
+				strcpy(buffer, "BAD: Your ship can't hold that many fighters!");
+				return;
+			}
+			if (amt > curplanet->fighters)
+			{
+				strcpy(buffer, "BAD: The planet doesn't have that many fighters!");
+				return;
+			}
+			curplanet->fighters = curplanet->fighters - amt;
+			curship->fighters = curship->fighters + amt;
+			break;
+		case 7:
+			if (curplanet->citdl->level == 0)
+			{
+				strcpy(buffer, "BAD: You need a citadel to do that!");
+				return;
+			}
+			if (amt > curplanet->citdl->treasury)
+			{
+				strcpy(buffer, "BAD: The treasury doesn't have that much!");
+				return;
+			}
+			curplanet->citdl->treasury =
+					  curplanet->citdl->treasury - amt;
+			curplayer->credits = curplayer->credits + amt;
+			break;
+		case 8:
+			if (curplanet->citdl->level < 5)
+			{
+				strcpy(buffer, "BAD: You need a better citadel to do that!");
+				return;
+			}
+			if (amt > curplanet->citdl->planetaryShields)
+			{
+				strcpy(buffer, "BAD: The shields don't have that much!");
+				return;
+			}
+			if (amt*10 > 
+				(shiptypes[curship->type -1]->maxshields - curship->shields))
+			{
+				strcpy(buffer, "BAD: Your ship can't carry that many!");
+				return;
+			}
+			curplanet->citdl->planetaryShields = 
+					curplanet->citdl->planetaryShields - amt;
+			curship->shields = curship->shields + 10*amt;
+			break;
+		default:
+			strcpy(buffer, "BAD: Invalid TAKE command!");
+			return;
+	}
+	strcpy(buffer, "OK: Taking stuff from the planet!");
+}
+
+void planetleave(char *buffer, struct player *curplayer)
+{
+	struct planet *curplanet;
+	struct ship *curship;
+	int amt;
+	int choice;
+	int emptyholds;
+
+	choice = popint(buffer, ":");
+	amt = popint(buffer, ":");
+	curship = ships[curplayer->ship - 1];
+	curplanet = planets[curship->onplanet - 1];
+	emptyholds = curship->holds - curship->ore -curship->organics 
+			  -curship->equipment - curship->colonists;
+	if (emptyholds < 0)
+	{
+		strcpy(buffer, "BAD: Ship has negative emptyholds!");
+		fprintf(stderr, "planettake: Ship (%d) has negative emptyholds!",
+							 curship->number);
+		return;
+	}
+	//For choices
+	//0 ore, 1 org, 2 equip, 3 col in ore, 4 col in org, 5 col in equip
+	//6 figs, 7 creds, 8 shields
+	switch(choice)
+	{
+		case 0:
+			if (amt > curship->ore)
+			{
+				strcpy(buffer, "BAD: You don't have that much ore!");
+				return;
+			}
+			if ((curplanet->fuel + amt) > curplanet->pClass->maxore)
+			{
+				strcpy(buffer, "BAD: Planet can't hold that much ore!");
+				return;
+			}
+			curplanet->fuel = curplanet->fuel + amt;
+			curship->ore = curship->ore - amt;
+			break;
+		case 1:
+				if (amt > curship->organics)
+			{
+				strcpy(buffer, "BAD: You don't have enough organics!");
+				return;
+			}
+			if ((curplanet->organics + amt) > curplanet->pClass->maxorganics)
+			{
+				strcpy(buffer, "BAD: Planet can't hold that many organics!");
+				return;
+			}
+			curplanet->organics = curplanet->organics + amt;
+			curship->organics = curship->organics - amt;
+			break;
+		case 2:
+			if (amt > curship->equipment)
+			{
+				strcpy(buffer, "BAD: You don't have that much equipment!");
+				return;
+			}
+			if ((curplanet->equipment+amt) > curplanet->pClass->maxequipment)
+			{
+				strcpy(buffer, "BAD: Planet can't hold that much equipment!");
+				return;
+			}
+			curplanet->equipment = curplanet->equipment + amt;
+			curship->equipment = curship->equipment - amt;
+			break;
+		case 3:
+			if (amt > curship->colonists)
+			{
+				strcpy(buffer, "BAD: You don't have that many colonists");
+				return;
+			}
+			if ((amt + curplanet->fuelColonist) > 
+								 curplanet->pClass->maxColonist[0])
+			{
+				strcpy(buffer, "BAD: Planet can't hold that many ore colonists!");
+				return;
+			}
+			curplanet->fuelColonist = curplanet->fuelColonist + amt;
+			curship->colonists = curship->colonists - amt;
+			break;
+		case 4:
+			if (amt > curship->colonists)
+			{
+				strcpy(buffer, "BAD: You don't have that many colonists");
+				return;
+			}
+			if ((amt + curplanet->organicsColonist) > 
+								 curplanet->pClass->maxColonist[1])
+			{
+				strcpy(buffer, "BAD: Planet can't hold that many organics colonists!");
+				return;
+			}
+			curplanet->organicsColonist = curplanet->organicsColonist + amt;
+			curship->colonists = curship->colonists - amt;
+			break;
+		case 5:
+			if (amt > curship->colonists)
+			{
+				strcpy(buffer, "BAD: You don't have that many colonists");
+				return;
+			}
+			if ((amt + curplanet->equipmentColonist) > 
+								 curplanet->pClass->maxColonist[2])
+			{
+				strcpy(buffer, "BAD: Planet can't hold that many equipment colonists!");
+				return;
+			}
+			curplanet->equipmentColonist = curplanet->equipmentColonist + amt;
+			curship->colonists = curship->colonists - amt;
+			break;
+		case 6:
+			if (amt > curship->fighters)
+			{
+				strcpy(buffer, "BAD: Your ship doesn't hold that many fighters!");
+				return;
+			}
+			if ((amt + curplanet->fighters) > curplanet->pClass->maxfighters)
+			{
+				strcpy(buffer, "BAD: The planet can't hold that many fighters!");
+				return;
+			}
+			curplanet->fighters = curplanet->fighters + amt;
+			curship->fighters = curship->fighters - amt;
+			break;
+		case 7:
+			if (curplanet->citdl->level == 0)
+			{
+				strcpy(buffer, "BAD: You need a citadel to do that!");
+				return;
+			}
+			if (amt > curplayer->credits)
+			{
+				strcpy(buffer, "BAD: You don't have that much!");
+				return;
+			}
+			curplanet->citdl->treasury =
+					  curplanet->citdl->treasury + amt;
+			curplayer->credits = curplayer->credits - amt;
+			break;
+		case 8:
+			if (curplanet->citdl->level < 5)
+			{
+				strcpy(buffer, "BAD: You need a better citadel to do that!");
+				return;
+			}
+			//Check max planet shields!
+			if (amt*10 > curship->shields)
+			{
+				strcpy(buffer, "BAD: Your ship doesn't have that many shields!");
+				return;
+			}
+			curplanet->citdl->planetaryShields = 
+					  curplanet->citdl->planetaryShields + amt;
+			curship->shields = curship->shields - 10*amt;
+			break;
+		default:
+			strcpy(buffer, "BAD: Invalid LEAVE command!");
+			return;
+	}
+	strcpy(buffer, "OK: Leaving stuff on the planet!");
+}
+
+void planetupgrade(char *buffer, struct planet *curplanet)
+{
+
+}
 void totalplanetinfo(int pnumb, char *buffer)
 {
 	buffer[0] = '\0';

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.44 $
- * Last Modified: $Date: 2003-12-31 21:39:59 $
+ * $Revision: 1.45 $
+ * Last Modified: $Date: 2004-01-01 00:14:22 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.44 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-12-31 21:39:59 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.45 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-01 00:14:22 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -612,7 +612,7 @@ void printmyinfo (struct player *curplayer)
         printf ("%sEquipment%s=%s%d ", KGRN, KLTYLW, KLTCYN,
                 curplayer->pship->equipment);
     }
-    if (curplayer->pship->equipment != 0)
+    if (curplayer->pship->colonists != 0)
     {
         printf ("%sColonists%s=%s%d ", KGRN, KLTYLW, KLTCYN,
                 curplayer->pship->colonists);
