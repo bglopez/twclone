@@ -29,8 +29,10 @@ struct connection* next_connection(int sock_desc, struct sockaddr_in *addr);
 void* listen_thread(void *arg);
 void* player_login(void *arg);
 
-int init_socket(struct sockaddr_in *addr, int port){
+int init_socket(struct sockaddr_in *addr, int port)
+{
 	int sockfd, conn=1, addr_length;
+	
 	SOCKLEN_TYPE sock_len;
 
 	addr_length=sizeof(struct sockaddr_in);
@@ -49,7 +51,8 @@ int init_socket(struct sockaddr_in *addr, int port){
 }
 
 
-struct connection* next_connection(int sockfd, struct sockaddr_in *addr){
+struct connection* next_connection(int sockfd, struct sockaddr_in *addr)
+{
 	int addr_length=sizeof(struct sockaddr_in);
 	struct connection *ncon;
 	ncon=(struct connection*)malloc(sizeof(struct connection));
@@ -60,31 +63,39 @@ struct connection* next_connection(int sockfd, struct sockaddr_in *addr){
 	return ncon;
 }
 
-void init_listen_thread(pthread_t *tid){
+void init_listen_thread(pthread_t *tid)
+{
 		fprintf(stderr, "starting listen thread...\n");
 		pthread_create(tid, NULL, listen_thread, NULL);
 }
 		
-void* listen_thread(void *arg){
+void* listen_thread(void *arg)
+{
 	struct connection *cx;
 	struct sockaddr_in addr;
 	pthread_t tid;
 	int sockfd = init_socket(&addr, 9999);
-	while(1){
+	while(1)
+	{
 		cx = next_connection(sockfd, &addr);
 		pthread_create(&tid, NULL, player_login, cx);
 	}
 	pthread_exit(0);
 }
 
-void* player_login(void *arg){
+void* player_login(void *arg)
+{
 	struct connection *cn = (struct connection*)arg;
+	
 	write(cn->connfd, g_login_prompt, strlen(g_login_prompt));
 	cn->ibuff_len = recv(cn->connfd, (void *)cn->ibuff, MAX_IBUFFSIZE, 0);
+	
 	fprintf(stderr, "got a login for %s\n", cn->ibuff);
+	
 	write(cn->connfd, g_passwd_prompt, strlen(g_passwd_prompt));
 	cn->ibuff_len = recv(cn->connfd, (void *)cn->ibuff, MAX_IBUFFSIZE, 0);
 	join_game(cn);
+	
 	return NULL;
 }
 /*
