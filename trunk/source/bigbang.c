@@ -143,7 +143,7 @@ main (int argc, char **argv)
   char *usageinfo =
     "Usage: bigbang [options]
     Options:
-    - t < integer >
+    -t < integer >
        indicate the max length of tunnels and dead ends.(default /minimum 6)
     - s < integer >
        indicate the max number of sectors.(default /minimum 500)
@@ -155,13 +155,12 @@ main (int argc, char **argv)
        way.(default /minimum 3)
     - d < integer >
        indicate the percentage chance that a tunnel will be a dead end.
-       (default /minimum 30) 
-    - g < integer >
-       generate a number of random planets. (default 0)\n ";
+       (default /minimum 30)
+    - g < integer > 
+       generate a number of random planets.(default 0) \n ";
     /* This has to be taken out because of the knockon affect it was having with the rest of the program.
        -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
      */
-
     opterr = 0;
 
 /*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
@@ -193,7 +192,9 @@ main (int argc, char **argv)
 	     atoi (optarg)) ? ONEWAYJUMPPERCENT : atoi (optarg);
 	  break;
 	case 'g':
-	  numRandomPlanets = (numRandomPlanets > atoi (optarg)) ? numRandomPlanets : atoi (optarg);
+	  numRandomPlanets =
+	    (numRandomPlanets >
+	     atoi (optarg)) ? numRandomPlanets : atoi (optarg);
 	  break;
 	case '?':
 	  if (isprint (optopt))
@@ -411,28 +412,30 @@ main (int argc, char **argv)
 
 
   printf ("Creating Ferringhi home sector...");
-  ferringhiSector = randomnum (21, (numSectors-1));
+  ferringhiSector = randomnum (21, (numSectors - 1));
   sectorlist[ferringhiSector]->beacontext = "Ferringhi";
   sectorlist[ferringhiSector]->nebulae = "Ferringhi";
   printf ("done.\n");
 
   printf ("Creating planets...");
   planetfile = fopen ("./planets.data", "w");
-  fprintf (planetfile,terraInfo );
-  fprintf(planetfile, "%d:%d:Ferringhi:c:Ferringhi:-2:\n", 2, ferringhiSector);
-  randomPlanetInfo = malloc (sizeof(strNameLength));
+  fprintf (planetfile, terraInfo);
+  fprintf (planetfile, "%d:%d:Ferringhi:c:Ferringhi:-2:\n", 2,
+	   ferringhiSector);
+  randomPlanetInfo = malloc (sizeof (strNameLength));
   if (numRandomPlanets > 0)
     {
       c = 3;
-      for(x=0;x<numRandomPlanets;x++)
+      for (x = 0; x < numRandomPlanets; x++)
 	{
-	    tempint = randomnum (21, (numSectors-1));
-	    while(tempint == ferringhiSector || tempint < 10)
-	      { 
-		tempint = randomnum (21, (numSectors-1));
-	      }
-	    fprintf(planetfile, "%d:%d:%s:c:No Owner:0:\n", c, tempint,randomname (randomPlanetInfo));
-	    c++;
+	  tempint = randomnum (21, (numSectors - 1));
+	  while (tempint == ferringhiSector || tempint < 10)
+	    {
+	      tempint = randomnum (21, (numSectors - 1));
+	    }
+	  fprintf (planetfile, "%d:%d:%s:c:No Owner:0:\n", c, tempint,
+		   randomname (randomPlanetInfo));
+	  c++;
 	}
     }
 
@@ -460,27 +463,27 @@ main (int argc, char **argv)
     {
       sprintf (fileline, "%d", (x + 1));
       fileline = strcat (fileline, ":");
-      for(y = 0; y < numwarps (x); y++)
-		{
-	  		secptr = sectorlist[x]->sectorptr[y];
-	  		sprintf (tempstr, "%d", secptr->number);
-	  		fileline = strcat (fileline, tempstr);
-	  		if(y + 1 != numwarps (x))
-	    		fileline = strcat (fileline, ",");
-		}
+      for (y = 0; y < numwarps (x); y++)
+	{
+	  secptr = sectorlist[x]->sectorptr[y];
+	  sprintf (tempstr, "%d", secptr->number);
+	  fileline = strcat (fileline, tempstr);
+	  if (y + 1 != numwarps (x))
+	    fileline = strcat (fileline, ",");
+	}
       fileline = strcat (fileline, ":");
       /* Adds in names for sectors */
       if (sectorlist[x]->nebulae == NULL)
-		{
-	  		sectorlist[x]->nebulae = malloc (sizeof (strNameLength));
-	  		tmpname = consellationName (tmpname);
-	  		sectorlist[x]->nebulae = tmpname;
-		}
+	{
+	  sectorlist[x]->nebulae = malloc (sizeof (strNameLength));
+	  tmpname = consellationName (tmpname);
+	  sectorlist[x]->nebulae = tmpname;
+	}
       if (sectorlist[x]->beacontext != NULL)
-			fileline = strcat (fileline, sectorlist[x]->beacontext);
+	fileline = strcat (fileline, sectorlist[x]->beacontext);
       fileline = strcat (fileline, ":");
       if (sectorlist[x]->nebulae != NULL)
-			fileline = strcat (fileline, sectorlist[x]->nebulae);
+	fileline = strcat (fileline, sectorlist[x]->nebulae);
       fileline = strcat (fileline, ":\n");
       /*  Later put in whitespace buffer for saving */
       /*  Not needed until user created beacons put in */
@@ -632,7 +635,7 @@ sectorsort (struct sector *base[configdata->maxwarps], int elements)
       return;
 
     }
-  while (1 != 0) /* instead of while (1) : gets rid of splint warning */
+  while (1 != 0)		/* instead of while (1) : gets rid of splint warning */
     {
       alldone = 1;
       for (x = 0; x < (elements / 2 - 1 + elements % 2); x++)

@@ -118,46 +118,49 @@ init_universe (char *filename, struct sector ***array)
 
 	      sectorcount = tempsector;
 
-	      /*I set it to zero now so I can test to make sure it has its own entry*/
+	      /*I set it to zero now so I can test to make sure it has its own entry */
 	      (*array)[tempsector - 1]->number = 0;
 	    }
 
-	  /*make the link from our current sector to where it points.*/
+	  /*make the link from our current sector to where it points. */
 	  (*array)[sectornum - 1]->sectorptr[sctptrcount++] =
 	    (*array)[tempsector - 1];
 	}
 
-      /*set the last pointer to NULL if applicable*/
+      /*set the last pointer to NULL if applicable */
       if (sctptrcount < MAX_WARPS_PER_SECTOR)
-			(*array)[sectornum - 1]->sectorptr[sctptrcount] = NULL;
-      /*copy the beacon info over*/
-		if (strncmp(buffer, ":", 1) != 0)
-		{  /* This is in case there are is no nebulaes since popstring doesn't
-			 * differentiate between ":<stuff>: and <stuff>: It thinks that its 
-			 * the same thing.
-			 */
-      popstring (buffer, temp, ":", BUFF_SIZE);
-      (*array)[sectornum - 1]->beacontext = (char *) malloc (strlen (temp) + 1);
-      strncpy ((*array)[sectornum - 1]->beacontext, temp, strlen (temp) + 1);
-      (*array)[sectornum - 1]->beacontext[strlen (temp)] = '\0';
-      if (strlen (temp) == 0)
-			strcpy ((*array)[sectornum - 1]->beacontext, "\0");
-		}
-		else
-		{
-			for (loop=0; loop<strlen(buffer); loop++)
-				buffer[loop]=buffer[loop+1];
-			(*array)[sectornum - 1]->beacontext = (char *)malloc(strlen("\0")+1);
-			strcpy((*array)[sectornum - 1]->beacontext, "\0");
-		}
-		
-      /*copy the nebulae info over*/
+	(*array)[sectornum - 1]->sectorptr[sctptrcount] = NULL;
+      /*copy the beacon info over */
+      if (strncmp (buffer, ":", 1) != 0)
+	{			/* This is in case there are is no nebulaes since popstring doesn't
+				   * differentiate between ":<stuff>: and <stuff>: It thinks that its 
+				   * the same thing.
+				 */
+	  popstring (buffer, temp, ":", BUFF_SIZE);
+	  (*array)[sectornum - 1]->beacontext =
+	    (char *) malloc (strlen (temp) + 1);
+	  strncpy ((*array)[sectornum - 1]->beacontext, temp,
+		   strlen (temp) + 1);
+	  (*array)[sectornum - 1]->beacontext[strlen (temp)] = '\0';
+	  if (strlen (temp) == 0)
+	    strcpy ((*array)[sectornum - 1]->beacontext, "\0");
+	}
+      else
+	{
+	  for (loop = 0; loop < strlen (buffer); loop++)
+	    buffer[loop] = buffer[loop + 1];
+	  (*array)[sectornum - 1]->beacontext =
+	    (char *) malloc (strlen ("\0") + 1);
+	  strcpy ((*array)[sectornum - 1]->beacontext, "\0");
+	}
+
+      /*copy the nebulae info over */
       popstring (buffer, temp, ":", BUFF_SIZE);
       (*array)[sectornum - 1]->nebulae = (char *) malloc (strlen (temp) + 1);
       strncpy ((*array)[sectornum - 1]->nebulae, temp, strlen (temp) + 1);
       (*array)[sectornum - 1]->nebulae[strlen (temp)] = '\0';
       if (strlen (temp) == 0)
-			strcpy ((*array)[sectornum - 1]->nebulae, "\0");
+	strcpy ((*array)[sectornum - 1]->nebulae, "\0");
       init_hash_table ((*array)[sectornum - 1]->playerlist, 1);
       (*array)[sectornum - 1]->portptr = NULL;
     }
