@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.55 $
- * Last Modified: $Date: 2004-06-18 05:40:06 $
+ * $Revision: 1.56 $
+ * Last Modified: $Date: 2004-06-22 16:00:42 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.55 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-06-18 05:40:06 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.56 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-06-22 16:00:42 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -295,6 +295,9 @@ int main (int argc, char *argv[])
 					 case 'V':
 						  dogameinfo(sockid);
 						  break;
+					 case 'a':
+					 case 'A':
+						  do_attack(sockid, curplayer, cursector);
                 case '?':
                     printhelp ();
                     break;
@@ -783,6 +786,7 @@ void psinfo (int sockid, int pnumb, struct player *p)
     popstring (buffer + position, pname, ":", 70);
     p->exper = popint (buffer + position, ":");
     p->align = popint (buffer + position, ":");
+	 p->number = pnumb;
     if ((curship = (struct ship *) malloc (sizeof (struct ship))) != NULL)
     {
         curship->name = NULL;
@@ -3477,4 +3481,139 @@ char * get_invis_password (void)
     pw_buffer[i] = '\0';
     done_nowait_io (0);
     return pw_buffer;
+}
+
+void do_attack(int sockid, struct player *curplayer, struct sector *cursector)
+{
+	char *buffer = (char *)malloc(sizeof(char)*5280);
+	int counter;
+	int done = 0;
+	struct player *first = NULL, *next = NULL, *target=NULL;
+	struct planet *curplanet, *pnext;
+	int shields, defense_lost, attack_lost, captured, destroyed;
+	char yesno;
+	int num_figs;
+
+	getsectorinfo(sockid, cursector);
+	free(cursector->nebulae);
+	cursector->nebulae = NULL;
+	if (cursector->beacontext != NULL)
+	{
+		free(cursector->beacontext);
+		cursector->beacontext = NULL;
+	}
+	if (cursector->ports != NULL)
+	{
+		free(cursector->ports->name);
+		free(cursector->ports);
+	}
+	if (cursector->planets != NULL)
+	{
+		curplanet = cursector->planets;
+		while(curplanet != NULL)
+		{
+			pnext = curplanet->next;
+			free(curplanet->name);
+			free(curplanet->type);
+			free(curplanet);
+			curplanet = pnext;
+		}
+	}
+	getmyinfo(sockid, curplayer);
+	printf("\n");
+	printf("\n%s<Attack>%s", KLTRED, KNRM);
+	if (cursector->players != NULL)
+	{
+		first = cursector->players;
+		done = 0;
+		while (!done)
+		{
+			if (first != NULL)
+			{
+				printf("\n%sAttack %s%s's %s %s(%s%d%s-%s%d%s) %s(Y/N) ? ", KGRN, KLTCYN, first->name, 
+					first->pship->type, KYLW, KLTCYN, curplayer->pship->fighters, KRED, KLTCYN,
+					first->pship->fighters, KYLW, KLTYLW);
+				scanf("%c", &yesno);
+				junkline();
+				if (yesno=='y' || yesno=='Y')
+				{
+					done = 1;
+					printf("\n%sHow many fighters do you wish to use (%s0 to %d%s) ? ",
+							KMAG, KLTYLW, curplayer->pship->fighters, KMAG);
+					scanf("%d", &num_figs);
+					target = first;
+				}
+				else
+				{
+					next = first->next;
+					clearplayer(first);
+					first = next;
+				}
+			}
+			else
+			{
+				done = 1;
+			}
+		}
+		if (target!=NULL)
+		{
+			strcpy(buffer, "\0");
+			strcpy(buffer, "ATTACK :");
+			addint(buffer, target->number, ':', BUFF_SIZE);
+			addint(buffer, num_figs, ':', BUFF_SIZE);
+			sendinfo(sockid, buffer);
+			recvinfo(sockid, buffer);
+			if (strncmp(buffer, "BAD", 3) != 0)
+			{
+				shields = popint(buffer, ":");
+				defense_lost = popint(buffer, ":");
+				attack_lost = popint(buffer, ":");
+				captured = popint(buffer, ":");
+				destroyed = popint(buffer, ":");
+			}
+			else
+			{
+				next = target->next;
+				while (target != NULL)
+				{
+					clearplayer(target);
+					target = next;
+					next = target->next;
+				}
+				return;
+			}
+			printf("\n");
+			if (shields == 1);
+			{
+				printf("\n%sYour fighers encountered a powerful forcefield around the ship!\n", KLTCYN);
+			}
+			printf("\n%sYou lost %s%d%s fighters, %s%d%s remain.", KGRN, KLTCYN, attack_lost, KGRN, KLTCYN,
+								curplayer->pship->fighters - attack_lost, KGRN);
+			if (destroyed==1)
+			{
+				printf("\n%sYou destroyed their ship! Congratulations!", KGRN);
+			}
+			else
+			{
+				printf("\n%sYou destroyed %s%d%s fighters, %s%d%s remain.", KGRN, KLTCYN, defense_lost, KGRN, KLTCYN,
+							target->pship->fighters - defense_lost, KGRN);
+			}
+			if (captured)
+			{
+				printf("\n%sYou captured their ship! Congratulations!", KGRN);
+			}
+			fflush(stdout);
+			if (target!=NULL)
+				next = target->next;
+			while (target != NULL)
+			{
+					clearplayer(target);
+					target = next;
+					if (target!=NULL)
+						next = target->next;
+			}
+		}
+	}
+	cursector->players = NULL;
+	getmyinfo(sockid, curplayer);
 }

@@ -195,5 +195,6 @@ int kbhit (void);
 int readch (void);
 int done_nowait_io (int status);
 char *get_invis_password (void);
+void do_attack(int sockid, struct player *curplayer, struct sector *cursector);
 
 #endif
