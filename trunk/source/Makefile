@@ -1,6 +1,6 @@
 FLAGS = -g -Wall
 
-all : server test_server test_client client
+all : server test_server test_client client bigbang
 
 common.o : common.h common.c
 	gcc $(FLAGS) -c -o common.o common.c
@@ -44,6 +44,8 @@ test_server : test_server.c common.o
 test_client : common.o test_client.c
 	gcc $(FLAGS) -o test_client test_client.c -lpthread common.o
 
+bigbang : universe.h
+	gcc $(FLAGS) -o bigbang bigbang.c 
 clean : 
 	rm -f *.o server test_client test_server client
 
