@@ -1,0 +1,13 @@
+.deps
+Makefile
+autoconf.h
+config.cache
+config.log
+config.status
+stamp-h
+stamp-h1
+client
+server
+test-server
+test-client
+bigbang
