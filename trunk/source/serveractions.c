@@ -1098,6 +1098,7 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   curship->owner = curplayer->number;
   curplayer->ship = curship->number;
   curplayer->sector = 0;               //The player is now in a ship
+  curplayer->messages = NULL;
   ships[i] = curship;
 }
 
