@@ -62,6 +62,31 @@ enum prompts
   debug
 };
 
+#define MAX_SHIP_NAME_LENGTH 40
+
+struct sp_shipinfo
+{
+  char name[MAX_SHIP_NAME_LENGTH];
+  int basecost;
+  int maxattack;
+  int initialholds;
+  int maxholds;
+  int maxfighters;
+  int turns;
+  int mines;
+  int genesis;
+  unsigned short twarp;
+  int transportrange;
+  int maxshields;
+  int offense;			//This needs to be divided by 10 before use 
+  int defense;			//This needs to be divided by 10 before use 
+  int beacons;
+  unsigned short holo;
+  unsigned short planet;
+  unsigned short photons;
+};
+
+
 struct sector
 {
   int number;
@@ -72,6 +97,7 @@ struct sector
   struct port *ports;
   struct planet *planets;
   struct ship *ships;
+  struct player *unmanned;
 };
 
 struct player
@@ -153,6 +179,7 @@ void dogenesis(int sockid, struct player *curplayer);
 char *prompttype (enum prompts type, int sector_or_porttype, int sockid);
 int getyes (char *answer);
 void psinfo (int sockid, int pnumb, struct player *p);
+void sinfo (int sockid, int snumb, struct player *p);
 void clearplayer (struct player *curplayer);
 void newfree(void *item);
 void getmyinfo (int sockid, struct player *curplayer);
@@ -164,6 +191,7 @@ void print_node_help();
 void print_shipyard_help();
 void print_bank_help();
 void do_stardock_menu(int sockid, struct player *curplayer);
+void do_cineplex_menu(int sockid, struct player *curplayer);
 void do_node_menu(int sockid, struct player *curplayer);
 void do_noderelay_menu(int sockid, struct player *curplayer);
 int do_planet_select(int sockid, struct player *curplayer, struct sector *cursector);
@@ -173,11 +201,15 @@ int do_citadel_menu(int sockid, struct player *curplayer, struct planet *curplan
 void treasury(int sockid, struct player *curplayer, int pcredits);
 void change_stuff(int sockid, struct player *curplayer, int type);
 void print_citadel_help();
+void print_cineplex_help();
 void getplanetinfo(int sockid, struct planet *curplanet);
 void do_planet_display(int sockid, struct player *curplayer, struct planet *curplanet);
+void do_examine_ship_specs(int sockid, struct player *curplayer);
 void print_planet_help();
+void print_shipspecs_help();
 void do_shipyard_menu(int sockid, struct player *curplayer);
 void buyship(int sockid, struct player *curplayer);
+void buymovieticket(int sockid, struct player *curplayer);
 int dlen(int input); 
 size_t slen(const char *string);
 char *spaces(int numspaces);

@@ -298,6 +298,14 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         buildshipinfo (data->to, buffer);
         break;
+	 case ct_listshipinfo:
+        if (intransit (data))
+        {
+            strcpy (buffer, "BAD: Moving you can't do that\n");
+            return;
+        }
+        buildallshipinfo (buffer);
+        break;
     case ct_logout:
         fprintf (stderr, "processcommand: Got a logout command\n");
         if ((curplayer =
@@ -2110,6 +2118,34 @@ void buildshipinfo (int shipnum, char *buffer)
     addint (buffer, ships[shipnum - 1]->fighters, ':', BUFF_SIZE);
     addint (buffer, ships[shipnum - 1]->shields, ':', BUFF_SIZE);
 
+}
+
+void buildallshipinfo(char *buffer)
+{
+	int index;
+	strcpy(buffer, ":\0");
+	addint(buffer, configdata->ship_type_count, ':', BUFF_SIZE);
+	for (index=0; index < configdata->ship_type_count; index++)
+		{
+		addstring(buffer, shiptypes[index]->name, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->basecost, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->maxattack, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->initialholds, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->maxholds, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->maxfighters, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->turns, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->mines, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->genesis, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->twarp, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->transportrange, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->maxshields, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->offense, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->defense, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->beacons, ',', BUFF_SIZE);
+ 		addint(buffer, shiptypes[index]->holo, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index]->planet, ',', BUFF_SIZE);
+ 		addint(buffer, shiptypes[index]->photons, ':', BUFF_SIZE);
+	}
 }
 
 void buildgameinfo(char *buffer)

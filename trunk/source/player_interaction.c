@@ -487,18 +487,26 @@ void *handle_player (void *threadinfo)
 	  data.command = ct_listplayers;
 	  commandgood = 1;
 	}
-      else if (strncmp (inbuffer, "LISTPLANETS", strlen ("LISTPLANETS")) == 0
+      else if (strncmp (inbuffer, "LISTMYPLANETS", strlen ("LISTPLANETS")) == 0
 	       && loggedin)
 	{
-	  data.command = ct_listplanets;
+	  data.command = ct_listmyplanets;
 	  commandgood = 1;
 	}
-      else if (strncmp (inbuffer, "LISTSHIPS", strlen ("LISTSHIPS")) == 0
+      else if (strncmp (inbuffer, "LISTMYSHIPS", strlen ("LISTSHIPS")) == 0
 	       && loggedin)
 	{
-	  data.command = ct_listships;
+	  data.command = ct_listmyships;
 	  commandgood = 1;
 	}
+		else if (strncmp (inbuffer, "LISTSHIPINFO", strlen ("LISTSHIPINFO")) == 0
+				  && loggedin)
+		{
+			strcpy(data.name, name);
+			data.command = ct_listshipinfo;
+			commandgood = 1;
+		}
+
       else if (strncmp (inbuffer, "LISTCORPS", strlen ("LISTCORPS")) == 0
 	       && loggedin)
 	{
