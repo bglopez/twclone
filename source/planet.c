@@ -53,7 +53,6 @@ init_planets (char *filename, struct sector *secarray[])
 int
 insert_planet(struct planet *p, struct sector *s, int playernumber)
 {
-
   struct list *p_list;
   if (s == NULL)
     {
@@ -63,7 +62,9 @@ insert_planet(struct planet *p, struct sector *s, int playernumber)
 
   p_list = s->planets;
   while (p_list != NULL)
-    p_list = p_list->listptr;
+    {
+      p_list = p_list->listptr;
+    }
   p_list = (struct list *) malloc (sizeof (struct list *));
   p_list->item = p;
   p_list->type = planet;
