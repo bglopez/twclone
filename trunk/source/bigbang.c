@@ -135,7 +135,7 @@ main (int argc, char **argv)
   FILE *file;
   FILE *planetfile;
   struct sector *secptr;
-  char *terraInfo = "1:1:terra:c:The Federation:-1:\n";
+  char *terraInfo = "1:1:terra:-1:1:Unknown:\n";
   char *randomPlanetInfo;
   int ferringhiSector;
 
@@ -403,7 +403,7 @@ main (int argc, char **argv)
   printf ("Creating planets...");
   planetfile = fopen ("./planets.data", "w");
   fprintf (planetfile, terraInfo);
-  fprintf (planetfile, "%d:%d:Ferringhi:c:Ferringhi:-2:\n", 2,
+  fprintf (planetfile, "%d:%d:Ferringhi:-2:1:Unknown:\n", 2,
 	   ferringhiSector);
   randomPlanetInfo = malloc (sizeof (strNameLength));
   if (numRandomPlanets > 0)
@@ -416,8 +416,8 @@ main (int argc, char **argv)
 	    {
 	      tempint = randomnum (21, (numSectors - 1));
 	    }
-	  fprintf (planetfile, "%d:%d:%s:c:No Owner:0:\n", c, tempint,
-		   randomname (randomPlanetInfo));
+	  fprintf (planetfile, "%d:%d:%s:0:%d:Unknown:\n", c, tempint,
+		   randomname (randomPlanetInfo), randomnum(1,5));
 	  c++;
 	}
     }

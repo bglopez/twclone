@@ -29,8 +29,9 @@ This is to make a new user.
 QUIT
 This is the logout command.
 
-PORT <TRADE, LAND, NEGOTIATE, ROB, SMUGGLE, ATTACK>:<ore, organics, equipment, credits>:<holds of stuff>:<price you offer or steal>:
+PORT <TRADE, LAND, NEGOTIATE, ROB, SMUGGLE, ATTACK>:<ore, organics, equipment, credits,holds,shields,fighters>:<Amt/holds of stuff>:<price you offer or steal>:
 Trade at a port
+0 for ore, 1 for organics, 2 for equipment, 3 for credits, 4 for holds, 5 for shields, 6 for fighters, 7 for (holds, shields and fighters)
 
 MYINFO
 Gets information for you and your ship
@@ -67,6 +68,7 @@ SHIPINFO response:
 PORT response:
   For Trade :<price offered>:<accepted or not accepted>:<exp gained from good trading>:
             Note: accepted = 1, not accepted = 0
+  For Upgrade :<price of holds>:<price of shields>:<price of fighters>:
 
 PORTINFO response:
 :<port number>:<port name>:<max ore>:<max organics>:<max equipment>:<current ore>:<current organics>:<current equipment>:<credits>:<type>:
