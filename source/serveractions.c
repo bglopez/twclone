@@ -3296,6 +3296,8 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 	int loop=1;
 	int done=0;
 	int random_sector=0;
+	int toshields;
+	int tofighters;
 	
 	if (ships[from->ship-1]->fighters < num_figs)
 	{
@@ -3328,17 +3330,45 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 	
 	if (attack_lost > num_figs)
 		attack_lost = num_figs;
-	
+	toshields = ships[to->ship-1]->shields;
+	tofighters = ships[to->ship-1]->fighters;
 	//This may need some tweaking
-	if (defense_lost > (ships[to->ship-1]->shields+ships[to->ship-1]->fighters))
+	if (defense_lost > (toshields+tofighters))
 	{
-		if (defense_lost > 1.05*(ships[to->ship-1]->shields+ships[to->ship-1]->fighters))
+		if (defense_lost > max(toshields+tofighters+5, (toshields+tofighters)*1.05))
 		{
 			captured = 0;
 			destroyed = 1;
 			fprintf(stderr, "Ship destroyed!\n");
 			curship = ships[to->ship -1];
 			strcpy(name, curship->name);
+      	if (to->sector == 0)
+      	{
+		  		fprintf(stderr, "Removing player from sector %d\n", ships[to->ship-1]->location);
+        		to = delete (to->name, player, 
+					sectors[ships[to->ship - 1]->location - 1]->playerlist,1);
+			}
+			else
+      	{
+         	to = delete (to->name, player, 
+					sectors[to->sector - 1]->playerlist, 1);
+			}
+			free(curship->name);
+			fprintf(stderr,"Destroying ship '%s'\n", name);
+			fflush(stderr);
+			delete(name, ship, symbols, HASH_LENGTH);
+			free(curship);
+			ships[to->ship -1 ] = NULL;
+			to->ship = 0;
+			fprintf(stderr, "No more ship in database!\n");
+		}
+		else
+		{
+			fprintf(stderr, "\nBeginning capture of ship!");
+			fflush(stderr);
+			captured = 1;
+			destroyed = 0;
+			oldship = curship;
       	if (to->sector == 0)
       	{
 		  		fprintf(stderr, "Removing player from sector %d", ships[to->ship-1]->location);
@@ -3350,41 +3380,32 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
          	to = delete (to->name, player, 
 					sectors[to->sector - 1]->playerlist, 1);
 			}
-			free(curship->name);
-			delete(name, ship, symbols, HASH_LENGTH);
-			free(curship);
-			ships[to->ship -1 ] = NULL;
-			to->ship = 0;
-			fprintf(stderr, "No more ship in database!\n");
-		}
-		else
-		{
-			captured = 1;
-			destroyed = 0;
-			oldship = curship;
 			insertitem(oldship, ship, sectors[oldship->location-1]->shiplist,1);
 			fprintf(stderr, "Ship captured!\n");
 		}
 		loop=1;
 		strcpy(name, "\0");
-		do
-		{
-		strcpy(name, "\0");
 		sprintf(name, "%s's Gallileo #%d", to->name, loop);
-		loop++;
-		}while ((curship =
-			(struct ship *)find(name, ship, symbols, HASH_LENGTH)) != NULL);
-
+		done = 0;
+		fprintf(stderr, "Looking for %s\n", name);
+		while (!done) 
+			{
+				if ((curship =
+					(struct ship *)insert(name, ship, symbols, HASH_LENGTH)) == NULL)
+					{
+					loop++;
+					strcpy(name, "\0");
+					sprintf(name, "%s's Gallileo #%d", to->name, loop);
+					fprintf(stderr, "Looking for %s\n", name);
+					}
+				else
+					{
+					done=1;
+					}
+			}
 		fprintf(stderr, "Found ship with name %s\n", name);
 		done=0;
 		loop=0;
-		if ((curship = 
-			(struct ship *)insert(name, ship, symbols, HASH_LENGTH)) == NULL)
-		{
-			//This should never be reached because of the previous do-while.
-			fprintf(stderr, "attack: duplicate shipanme");
-			return;
-		}
 
 		while (!done)
 		{
@@ -3476,6 +3497,11 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 		ships[from->ship-1]->fighters -= attack_lost;
 	}
 
+	saveship(to->ship, "./ships.data");
+	if (captured)
+	{
+		saveship(oldship->number, "./ships.data");
+	}
 	strcpy(buffer,"\0");
 	addint(buffer, shields_lost, ':', BUFF_SIZE);
 	addint(buffer, defense_lost, ':', BUFF_SIZE);
