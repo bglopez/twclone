@@ -282,6 +282,13 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_playerinfo:
         //fprintf(stderr, "processcommand: Got a playerinfo command\n");
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
         if (intransit (data))
         {
             strcpy (buffer, "BAD: Moving you can't do that\n");
@@ -291,6 +298,13 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_shipinfo:
         //fprintf(stderr, "processcommand: Got a shipinfo command\n");
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
         if (intransit (data))
         {
             strcpy (buffer, "BAD: Moving you can't do that\n");
@@ -298,7 +312,14 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         buildshipinfo (data->to, buffer);
         break;
-	 case ct_listshipinfo:
+    case ct_listshipinfo:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
         if (intransit (data))
         {
             strcpy (buffer, "BAD: Moving you can't do that\n");
@@ -306,6 +327,21 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         buildallshipinfo (buffer);
         break;
+    case ct_listmyships:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy (buffer, "BAD: Moving you can't do that\n");
+            return;
+        }
+	listplayerships(buffer, curplayer);
+	break;
     case ct_logout:
         fprintf (stderr, "processcommand: Got a logout command\n");
         if ((curplayer =
@@ -2148,6 +2184,27 @@ void buildallshipinfo(char *buffer)
 	}
 }
 
+void listplayerships(char *buffer, struct player *curplayer)
+{
+   int loop=0;
+   strcpy(buffer, ":\0");
+   
+   while (ships[loop] != NULL && loop < configdata->max_ships)
+   {
+	if (ships[loop]->owner == curplayer->number)   //Or corp
+	{
+	   addint(buffer, ships[loop]->number, ',', BUFF_SIZE);
+	   addint(buffer, ships[loop]->location, ',', BUFF_SIZE);
+	   addstring(buffer, ships[loop]->name, ',', BUFF_SIZE);
+	   addint(buffer, ships[loop]->fighters, ',', BUFF_SIZE);
+	   addint(buffer, ships[loop]->shields, ',', BUFF_SIZE);
+	   //hops
+	   addint(buffer, 0, ',', BUFF_SIZE);
+	   addstring(buffer, shiptypes[ships[loop]->type-1]->name, ':', BUFF_SIZE);
+	}
+	loop++;
+   }
+}
 void buildgameinfo(char *buffer)
 {
   time_t datenow;
@@ -3529,6 +3586,8 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 		curship->organics=0;
 		curship->ore=0;
 		curship->owner = to->number;
+		curship->flags = 0;
+		curship->onplanet = 0;
 		fprintf(stderr, "Finished Initializing ship\n");
       if (to->sector == 0)
       {

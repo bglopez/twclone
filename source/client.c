@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.58 $
- * Last Modified: $Date: 2004-12-10 04:32:54 $
+ * $Revision: 1.59 $
+ * Last Modified: $Date: 2004-12-30 07:46:51 $
  */
 
 /* Normal Libary Includes */
@@ -40,8 +40,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.58 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-12-10 04:32:54 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.59 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-12-30 07:46:51 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -204,35 +204,38 @@ int main (int argc, char *argv[])
                     sector = getsectorinfo (sockid, cursector);
                     printsector (cursector);
                     break;
+		case 'x':
+		case 'X':
+		    do_transport(sockid, curplayer);
                 case 'i':
                 case 'I':
                     getmyinfo (sockid, curplayer);
                     printmyinfo (curplayer);
                     break;
-					 case 'u':
-					 case 'U':
-						  dogenesis(sockid, curplayer);
-						  break;
-					 case 'l':
-					 case 'L':
-						  sector = getsectorinfo(sockid, cursector);
-						  if (cursector->planets == NULL)
-						  {
-								printf("\nThere are no planets in this sector!");
-								break;
-						  }
-						  if (cursector->planets->next == NULL)
-						  {
-								sprintf(buffer, "LAND %d:", cursector->planets->number);
-								sendinfo(sockid, buffer);
-								recvinfo(sockid, buffer);
-								temp = do_planet_menu(sockid, curplayer);
-						  }
-						  else
-						  {
-								temp = do_planet_select(sockid, curplayer, cursector);
-						  }
-						  break;
+	 	case 'u':
+		case 'U':
+		  dogenesis(sockid, curplayer);
+		  break;
+		case 'l':
+		case 'L':
+		  sector = getsectorinfo(sockid, cursector);
+		  if (cursector->planets == NULL)
+		  {
+			printf("\nThere are no planets in this sector!");
+			break;
+		  }
+		  if (cursector->planets->next == NULL)
+		  {
+			sprintf(buffer, "LAND %d:", cursector->planets->number);
+			sendinfo(sockid, buffer);
+			recvinfo(sockid, buffer);
+			temp = do_planet_menu(sockid, curplayer);
+		  }
+		  else
+		  {
+			temp = do_planet_select(sockid, curplayer, cursector);
+		  }
+		  break;
                 case 'p':
                 case 'P':
                     sector = getsectorinfo (sockid, cursector);
@@ -1487,6 +1490,38 @@ void print_shipspecs_help()
 
 	printf("\n");
 	return;
+}
+
+void print_available_ships(int sockid, struct player *curplayer)
+{
+  int ship;
+  int sector;
+  char *name;
+  int fighters;
+  int shields;
+  int hops;
+  char *type;
+
+  printf("\n%s--< Available Ship Scan >--", KLTCYN);
+  printf("\n%sShip Sect Name Fighters Shields Hops Type", KMAG);
+  printf("\n%s%s---------------------------------------------------%s", KBBLU, 
+  	KFWHT, KNRM);
+  printf("\n%s%d  %s%d %s%s %s%d %s%d %s%d %s%s", KBLU, ship, KLTCYN, sector, 
+  	KLTYLW, name, KCYN, fighters, KYLW, shields, KGRN, hops, KMAG, type);
+	
+}
+
+void do_transport(int sockid, struct player *curplayer)
+{
+
+  printf("\n%s%s<Transport to Ship>%s", KBBLU, KFWHT, KNRM);
+  print_available_ships(sockid, curplayer);
+  printf("\n");
+  printf("\n%s<%sI%s> %sShip details", KMAG, KGRN, KMAG, KGRN);
+  printf("\n%s<%sQ%s> %sExit Transporter", KMAG, KGRN, KMAG, KGRN);
+  printf("\n");
+  printf("\n%sChoose which ship to beam to (Q=Quit) ", KMAG);
+
 }
 
 void print_bank_help()
