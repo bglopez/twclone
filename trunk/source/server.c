@@ -57,6 +57,7 @@ struct ship **ships;
 struct port **ports;
 struct config *configdata;
 struct sp_shipinfo **shiptypes;
+struct node **nodes;
 
 time_t *timeptr;
 time_t starttime;
@@ -144,6 +145,11 @@ int main (int argc, char *argv[])
     fflush (stdout);
     init_portinfo ("./ports.data");
     printf (" Done!\n");
+
+	 printf("Configuring node information...");
+	 fflush(stdout);
+	 init_nodes(sectorcount);
+	 printf(" Done!\n");
 
     /*looks like maybe I shouldn't do this
        printf("Verify Universe...");

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.50 $
- * Last Modified: $Date: 2004-01-03 03:57:11 $
+ * $Revision: 1.51 $
+ * Last Modified: $Date: 2004-01-05 22:37:32 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.50 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-03 03:57:11 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.51 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-05 22:37:32 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -251,11 +251,15 @@ int main (int argc, char *argv[])
                         	break;
 						  		case 's':
 						  		case 'S':
-									do_stardock_menu(sockid, curplayer);
+									if (cursector->ports->type == 9)
+										do_stardock_menu(sockid, curplayer);
+									else if (cursector->ports->type == 10)
+										do_node_menu(sockid, curplayer);
 									break;
 								default:
 									break;
                     }
+						  sector = getsectorinfo(sockid, cursector);
                     break;	//Porting ain't done yet.
                 case 'm':
                 case 'M':	//Shorthand for this command is to type
@@ -841,7 +845,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
     if ((length = strcspn (buff + position, ":")) == 0)	//If no port!
     {
         cursector->ports = NULL;
-        porttype = 10;
+        porttype = -1;
         position++;
     }
     else
@@ -875,7 +879,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
             curport->name = (char *) 
 					malloc(sizeof(char)*(strlen (portname) + 1));
             strncpy (curport->name, portname, strlen (portname) + 1);
-            if (porttype != 10)
+            if (porttype != -1)
                 curport->type = porttype;
             else
             {
@@ -1020,6 +1024,8 @@ int printsector (struct sector *cursector)
                 porttypes[cursector->ports->type], KMAG);
         if (cursector->ports->type == 9)
             printf (" %s(Stardock)%s", KYLW, KNRM);
+		  if (cursector->ports->type == 10)
+				printf(" %s(Node Station)%s", KYLW, KNRM);
         free(cursector->ports->name);
         free(cursector->ports);
     }
@@ -1131,6 +1137,27 @@ void print_stardock_help()
 	return;
 }
 
+void print_node_help()
+{
+	printf("\n%s+=====================================+ ", KGRN);
+	printf("\n%s|      Obvious Places to go are%s:%s      |",KGRN, KLTYLW, KGRN);
+	printf("\n%s|                                     |",KGRN);
+	printf("\n%s| %s<%sC%s> %sThe CinePlex Videon Theatres%s    |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sG%s> %sThe 2nd National Galactic Bank%s  |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sH%s> %sThe Stellar Hardware Emporium%s   |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sL%s> %sThe Libram Universitatus%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sP%s> %sThe Federal Space Police HQ%s     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sS%s> %sThe Federation Shipyards%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sT%s> %sThe Lost Trader's Tavern%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sN%s> %sThe Node Relay System%s       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+
+	printf("\n%s|                                     |",KGRN);
+	printf("\n%s| %s<%s!%s> %sStardock Help%s                   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sReturn to your ship and leave%s   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+=====================================+",KGRN);
+	return;
+}
+
 void print_shipyard_help()
 {
 	printf("\n%s+===================================+",KGRN);
@@ -1194,6 +1221,54 @@ void do_stardock_menu(int sockid, struct player *curplayer)
 				break;
 			case '?':
 				print_stardock_help();
+				break;
+			default:
+				printf("\nThat option is not supported yet!");
+				break;
+		}
+	}
+	strcpy(buff, "PORT QUIT:");
+	sendinfo(sockid, buff);
+	recvinfo(sockid, buff);
+	free(buff);
+	return;
+}
+
+void do_node_menu(int sockid, struct player *curplayer)
+{
+	char *buff = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char command;
+	int done=0;
+
+	strcpy(buff, "PORT LAND:");
+	sendinfo(sockid, buff);
+	recvinfo(sockid, buff);
+	while (!done)
+	{
+		printf("\n%s<%sNode Station%s> Where to? (%s?=Help%s) "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		scanf("%c", &command);
+		junkline();
+		switch(command)
+		{
+			case 'q':
+			case 'Q':
+				done = 1;
+				break;
+			case 's':
+			case 'S':
+				do_shipyard_menu(sockid, curplayer);
+				break;
+			case 'g':
+			case 'G':
+				do_bank_menu(sockid, curplayer);
+				break;
+			case 'n':
+			case 'N':
+				do_noderelay_menu(sockid, curplayer);
+				break;
+			case '?':
+				print_node_help();
 				break;
 			default:
 				printf("\nThat option is not supported yet!");
@@ -1884,6 +1959,89 @@ void print_planet_help()
 	printf("\n%s| %s<%sQ%s> %sLeave this Planet%s                   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
 	printf("\n%s+=========================================+",KGRN);
 
+}
+
+void do_noderelay_menu(int sockid, struct player *curplayer)
+{
+	int done=0;
+	int moredone=0;
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *input = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *duplicate = NULL;
+	char ch;
+	int count;
+	char choice;
+	int nodenum;
+	char temp[BUFF_SIZE];
+
+	while (!done)
+	{
+		printf("\n%s<%sNode Relay%s> Your option %s(?)%s ? "
+					, KMAG, KYLW, KMAG, KLTYLW, KMAG);
+		for (count=0;(ch=getchar())!='\n';count++)
+		{
+			*(input+count+1)='\0';
+			*(input+count)=ch;
+		}
+		choice = strtoul(input, NULL, 10);
+		if (isdigit(*(input+0)) !=0 )
+		{
+			done = 1;
+		}
+		else if (isspace(*(input+0)) == 0)
+		{
+			switch (*(input+0))
+			{
+				case 'q':
+				case 'Q':
+					free(buffer);
+					free(input);
+					return;
+					break;
+				case '?':
+					done = 0;
+					strcpy(buffer, "NODE LISTNODES:");
+					sendinfo(sockid, buffer);
+					recvinfo(sockid, buffer);
+					while (!moredone)
+					{
+						popstring(buffer, temp, ",", BUFF_SIZE);
+						nodenum = popint(buffer, ":");
+						printf("\n%s<%s%d%s> %s%s", KMAG,KGRN,nodenum,KMAG
+												 , KLTCYN, temp);
+						fflush(stdout);
+						count++;
+						if (*(buffer+0)=='\0')
+							moredone=1;
+					}
+			}
+		}
+	}
+	strcpy(buffer, "NODE TRAVEL:");
+	addint(buffer, choice, ':', BUFF_SIZE);
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	done=0;
+   while (!done)
+   {
+      // Check the real time stuff here!
+      // And then print out real time stuff!!!
+      sendinfo (sockid, "UPDATE");
+      recvinfo (sockid, buffer);
+      duplicate = strdup (buffer);
+      if (strncmp (duplicate, "OK", 2) == 0)
+      {
+          free (duplicate);
+		}
+		else
+		{
+			done=1;
+		}
+	}
+	printf("\n%sYou have reached your destination!", KMAG);
+	printf("\n");
+	free(buffer);
+	free(input);
 }
 
 void do_shipyard_menu(int sockid, struct player *curplayer)
@@ -2873,6 +3031,8 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
 				//Attack goes here
 				if (sector_or_porttype==9)
 					printf("\n%s<%sS%s>%s Land on the %sStardock", KMAG, KGRN, KMAG, KGRN, KYLW);
+				if (sector_or_porttype==10)
+					printf("\n%s<%sS%s>%s Land at the %sNode Station", KMAG, KGRN, KMAG, KGRN, KYLW);
             printf("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
             printf("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
             printf("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);

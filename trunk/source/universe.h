@@ -45,9 +45,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define S_INTRANSIT 1 
 #define S_PORTED 2
 #define S_STARDOCK 4
-#define S_PLANET 8
-#define S_CITADEL 16
-#define S_MAX 31
+#define S_NODE 8
+#define S_PLANET 16
+#define S_CITADEL 32
+#define S_MAX 63
 //And now for player flags
 #define P_LOGGEDIN 1
 #define P_STARDOCK 2
@@ -246,6 +247,13 @@ struct sector
   struct list *planets;		/* Pointer to list of planets in sector */
 };
 
+struct node
+{
+	int number;
+	struct port *portptr;
+	int min;
+	int max;
+};
 
 int init_universe (char *filename, struct sector ***array);
 int verify_universe (struct sector **array, int sectorcount);
@@ -254,4 +262,5 @@ void init_playerinfo (char *filename);
 void init_shipinfo (char *filename);
 void init_portinfo (char *filename);
 void init_planetClassification (void);
+void init_nodes(int numsectors);
 #endif

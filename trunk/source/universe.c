@@ -52,6 +52,7 @@ extern struct ship **ships;
 extern struct port **ports;
 extern struct sector **sectors;
 extern struct config *configdata;
+extern struct node **nodes;
 
 int
 init_universe (char *filename, struct sector ***array)
@@ -425,6 +426,41 @@ void init_portinfo (char *filename)
 
 }
 
+void init_nodes(int numsectors)
+{
+	int counter;
+	int portcount;
+
+	nodes = (struct node **)malloc(sizeof(struct node *)*configdata->numnodes);
+	if (configdata->numnodes == 1)
+	{
+		nodes[0] = (struct node *)malloc(sizeof (struct node));
+		nodes[0]->number = 1;
+		nodes[0]->min = 1;
+		nodes[0]->max = numsectors;
+		return;
+	}
+	for (counter=0; counter < configdata->numnodes; counter++)
+	{
+		nodes[counter] = (struct node *)malloc(sizeof(struct node));
+		nodes[counter]->number = counter+1;
+		nodes[counter]->min = (int)(counter)*(float)(numsectors)/(float)configdata->numnodes + 1.0;
+		nodes[counter]->max = (int)(counter + 1.0)*(float)(numsectors)/(float)configdata->numnodes;
+		nodes[counter]->portptr = NULL;
+		for (portcount = 0; portcount < configdata->max_ports; portcount++)
+		{
+			if (ports[portcount]->type == 10)
+			{
+				if ((ports[portcount]->location >= nodes[counter]->min) &&
+					(ports[portcount]->location <= nodes[counter]->max))
+				{
+					nodes[counter]->portptr = ports[portcount];
+					portcount = configdata->max_ports+1;
+				}
+			}
+		}
+	}
+}
 //This stuff isn't used right now.
 int verify_universe (struct sector **array, int sectorcount)
 {
