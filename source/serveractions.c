@@ -554,6 +554,12 @@ processcommand (char *buffer, struct msgcommand *data)
 						break;
 					case p_sellship:
 						break;
+					case p_priceship:
+						priceship(buffer, curplayer);
+						break;
+					case p_listships:
+						listships(buffer);
+						break;
 					case p_buyhardware:
 						break;
             	default:
@@ -1251,6 +1257,178 @@ buildportinfo (int portnumb, char *buffer)
     addint (buffer, ports[portnumb - 1]->type, ':', BUFF_SIZE);
 }
 
+void sellship(char *buffer, struct player *curplayer)
+{
+	const int price_per_fighter = 218;
+	const int price_per_shield = 131;
+	const int base_hold_price = 249;
+	const int hold_increment = 20;
+	char shipname[300]="\0";
+	int shipnum=0;
+
+	int holds_to_sell=0;
+	int price_holds=0;
+	struct ship *curship;
+	const float multiplier = 0.75;
+	int total = 0;
+	
+	curship = ships[curplayer->ship - 1];
+	curplayer->sector = curship->location;
+	holds_to_sell = curship->holds - shiptypes[curship->type - 1].initialholds;
+	//Taken from do_ship_upgrade
+	price_holds = base_hold_price*holds_to_sell + 
+		hold_increment*holds_to_sell*shiptypes[curship->type -1].initialholds;
+
+	total = total + multiplier*(float)shiptypes[curship->type -1].basecost;
+	total = total + multiplier*(float)(price_per_fighter*curship->fighters);
+	total = total + multiplier*(float)(price_per_shield*curship->shields);
+	total = total + multiplier*(float)price_holds;
+	//Add hardware in here!
+	
+	curplayer->credits= curplayer->credits + total;
+	buffer[0]='\0';
+	addint(buffer, total, ':', BUFF_SIZE);
+	strcpy(shipname, curship->name);
+	shipnum = curship->number;
+	free(curship->name);
+	delete(shipname, ship, symbols, HASH_LENGTH);
+	curplayer->ship = 0;
+	ships[shipnum]=NULL;
+	return;
+}
+
+void priceship(char *buffer, struct player *curplayer)
+{
+	const int price_per_fighter = 218;
+	const int price_per_shield = 131;
+	const int base_hold_price = 249;
+	const int hold_increment = 20;
+	char *temp = (char *)malloc(sizeof(char)*BUFF_SIZE);
+
+	int holds_to_sell=0;
+	int price_holds=0;
+	struct ship *curship;
+	const float multiplier = 0.75;
+	int total = 0;
+	
+	curship = ships[curplayer->ship - 1];
+	holds_to_sell = curship->holds - shiptypes[curship->type - 1].initialholds;
+	//Taken from do_ship_upgrade
+	price_holds = base_hold_price*holds_to_sell + 
+		hold_increment*holds_to_sell*shiptypes[curship->type -1].initialholds;
+
+	total = total + multiplier*(float)shiptypes[curship->type -1].basecost;
+	strcpy(temp, "Basecost,");
+	addint(temp, multiplier*(float)shiptypes[curship->type - 1].basecost
+		  , ':', BUFF_SIZE);
+	addstring(temp, "Fighters", ',', BUFF_SIZE);
+	addint(temp, multiplier*(float)curship->fighters
+		  , ':', BUFF_SIZE);
+	total = total + multiplier*(float)(price_per_fighter*curship->fighters);
+	addint(temp, multiplier*(float)curship->shields
+		  , ':', BUFF_SIZE);
+   addstring(temp, "Shields", ',', BUFF_SIZE);
+	total = total + multiplier*(float)(price_per_shield*curship->shields);
+	addint(temp, multiplier*(float)price_holds, ':', BUFF_SIZE);
+	addstring(temp, "Holds", ',', BUFF_SIZE);
+	total = total + multiplier*(float)price_holds;
+	//Add hardware in here!
+	
+	strcpy(buffer, ":");
+	addint(buffer, total, ':', BUFF_SIZE);
+	strcat(buffer, temp);
+	return;
+
+}
+
+void listships(char *buffer)
+{
+	int index=0;
+	strcpy(buffer, ":");
+	for(index=0;index<=SHIP_TYPE_COUNT-1;index++)
+	{
+		addstring(buffer, shiptypes[index].name, ',', BUFF_SIZE);
+		addint(buffer, shiptypes[index].basecost, ':', BUFF_SIZE);
+	}
+}
+
+void buyship(char *buffer, struct player *curplayer)
+{
+	int type=0;
+	int manned=0;
+	char name[500];
+	int i=0;
+	int done=0;
+	struct ship *curship = NULL;
+
+	type = popint(buffer, ":");
+	manned = popint(buffer, ":");
+	popstring(buffer, name, ":", BUFF_SIZE);
+	if ((manned==1) && (curplayer->ship != 0))
+	{
+		strcpy(buffer, "BAD: You can't man a new ship w/o selling the current one.");
+		return;
+	}
+	if (curplayer->credits < shiptypes[type - 1].basecost)
+	{
+		strcpy(buffer, "BAD: You don't have enough credits!");
+		return;
+	}
+	if ((curship =
+			(struct ship *)find(name, ship, symbols, HASH_LENGTH)) == NULL)
+	{
+		fprintf(stderr, "buyship: duplicate shipname!");
+		strcpy(buffer, "BAD: Another ship has this name already!");
+		return;
+	}
+	if ((curship = 
+			(struct ship *)insert(name, ship, symbols, HASH_LENGTH)) == NULL)
+	{
+		//This should never be reached because of the previous if.
+		fprintf(stderr, "buyship: duplicate shipanme");
+		strcpy(buffer, "BAD: Another ship has this name already!");
+		return;
+	}
+	while(!done)
+	{
+		if (i>MAX_SHIPS-1)
+		{
+			done=1;
+		}
+		else
+		{
+			if (ships[i] == NULL)
+			{
+				ships[i] = curship;
+				curship->number = i+1;
+				done = 1;
+			}
+		}
+		i++;
+	}
+	curship->name = (char *)malloc(strlen(name) + 1);
+	strcpy(curship->name, name);
+	curship->location = curplayer->sector;
+	curship->type = type;
+	curship->fighters = 0;
+	curship->holds = shiptypes[type -1].initialholds;
+	curship->colonists = 0;
+	curship->equipment = 0;
+	curship->organics = 0;
+	curship->ore = 0;
+	curship->owner = curplayer->number;
+	curship->flags = 0 | S_STARDOCK | S_PORTED;
+	curship->ported = 1;
+	if (manned==1)
+	{
+		curplayer->ship = curship->number;
+		curplayer->sector = 0;
+	}
+	curplayer->credits = curplayer->credits - shiptypes[type -1].basecost;
+	return;
+}
+
+
 void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curship)
 {
 	const int base_hold_price=249;
@@ -1869,8 +2047,7 @@ move_player (struct player *p, struct msgcommand *data, char *buffer)
     return data->to;
 }
 
-void
-fedcommlink (int playernum, char *message)
+void fedcommlink (int playernum, char *message)
 {
     char buffer[BUFF_SIZE];
     struct player *curplayer;
@@ -1892,8 +2069,7 @@ fedcommlink (int playernum, char *message)
     }
 }
 
-void
-sendtoallonline (char *message)
+void sendtoallonline (char *message)
 {
     int loop = 1;
     struct player *curplayer;

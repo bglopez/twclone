@@ -75,6 +75,8 @@ enum porttype
   p_quit,
   p_buyship,
   p_sellship,
+  p_priceship,
+  p_listships,
   p_deposit,
   p_withdraw,
   p_balance,

@@ -178,6 +178,10 @@ handle_player (void *threadinfo)
 				data.pcommand = p_buyship;
 			else if (strncmp(temp, "SELLSHIP", strlen("SELLSHIP")) == 0)
 				data.pcommand = p_sellship;
+			else if (strncmp(temp, "PRICESHIP", strlen("PRICESHIP")) == 0)
+				data.pcommand = p_priceship;
+			else if (strncmp(temp, "LISTSHIPS", strlen("PRICESHIP")) == 0)
+				data.pcommand = p_listships;
 			else if (strncmp(temp, "DEPOSIT", strlen("DEPOSIT")) == 0)
 				data.pcommand = p_deposit;
 			else if (strncmp(temp, "WITHDRAW", strlen("WITHDRAW")) == 0)
