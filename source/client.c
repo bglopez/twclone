@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.19 $
- * Last Modified: $Date: 2002-07-14 00:00:25 $
+ * $Revision: 1.20 $
+ * Last Modified: $Date: 2002-11-03 07:38:48 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.19 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-07-14 00:00:25 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.20 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-11-03 07:38:48 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -193,7 +193,16 @@ main (int argc, char *argv[])
 		case 'P':
 		  ptype = pt_port;
 		  mickey = prompttype (ptype, 0, sockid);
-		  doporting (sockid, curplayer);
+		  switch (*(mickey + 0))
+		  {
+				case 'q':
+				case 'Q':
+					break;
+				case 't':
+				case 'T':
+					doporting(sockid, curplayer);
+					break;
+		  }
 		  break;	//Porting ain't done yet.
 		case 'm':
 		case 'M':	//Shorthand for this command is to type  
@@ -906,7 +915,7 @@ printsector (struct sector *cursector)
 	      KMAG, KLTCYN, cursector->ports->type, KMAG,
 	      porttypes[cursector->ports->type], KMAG);
       if (cursector->ports->type == 9)
-	printf ("%s(Stardock)%s", KYLW, KNRM);
+	printf (" %s(Stardock)%s", KYLW, KNRM);
       free (cursector->ports->name);
       free (cursector->ports);
     }
@@ -1470,8 +1479,9 @@ prompttype (enum prompts type, int sector, int sockid)
 	  printf ("\n%sConfirmed? (Y/N)? ", KMAG);
 	  break;
 	case pt_port:
-	  printf ("%s\n", KNRM);
-	  printf ("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
+	  printf("%s\n", KNRM);
+	  printf("\n%s<%sT%s>%s Trade at this Port", KMAG, KGRN, KMAG, KGRN);
+	  printf("\n%s<%sQ%s>%s Quit", KMAG, KGRN, KMAG, KGRN);
 	  printf ("\n\n%sEnter your choice %s[T]%s ?", KMAG, KLTYLW, KMAG);
 	  break;
 	case move:
