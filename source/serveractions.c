@@ -867,7 +867,7 @@ void trading(struct player *curplayer, struct port *curport, char *buffer, struc
       }
       else if (portconversion[curport->type][product] == 'S')
       {
-        fprintf(stderr, "Offered price is %d, They have %di\n", playerprice,
+        fprintf(stderr, "Offered price is %d, They have %d\n", playerprice,
 	      curplayer->credits);
         if (playerprice > curplayer->credits)  //In case someones trying to
         {					     //out fox the system
