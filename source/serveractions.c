@@ -701,23 +701,29 @@ saveplayer (int pnumb, char *filename)
     {
       fprintf (stderr, "\nsaveplayer: No playerfile! Saving to new one!");
       if ((pnumb - 1) != 0)
-	{
-	  fprintf (stderr,
-		   "\nsaveplayer: Player is not player 1 for new save file!");
-	  exit (-1);
-	}
-      playerfile = fopen (filename, "w");
-      fprintf (playerfile, "%s", stufftosave);
-      fclose (playerfile);
+		{
+	  		fprintf (stderr, "\nsaveplayer: Player is not player 1 for new save file!");
+	  		free(intptr);
+			free(buffer);
+			free(stufftosave);
+			return;
+		}
+      playerfile = fopen(filename, "w");
+      fprintf(playerfile, "%s", stufftosave);
+      fclose(playerfile);
+		free(intptr);
+		free(buffer);
+		free(stufftosave);
+		return;
     }
   while (1)
     {
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-	break;
+			break;
       if (strncmp (buffer, intptr, strlen (intptr)) == 0)
-	fgetpos (playerfile, playerplace);
+			fgetpos (playerfile, playerplace);
     }
   fsetpos (playerfile, playerplace);
   fprintf (playerfile, "%s", stufftosave);
@@ -763,9 +769,18 @@ saveship (int snumb, char *filename)
   if (playerfile == NULL)
     {
       fprintf (stderr, "\nsaveship: No ship file! Saving to new one!");
-      playerfile = fopen (filename, "w");
+		if ((snumb-1) != 0)
+		{
+			fprintf(stderr, "\nsaveship: Ship is not #1 for new save file!");
+			exit(-1);
+		}
+      playerfile = fopen(filename, "w");
       fprintf (playerfile, "%s", stufftosave);
       fclose (playerfile);
+		free(intptr);
+		free(buffer);
+		free(stufftosave);
+		return;
     }
 
   while (1)
@@ -773,9 +788,9 @@ saveship (int snumb, char *filename)
       strcpy (buffer, "\0");
       fgets (buffer, BUFF_SIZE, playerfile);
       if (strlen (buffer) == 0)
-	break;
+			break;
       if (strncmp (buffer, intptr, strlen (intptr)) == 0)
-	fgetpos (playerfile, playerplace);
+			fgetpos (playerfile, playerplace);
     }
   fsetpos (playerfile, playerplace);
   fprintf (playerfile, "%s", stufftosave);

@@ -460,27 +460,27 @@ main (int argc, char **argv)
     {
       sprintf (fileline, "%d", (x + 1));
       fileline = strcat (fileline, ":");
-      for (y = 0; y < numwarps (x); y++)
-	{
-	  secptr = sectorlist[x]->sectorptr[y];
-	  sprintf (tempstr, "%d", secptr->number);
-	  fileline = strcat (fileline, tempstr);
-	  if (y + 1 != numwarps (x))
-	    fileline = strcat (fileline, ",");
-	}
+      for(y = 0; y < numwarps (x); y++)
+		{
+	  		secptr = sectorlist[x]->sectorptr[y];
+	  		sprintf (tempstr, "%d", secptr->number);
+	  		fileline = strcat (fileline, tempstr);
+	  		if(y + 1 != numwarps (x))
+	    		fileline = strcat (fileline, ",");
+		}
       fileline = strcat (fileline, ":");
       /* Adds in names for sectors */
       if (sectorlist[x]->nebulae == NULL)
-	{
-	  sectorlist[x]->nebulae = malloc (sizeof (strNameLength));
-	  tmpname = consellationName (tmpname);
-	  sectorlist[x]->nebulae = tmpname;
-	}
+		{
+	  		sectorlist[x]->nebulae = malloc (sizeof (strNameLength));
+	  		tmpname = consellationName (tmpname);
+	  		sectorlist[x]->nebulae = tmpname;
+		}
       if (sectorlist[x]->beacontext != NULL)
-	fileline = strcat (fileline, sectorlist[x]->beacontext);
+			fileline = strcat (fileline, sectorlist[x]->beacontext);
       fileline = strcat (fileline, ":");
       if (sectorlist[x]->nebulae != NULL)
-	fileline = strcat (fileline, sectorlist[x]->nebulae);
+			fileline = strcat (fileline, sectorlist[x]->nebulae);
       fileline = strcat (fileline, ":\n");
       /*  Later put in whitespace buffer for saving */
       /*  Not needed until user created beacons put in */
