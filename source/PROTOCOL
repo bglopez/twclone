@@ -111,8 +111,8 @@ for the types of messages
 -----------------------------------------------------------
 -----------------------------------------------------------
 
-USE <planet name>
-USE response
+GENESIS <planet name>
+GENESIS response
 :Planet Number:Owner:Sector:Planet Type:Planet Name:
 
 LAND <planet number>
