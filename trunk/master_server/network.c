@@ -20,10 +20,10 @@
 ** OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ** WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **
-** $Author: eryndil $
-** $Date: 2002-07-17 14:24:36 $
+** $Author: rdearman $
+** $Date: 2002-07-22 09:02:49 $
 ** $RCSfile: network.c,v $
-** $Revision: 1.1.1.1 $
+** $Revision: 1.2 $
 ** $State: Exp $
 **
 ** Description: This program is used to listen on ports 
@@ -249,10 +249,7 @@ ServiceThread (void *pData)
   PRFileDesc *s;
   PRFileDesc *f;
   char *strbufptr = &strbuf;
-  char *mybuf = "Are you talking to me?\n";
-  char *mybuf2 = "OK YOUR FUCKING FILE IS OPEN BITCH!\n";
   s = (PRFileDesc *) pData;
-
 
   newgame = read_socket (s, newgame);
 
@@ -261,10 +258,8 @@ ServiceThread (void *pData)
     {
       if ((f = (PRFileDesc *) fopen ("./data.xml", "r")) != NULL)
 	{
-	  while ((NULL != fgets (f, strlen (strbuf), strbuf)))
+	  while ((NULL != fgets (strbuf, sizeof (strbuf), f)))
 	    {
-	      fprintf (stderr, "OH BOYS HERE I AM!! INSIDE WHILE LOOP!\n%s\n",
-		       strbuf);
 	      if (-1 !=
 		  (PR_Send
 		   (s, strbufptr, strlen (strbufptr), 0, PR_INTERVAL_MAX)))
