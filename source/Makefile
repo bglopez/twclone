@@ -50,8 +50,8 @@ test_server : test_server.c common.o
 test_client : common.o test_client.c
 	gcc $(FLAGS) -o test_client test_client.c -lpthread common.o
 
-bigbang : universe.h bigbang.c namegen.o
-	gcc $(FLAGS) -o bigbang bigbang.c parse.o config.o namegen.o 
+bigbang : universe.h bigbang.c namegen.o planet.o
+	gcc $(FLAGS) -o bigbang bigbang.c parse.o config.o namegen.o planet.o
 clean : 
 	rm -f *.o server test_client test_server client bigbang core
 
