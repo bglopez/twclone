@@ -25,7 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 #include "common.h"
 
-int main(int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
   char buffer[BUFF_SIZE];
   int sockid, port = DEFAULT_PORT, len, sockaid;
@@ -35,46 +36,46 @@ int main(int argc, char *argv[])
   if (argc > 1)
     {
       //change the string to a long
-      port = strtoul(argv[1], NULL, 10);
-      if (port == 0) //if it wasn't possible to change to an int
+      port = strtoul (argv[1], NULL, 10);
+      if (port == 0)		//if it wasn't possible to change to an int
 	{
 	  //quit, and tell the user how to use us
-	  printf("usage:  %s [port_num]\n", argv[0]);
-	  exit(-1);
+	  printf ("usage:  %s [port_num]\n", argv[0]);
+	  exit (-1);
 	}
     }
 
   //creating the original server port
-  sockid = init_sockaddr(port, &serv_sockaddr);
-  
-  printf("Listening on port %d!\n", port);
-  
-  sockaid = acceptnewconnection(sockid);
+  sockid = init_sockaddr (port, &serv_sockaddr);
 
-  printf("Connected!\n");
+  printf ("Listening on port %d!\n", port);
+
+  sockaid = acceptnewconnection (sockid);
+
+  printf ("Connected!\n");
 
   do
     {
-      if (recvinfo(sockaid, buffer) == -1)
-	exit(-1);
-      
+      if (recvinfo (sockaid, buffer) == -1)
+	exit (-1);
+
       buffer[len] = '\0';
-      fprintf(stderr, "The client said '%s', what do you want to say: ", buffer);
+      fprintf (stderr, "The client said '%s', what do you want to say: ",
+	       buffer);
 
-      fgets(buffer, BUFF_SIZE, stdin);
-      buffer[strcspn(buffer, "\n")] = '\0';
+      fgets (buffer, BUFF_SIZE, stdin);
+      buffer[strcspn (buffer, "\n")] = '\0';
 
-      if (sendinfo(sockid, buffer) == -1)
-	exit(-1);
+      if (sendinfo (sockid, buffer) == -1)
+	exit (-1);
 
-      fprintf(stderr, "I just told the client '%s'\n", buffer);
+      fprintf (stderr, "I just told the client '%s'\n", buffer);
 
     }
-  while(strcmp(buffer, "QUIT") != 0);
+  while (strcmp (buffer, "QUIT") != 0);
 
   //close the one and only socket that the client ever opened
-  close(sockid);
+  close (sockid);
 
   return 0;
 }
-

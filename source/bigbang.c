@@ -30,6 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 **    complilant. (like some older Sun or HP compilers)
 **
 ** 3) Added random name generation for the ports.
+** 
+** 4) Added consellation names for sectors.
+**
+** 5) Added randomly placed Ferringhi sector.
 **
 */
 
@@ -74,17 +78,17 @@ int strNameLength = 25;
 
 /*  THESE ARE THE SET-IN-STONE FEDSPACE LINKS */
 /*  DON'T EVEN THINK ABOUT TOUCHING THESE... */
-const int fedspace[10][6] = { 
-{2, 3, 4, 5, 6, 7},
-{1, 3, 7, 8, 9, 10},
-{1, 2, 4, 0, 0, 0},
-{1, 3, 5, 0, 0, 0},
-{1, 4, 6, 0, 0, 0},
-{1, 5, 7, 0, 0, 0},
-{1, 2, 6, 8, 0, 0},
-{2, 7, 0, 0, 0, 0},
-{2, 10, 0, 0, 0, 0},
-{2, 9, 0, 0, 0, 0}
+const int fedspace[10][6] = {
+  {2, 3, 4, 5, 6, 7},
+  {1, 3, 7, 8, 9, 10},
+  {1, 2, 4, 0, 0, 0},
+  {1, 3, 5, 0, 0, 0},
+  {1, 4, 6, 0, 0, 0},
+  {1, 5, 7, 0, 0, 0},
+  {1, 2, 6, 8, 0, 0},
+  {2, 7, 0, 0, 0, 0},
+  {2, 10, 0, 0, 0, 0},
+  {2, 9, 0, 0, 0, 0}
 };
 
 struct sector **sectorlist;
@@ -102,7 +106,7 @@ int freewarp (int sector);
 int warpsfull (int sector);
 int numwarps (int sector);
 void makeports ();
-void sectorsort(struct sector *base[configdata->maxwarps], int elements);
+void sectorsort (struct sector *base[configdata->maxwarps], int elements);
 extern char *randomname (char *name);
 extern char *consellationName (char *name);
 extern void init_usedNames ();
@@ -127,19 +131,18 @@ main (int argc, char **argv)
     "Usage: bigbang [options]
     Options:
     -t < integer >
-       indicate the max length of tunnels and dead ends.(default /minimum 6) 
-    -s < integer >
-       indicate the max number of sectors.(default /minimum 500) 
-    -p < integer >
+       indicate the max length of tunnels and dead ends.(default /minimum 6)
+    - s < integer >
+       indicate the max number of sectors.(default /minimum 500)
+    - p < integer >
        indicate the max number of ports which MUST be at least 10 LESS than the
-       number of sectors.(default /minimum 190) 
-    -o < integer >
+       number of sectors.(default /minimum 190)
+    - o < integer >
        indicate the percentage chance that a final jump will be a one -
-       way.(default /minimum 3) 
-    -d < integer >
+       way.(default /minimum 3)
+    - d < integer >
        indicate the percentage chance that a tunnel will be a dead end.
-       (default/minimum 30) \n
-    ";
+       (default /minimum 30) \n ";
     /* This has to be taken out because of the knockon affect it was having with the rest of the program.
        -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
      */
@@ -198,7 +201,7 @@ main (int argc, char **argv)
   usedsecptr = numSectors - 11;
 
   randsectornum = (int *) malloc ((numSectors - 11) * sizeof (int));
-  tmpname = malloc(sizeof(strNameLength));
+  tmpname = malloc (sizeof (strNameLength));
 
   /*  Seed our randomizer */
   srand ((unsigned int) time (NULL));
@@ -215,12 +218,12 @@ main (int argc, char **argv)
   sectorlist = malloc (numSectors * sizeof (struct sector *));
 
   for (x = 0; x < numSectors; x++)
-    sectorlist[x] = malloc(sizeof(struct sector));
+    sectorlist[x] = malloc (sizeof (struct sector));
   printf ("done.\n");
 
   printf ("Creating port array...");
   portlist = malloc (numPorts * sizeof (struct port *));
- 
+
   for (x = 0; x < numPorts; x++)
     {
       portlist[x] = malloc (sizeof (struct port));
@@ -383,14 +386,20 @@ main (int argc, char **argv)
     }
   printf ("done.\n");
 
-  printf ("Creating %d ports!\n", numPorts);
+  printf ("Creating %d ports...", numPorts);
   makeports ();
   printf ("done.\n");
 
+
+  printf ("Creating Ferringhi Home Sector...");
+  tempint = randomnum (21, (numSectors-1));
+  sectorlist[tempint]->beacontext = "Ferringhi";
+  sectorlist[tempint]->nebulae = "Ferringhi";
+  printf ("done.\n");
   /*  Sorts each sector's warps into numeric order */
   for (x = 0; x < numSectors; x++)
     {
-		sectorsort(sectorlist[x]->sectorptr, numwarps(x));
+      sectorsort (sectorlist[x]->sectorptr, numwarps (x));
     }
 
   /*  Writing data to universe.data file */
@@ -416,8 +425,8 @@ main (int argc, char **argv)
       /* Adds in names for sectors */
       if (sectorlist[x]->nebulae == NULL)
 	{
-	  sectorlist[x]->nebulae = malloc(sizeof(strNameLength));
-	  tmpname = consellationName(tmpname);
+	  sectorlist[x]->nebulae = malloc (sizeof (strNameLength));
+	  tmpname = consellationName (tmpname);
 	  sectorlist[x]->nebulae = tmpname;
 	}
       if (sectorlist[x]->beacontext != NULL)
@@ -433,6 +442,7 @@ main (int argc, char **argv)
   fclose (file);
   free (fileline);
   free (tempstr);
+  printf ("done.\n");
 
   /*  Writing data to ports.data file */
   printf ("Saving ports to file...");
@@ -448,8 +458,8 @@ main (int argc, char **argv)
 	       portlist[x]->maxproduct[0], portlist[x]->maxproduct[1],
 	       portlist[x]->maxproduct[2], portlist[x]->product[0],
 	       portlist[x]->product[1], portlist[x]->product[2],
-	       (long int)portlist[x]->credits, portlist[x]->type,
-	       (int)portlist[x]->invisible);
+	       (long int) portlist[x]->credits, portlist[x]->type,
+	       (int) portlist[x]->invisible);
       fileline = strcat (fileline, ":");
       len = strlen (fileline);
       for (y = 0; y <= 99 - len; y++)
@@ -469,7 +479,7 @@ compsec (const void *cmp1, const void *cmp2)
 {
   const struct sector *a = *(struct sector **) cmp1;
   const struct sector *b = *(struct sector **) cmp2;
-  
+
   if (a->number > b->number)
     return 1;
   if (a->number < b->number)
@@ -555,56 +565,58 @@ numwarps (int sector)
   return x;
 }
 
-void sectorsort(struct sector *base[configdata->maxwarps], int elements)
+void
+sectorsort (struct sector *base[configdata->maxwarps], int elements)
 {
-   struct sector *holdersector;
-	int x=0;
-	int done=0, alldone=1;  /* This allows for exiting the sort */
-	/*This could be done better, but for now it works */
-	if (elements == 1)
-		return;
-	if (elements == 2)
+  struct sector *holdersector;
+  int x = 0;
+  int done = 0, alldone = 1;	/* This allows for exiting the sort */
+  /*This could be done better, but for now it works */
+  if (elements == 1)
+    return;
+  if (elements == 2)
+    {
+      if (base[0]->number > base[1]->number)
 	{
-		if (base[0]->number > base[1]->number)
-		{
-			holdersector = base[0];
-			base[0] = base[1];
-			base[1] = holdersector;
-		}
-		return;
+	  holdersector = base[0];
+	  base[0] = base[1];
+	  base[1] = holdersector;
+	}
+      return;
 
-	}
-	while(1)
+    }
+  while (1)
+    {
+      alldone = 1;
+      for (x = 0; x < (elements / 2 - 1 + elements % 2); x++)
 	{
-		alldone = 1;
-		for(x=0;x<(elements/2-1+elements%2);x++)
-		{
-			if (base[2*x]->number > base[2*x+1]->number)
-			{
-				holdersector = base[2*x];
-				base[2*x] = base[2*x+1];
-				base[2*x+1] = holdersector;
-			}
-		}
-		for(x=1;x<=(elements/2 - 1 + elements%2);x++)
-		{
-			if (base[2*x-1]->number > base[2*x]->number)
-			{
-				alldone = 0;
-				done = 0;
-				holdersector = base[2*x-1];
-				base[2*x-1] = base[2*x];
-				base[2*x] = holdersector;
-			}
-			else if (alldone)
-				done = 1;
-		}	
-		if (done)
-			break;
+	  if (base[2 * x]->number > base[2 * x + 1]->number)
+	    {
+	      holdersector = base[2 * x];
+	      base[2 * x] = base[2 * x + 1];
+	      base[2 * x + 1] = holdersector;
+	    }
 	}
+      for (x = 1; x <= (elements / 2 - 1 + elements % 2); x++)
+	{
+	  if (base[2 * x - 1]->number > base[2 * x]->number)
+	    {
+	      alldone = 0;
+	      done = 0;
+	      holdersector = base[2 * x - 1];
+	      base[2 * x - 1] = base[2 * x];
+	      base[2 * x] = holdersector;
+	    }
+	  else if (alldone)
+	    done = 1;
+	}
+      if (done)
+	break;
+    }
 }
 
-void makeports ()
+void
+makeports ()
 {
   struct port *curport;
   int type = 0;
@@ -613,17 +625,17 @@ void makeports ()
   char name[25];
   char *tmpname;
 
-  tmpname = malloc(sizeof(strNameLength));
+  tmpname = malloc (sizeof (strNameLength));
 
   for (loop = 0; loop < numPorts; loop++)
     {
       curport = (struct port *) malloc (sizeof (struct port));
       curport->number = loop + 1;
-      tmpname = randomname( tmpname );
-      curport->name = (char *)malloc(sizeof(struct port));
-      strcpy(name, "\0");
-      sprintf(name, "%s", tmpname);
-      strcpy(curport->name, name);
+      tmpname = randomname (tmpname);
+      curport->name = (char *) malloc (sizeof (struct port));
+      strcpy (name, "\0");
+      sprintf (name, "%s", tmpname);
+      strcpy (curport->name, name);
       curport->maxproduct[0] = randomnum (2800, 3000);
       curport->maxproduct[1] = randomnum (2800, 3000);
       curport->maxproduct[2] = randomnum (2800, 3000);

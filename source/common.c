@@ -35,112 +35,118 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   returns a sockid corresponding to a bound socket that was made in the
   function.
 */
-int init_sockaddr(int port, struct sockaddr_in *sock)
+int
+init_sockaddr (int port, struct sockaddr_in *sock)
 {
   int sockid;
 
   sock->sin_family = AF_INET;
-  sock->sin_port = htons(port);
-  sock->sin_addr.s_addr = htonl(INADDR_ANY);
+  sock->sin_port = htons (port);
+  sock->sin_addr.s_addr = htonl (INADDR_ANY);
 
-  if ((sockid = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+  if ((sockid = socket (AF_INET, SOCK_STREAM, 0)) == -1)
     {
-      perror("init_sockaddr: socket");
-      exit(-1);
-    }
-  
-  if (bind(sockid, (struct sockaddr *) sock, sizeof(* sock)) == -1)
-    {
-      perror("init_sockaddr: bind");
-      close(sockid);
-      exit(-1);
+      perror ("init_sockaddr: socket");
+      exit (-1);
     }
 
-  if (listen(sockid, 7) == -1)
+  if (bind (sockid, (struct sockaddr *) sock, sizeof (*sock)) == -1)
     {
-      perror("init_sockaddr: listen");
-      close(sockid);
-      exit(-1);
+      perror ("init_sockaddr: bind");
+      close (sockid);
+      exit (-1);
+    }
+
+  if (listen (sockid, 7) == -1)
+    {
+      perror ("init_sockaddr: listen");
+      close (sockid);
+      exit (-1);
     }
 
   return sockid;
-}  
+}
 
-int init_clientnetwork(char *hostname, int port)
+int
+init_clientnetwork (char *hostname, int port)
 {
   struct hostent *host;
   struct sockaddr_in serv_sockaddr;
   int sockid;
 
-  if ((host = gethostbyname(hostname)) == (struct hostent *)NULL)
+  if ((host = gethostbyname (hostname)) == (struct hostent *) NULL)
     {
-      perror("WRITER: gethostbyname");
-      exit(-1);
+      perror ("WRITER: gethostbyname");
+      exit (-1);
     }
 
   //setting up the sockaddt pointing to the server
   serv_sockaddr.sin_family = AF_INET;
-  memcpy(&serv_sockaddr.sin_addr, host->h_addr, host->h_length);
-  serv_sockaddr.sin_port = htons(port);
+  memcpy (&serv_sockaddr.sin_addr, host->h_addr, host->h_length);
+  serv_sockaddr.sin_port = htons (port);
 
-  if((sockid = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+  if ((sockid = socket (AF_INET, SOCK_STREAM, 0)) == -1)
     {
-      perror("socket: ");
-      exit(-1);
+      perror ("socket: ");
+      exit (-1);
     }
-  
-  if (connect(sockid, (struct sockaddr *) &serv_sockaddr, sizeof(serv_sockaddr)) == -1)
+
+  if (connect
+      (sockid, (struct sockaddr *) &serv_sockaddr,
+       sizeof (serv_sockaddr)) == -1)
     {
-      perror("connect: ");
-      exit(-1);
+      perror ("connect: ");
+      exit (-1);
     }
 
   return sockid;
 
 }
 
-int sendinfo(int sockid, char *buffer)
+int
+sendinfo (int sockid, char *buffer)
 {
-  if (send(sockid, buffer, strlen(buffer), 0) == -1)
+  if (send (sockid, buffer, strlen (buffer), 0) == -1)
     {
-      perror("sendto: ");
-      close(sockid);
+      perror ("sendto: ");
+      close (sockid);
       return -1;
     }
   return 0;
 }
 
 
-int recvinfo(int sockid, char *buffer)
+int
+recvinfo (int sockid, char *buffer)
 {
   int len;
   char tempbuffer[BUFF_SIZE];
 
-  if ((len = recv(sockid, tempbuffer, BUFF_SIZE, 0)) == -1)
+  if ((len = recv (sockid, tempbuffer, BUFF_SIZE, 0)) == -1)
     {
-      perror("recvfrom: ");
-      close(sockid);
+      perror ("recvfrom: ");
+      close (sockid);
       return -1;
     }
   tempbuffer[len] = '\0';
-  strncpy(buffer, tempbuffer, BUFF_SIZE);
+  strncpy (buffer, tempbuffer, BUFF_SIZE);
   return 0;
 }
 
-int acceptnewconnection(int sockid)
+int
+acceptnewconnection (int sockid)
 {
   int sockaid, clnt_length;
   struct sockaddr_in *clnt_sockaddr;
 
-  clnt_length = sizeof(* clnt_sockaddr);
+  clnt_length = sizeof (*clnt_sockaddr);
 
-  if ((sockaid = accept(sockid, (struct sockaddr *) clnt_sockaddr,
-			    &clnt_length)) == -1)
+  if ((sockaid = accept (sockid, (struct sockaddr *) clnt_sockaddr,
+			 &clnt_length)) == -1)
     {
-      perror("accept: ");
-      exit(-1);
+      perror ("accept: ");
+      exit (-1);
     }
 
   return sockaid;
 }
-

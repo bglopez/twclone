@@ -22,93 +22,102 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include "msgqueue.h"
 
-int init_msgqueue()
+int
+init_msgqueue ()
 {
   int msgid;
 
-  if ((msgid = msgget(rand(), IPC_CREAT | IPC_EXCL | 0600)) < 0)
+  if ((msgid = msgget (rand (), IPC_CREAT | IPC_EXCL | 0600)) < 0)
     {
-      perror("Failure to initialize message queue: ");
-      exit(-1);
+      perror ("Failure to initialize message queue: ");
+      exit (-1);
     }
 
-  return msgid; 
+  return msgid;
 }
 
-long getmsg(int msgid, char *buffer, long mtype)
+long
+getmsg (int msgid, char *buffer, long mtype)
 {
   int len, senderid;
-  void *msg = malloc(sizeof(struct msgbuffer));
-  
-  //fprintf(stderr, "getmsg: thread %d is attempting to retrieve messages to %d\n", 
-  //	  pthread_self(), mtype);
+  void *msg = malloc (sizeof (struct msgbuffer));
 
-  if ((len = msgrcv(msgid, msg, sizeof(struct msgbuffer), mtype, MSG_NOERROR)) < 0)
+  //fprintf(stderr, "getmsg: thread %d is attempting to retrieve messages to %d\n", 
+  //      pthread_self(), mtype);
+
+  if ((len =
+       msgrcv (msgid, msg, sizeof (struct msgbuffer), mtype,
+	       MSG_NOERROR)) < 0)
     {
-      perror("getmsg: Couldn't recieve message from the queue: ");
-      exit(-1);
+      perror ("getmsg: Couldn't recieve message from the queue: ");
+      exit (-1);
     }
 
-  strncpy(buffer, ((struct msgbuffer *)msg)->buffer, BUFF_SIZE);
-  senderid =  ((struct msgbuffer *)msg)->senderid;
+  strncpy (buffer, ((struct msgbuffer *) msg)->buffer, BUFF_SIZE);
+  senderid = ((struct msgbuffer *) msg)->senderid;
 
-  
+
   if (len < BUFF_SIZE)
     buffer[len] = '\0';
 
   //  fprintf(stderr, "getmsg: message '%s' was recieved heading to %d from %d\n", 
   //  buffer, mtype, senderid);
 
-  free(msg);
+  free (msg);
 
   return senderid;
 }
-		     
-void sendmsg(int msgid, char *buffer, long mtype)
-{
-  void *msg = malloc(sizeof(struct msgbuffer));
 
-  strncpy(((struct msgbuffer *)msg)->buffer, buffer, BUFF_SIZE);
-  ((struct msgbuffer *)msg)->mtype = mtype;
-  ((struct msgbuffer *)msg)->senderid = pthread_self();
+void
+sendmsg (int msgid, char *buffer, long mtype)
+{
+  void *msg = malloc (sizeof (struct msgbuffer));
+
+  strncpy (((struct msgbuffer *) msg)->buffer, buffer, BUFF_SIZE);
+  ((struct msgbuffer *) msg)->mtype = mtype;
+  ((struct msgbuffer *) msg)->senderid = pthread_self ();
 
   //fprintf(stderr, "sendmsg: Sending message '%s' from %d to %d\n", 
   //buffer, pthread_self(), mtype);
 
-  if (msgsnd(msgid, msg, sizeof(struct msgbuffer), 0) < 0)
+  if (msgsnd (msgid, msg, sizeof (struct msgbuffer), 0) < 0)
     {
-      perror("sendmsg: unable to send message to queue: ");
-      exit(-1);
+      perror ("sendmsg: unable to send message to queue: ");
+      exit (-1);
     }
 
-  free(msg);
+  free (msg);
   return;
 }
 
-long getdata(int msgid, struct msgcommand *data, long mtype)
+long
+getdata (int msgid, struct msgcommand *data, long mtype)
 {
   int len, senderid;
 
-  if ((len = msgrcv(msgid, (void *)data, sizeof(struct msgcommand), mtype, MSG_NOERROR)) < 0)
+  if ((len =
+       msgrcv (msgid, (void *) data, sizeof (struct msgcommand), mtype,
+	       MSG_NOERROR)) < 0)
     {
-      perror("getdata: Couldn't recieve message from the queue: ");
-      exit(-1);
+      perror ("getdata: Couldn't recieve message from the queue: ");
+      exit (-1);
     }
 
   senderid = data->senderid;
-  
+
   return senderid;
 }
 
-void senddata(int msgid, struct msgcommand *data, long mtype)
+void
+senddata (int msgid, struct msgcommand *data, long mtype)
 {
   data->mtype = mtype;
-  data->senderid = pthread_self();
+  data->senderid = pthread_self ();
 
-  if (msgsnd(msgid, data, sizeof(struct msgcommand), 0) < 0)
+  if (msgsnd (msgid, data, sizeof (struct msgcommand), 0) < 0)
     {
-      perror("senddata: unable to send message to queue: ");
-      exit(-1);
+      perror ("senddata: unable to send message to queue: ");
+      exit (-1);
     }
 
   return;

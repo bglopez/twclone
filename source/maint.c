@@ -43,58 +43,63 @@ extern int sectorcount;
 
 time_t *timeptr;
 
-void *background_maint(void *threadinfo)
+void *
+background_maint (void *threadinfo)
 {
-	time_t curtime;
-	struct tm *timenow;
-	int lastregen=-1;
-	int lastday=-1;
-	int loop=0;
+  time_t curtime;
+  struct tm *timenow;
+  int lastregen = -1;
+  int lastday = -1;
+  int loop = 0;
 
-	free(threadinfo);
+  free (threadinfo);
 
-	while (1)
+  while (1)
+    {
+      curtime = time (timeptr);
+      timenow = localtime (&curtime);
+      if (lastregen == -1)
+	lastregen = timenow->tm_hour;
+      if (lastday == -1)
+	lastday = timenow->tm_yday;
+      if ((curtime - starttime) % configdata->autosave * 60)	//Autosave
+	;			//saveall();
+      if ((timenow->tm_hour == lastregen + 1)
+	  || ((timenow->tm_hour == 0) && (lastregen == 23)))
 	{
-   	curtime = time(timeptr);
-		timenow = localtime(&curtime);
-		if (lastregen == -1)
-			lastregen = timenow->tm_hour;
-		if (lastday == -1)
-			lastday = timenow->tm_yday;
-   	if ((curtime - starttime)% configdata->autosave * 60) //Autosave
-     		;//saveall();
-   	if ((timenow->tm_hour == lastregen+1) || ((timenow->tm_hour == 0) && (lastregen==23)))
-		{
-			lastregen=timenow->tm_hour;
-			fprintf(stderr, "\nRegen turns by the hour!");
-			loop=0;
-			while(players[loop]!=NULL)
-			{
-				players[loop]->turns = players[loop]->turns + configdata->turnsperday/24;
-				if (players[loop]->turns > configdata->turnsperday)
-					players[loop]->turns = configdata->turnsperday;
-				loop++;
-			}
-		}
-   	if ((timenow->tm_yday == lastday+1) || ((timenow->tm_yday == 0) && (lastday==365)))
-		{
-			lastday=timenow->tm_yday;
-			fprintf(stderr, "\nRegen leftover turns!");
-   		while(players[loop]!=NULL)
-			{
-				players[loop]->turns = players[loop]->turns + configdata->turnsperday%24;
-				if (players[loop]->turns > configdata->turnsperday)
-					players[loop]->turns = configdata->turnsperday;
-				loop++;
-			}
-		}
-  		if ((curtime - starttime)% configdata->processinterval == 0)
-   	{
-			//Process real time stuff?
-		}
-   	if ((curtime - starttime)% 3*configdata->processinterval == 0)
-   	{
-			//Alien movement here.
-		} 
+	  lastregen = timenow->tm_hour;
+	  fprintf (stderr, "\nRegen turns by the hour!");
+	  loop = 0;
+	  while (players[loop] != NULL)
+	    {
+	      players[loop]->turns =
+		players[loop]->turns + configdata->turnsperday / 24;
+	      if (players[loop]->turns > configdata->turnsperday)
+		players[loop]->turns = configdata->turnsperday;
+	      loop++;
+	    }
 	}
+      if ((timenow->tm_yday == lastday + 1)
+	  || ((timenow->tm_yday == 0) && (lastday == 365)))
+	{
+	  lastday = timenow->tm_yday;
+	  fprintf (stderr, "\nRegen leftover turns!");
+	  while (players[loop] != NULL)
+	    {
+	      players[loop]->turns =
+		players[loop]->turns + configdata->turnsperday % 24;
+	      if (players[loop]->turns > configdata->turnsperday)
+		players[loop]->turns = configdata->turnsperday;
+	      loop++;
+	    }
+	}
+      if ((curtime - starttime) % configdata->processinterval == 0)
+	{
+	  //Process real time stuff?
+	}
+      if ((curtime - starttime) % 3 * configdata->processinterval == 0)
+	{
+	  //Alien movement here.
+	}
+    }
 }

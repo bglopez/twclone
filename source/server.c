@@ -47,151 +47,156 @@ struct config *configdata;
 time_t *timeptr;
 time_t starttime;
 
-int main(int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
   int sockid, port = DEFAULT_PORT, msgidin, msgidout, senderid;
   pthread_t threadid;
-  struct connectinfo *threadinfo = (struct connectinfo *) malloc(sizeof(struct connectinfo));
+  struct connectinfo *threadinfo =
+    (struct connectinfo *) malloc (sizeof (struct connectinfo));
   struct sockaddr_in serv_sockaddr;
   struct msgcommand data;
   char buffer[BUFF_SIZE];
 
-  starttime = time(timeptr);
+  starttime = time (timeptr);
   //reading the port to run on from the command line
   if (argc > 1)
     {
       //change the string to a long
-      port = strtoul(argv[1], NULL, 10);
-      if (port == 0) //if it wasn't possible to change to an int
+      port = strtoul (argv[1], NULL, 10);
+      if (port == 0)		//if it wasn't possible to change to an int
 	{
 	  //quit, and tell the user how to use us
-	  printf("usage:  %s [port_num]\n", argv[0]);
-	  exit(-1);
+	  printf ("usage:  %s [port_num]\n", argv[0]);
+	  exit (-1);
 	}
     }
 
-  init_hash_table(symbols, HASH_LENGTH);
+  init_hash_table (symbols, HASH_LENGTH);
 
-  printf("initializing configuration data from 'config.data'...");
-  fflush(stdout);
-  init_config("config.data");
-  printf(" Done\n");
-  
-  printf("initializing the universe from '%s'...", "universe.data");
-  fflush(stdout);
-  sectorcount = init_universe("universe.data", &sectors);
-  printf(" Done\n");
+  printf ("initializing configuration data from 'config.data'...");
+  fflush (stdout);
+  init_config ("config.data");
+  printf (" Done\n");
 
-  printf("Reading in planet information from 'planets.data'...\n");
-  fflush(stdout);
-  init_planets("planets.data", sectors);
-  printf("... Done!\n");
+  printf ("initializing the universe from '%s'...", "universe.data");
+  fflush (stdout);
+  sectorcount = init_universe ("universe.data", &sectors);
+  printf (" Done\n");
 
-  init_shiptypeinfo();
+  printf ("Reading in planet information from 'planets.data'...\n");
+  fflush (stdout);
+  init_planets ("planets.data", sectors);
+  printf ("... Done!\n");
 
-  printf("Reading in ship information from 'ships.data'...");
-  fflush(stdout);
-  init_shipinfo("ships.data");
-  printf(" Done!\n");
+  init_shiptypeinfo ();
 
-  printf("Reading in player information from 'players.data'...");
-  fflush(stdout);
-  init_playerinfo("players.data");
-  printf(" Done!\n");
-  
-  printf("Reading in port information from 'ports.data'...");
-  fflush(stdout);
-  init_portinfo("ports.data");
-  printf(" Done!\n");
-  
+  printf ("Reading in ship information from 'ships.data'...");
+  fflush (stdout);
+  init_shipinfo ("ships.data");
+  printf (" Done!\n");
+
+  printf ("Reading in player information from 'players.data'...");
+  fflush (stdout);
+  init_playerinfo ("players.data");
+  printf (" Done!\n");
+
+  printf ("Reading in port information from 'ports.data'...");
+  fflush (stdout);
+  init_portinfo ("ports.data");
+  printf (" Done!\n");
+
   /*looks like maybe I shouldn't do this
-    printf("Verify Universe...");
-    fflush(stdout);
-    if (verify_universe(sectors, sectorcount) < 0)
-    {
-    printf(" Failed, exiting!\n");
-    exit(-1);
-    }
-    printf(" Done\n");
-  */
+     printf("Verify Universe...");
+     fflush(stdout);
+     if (verify_universe(sectors, sectorcount) < 0)
+     {
+     printf(" Failed, exiting!\n");
+     exit(-1);
+     }
+     printf(" Done\n");
+   */
 
-  printf("Initializing random number generator...");
-  srand((int)time(NULL));
-  printf(" Done\n");
+  printf ("Initializing random number generator...");
+  srand ((int) time (NULL));
+  printf (" Done\n");
 
-  printf("Initializing message queues...");
-  msgidin = init_msgqueue();
-  msgidout = init_msgqueue();
-  printf(" Done\n");
+  printf ("Initializing message queues...");
+  msgidin = init_msgqueue ();
+  msgidout = init_msgqueue ();
+  printf (" Done\n");
 
-  printf("Creating sockets....");
-  fflush(stdout);
-  sockid = init_sockaddr(port, &serv_sockaddr);
-  printf(" Listening on port %d!\n", port);
+  printf ("Creating sockets....");
+  fflush (stdout);
+  sockid = init_sockaddr (port, &serv_sockaddr);
+  printf (" Listening on port %d!\n", port);
 
   threadinfo->sockid = sockid;
   threadinfo->msgidin = msgidin;
   threadinfo->msgidout = msgidout;
-  if (pthread_create(&threadid, NULL, makeplayerthreads, (void *) threadinfo) != 0)
+  if (pthread_create (&threadid, NULL, makeplayerthreads, (void *) threadinfo)
+      != 0)
     {
-      perror("Unable to Create Listening Thread");
-      exit(-1);
+      perror ("Unable to Create Listening Thread");
+      exit (-1);
     }
-  printf("Accepting connections!\n");
-  
-  printf("Initializing background maintenance...");
-  fflush(stdout);
-  threadinfo = (struct connectinfo *)malloc(sizeof(struct connectinfo));
-  threadinfo->msgidin = msgidin;
-  threadinfo->msgidout = msgidout;
-  if (pthread_create(&threadid, NULL, background_maint, (void *) threadinfo) != 0)
-    {
-      perror("Unable to Create Backgroud Thread");
-      exit(-1);
-    }
-  printf("Done!\n");
+  printf ("Accepting connections!\n");
 
-  threadinfo = (struct connectinfo *)malloc(sizeof(struct connectinfo));
+  printf ("Initializing background maintenance...");
+  fflush (stdout);
+  threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
   threadinfo->msgidin = msgidin;
   threadinfo->msgidout = msgidout;
-  if (pthread_create(&threadid, NULL, getsysopcommands, (void *) threadinfo) != 0)
+  if (pthread_create (&threadid, NULL, background_maint, (void *) threadinfo)
+      != 0)
     {
-      perror("Unable to Create Sysop Thread");
-      exit(-1);
+      perror ("Unable to Create Backgroud Thread");
+      exit (-1);
     }
-  printf("Accepting Sysop commands\n");
+  printf ("Done!\n");
+
+  threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
+  threadinfo->msgidin = msgidin;
+  threadinfo->msgidout = msgidout;
+  if (pthread_create (&threadid, NULL, getsysopcommands, (void *) threadinfo)
+      != 0)
+    {
+      perror ("Unable to Create Sysop Thread");
+      exit (-1);
+    }
+  printf ("Accepting Sysop commands\n");
 
   //process the commands from the threads
-  senderid = getdata(msgidin, &data, 0);
-  while(data.command != ct_quit || senderid != threadid)  //Main game loop
+  senderid = getdata (msgidin, &data, 0);
+  while (data.command != ct_quit || senderid != threadid)	//Main game loop
     {
-      processcommand(buffer, &data);
-      sendmsg(msgidout, buffer, senderid);
-      senderid = getdata(msgidin, &data, 0);
+      processcommand (buffer, &data);
+      sendmsg (msgidout, buffer, senderid);
+      senderid = getdata (msgidin, &data, 0);
     }
-  saveallports();
+  saveallports ();
 
   //when we're done, clean up the msg queues
-  if (fork() == 0)
+  if (fork () == 0)
     {
-      sprintf(buffer, "%d", msgidin);
-      fprintf(stderr, "Killing message queue with id %s...", buffer);
-      if (execlp("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
+      sprintf (buffer, "%d", msgidin);
+      fprintf (stderr, "Killing message queue with id %s...", buffer);
+      if (execlp ("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
 	{
-	  perror("Unable to exec: ");
-	  printf("Please run 'ipcrm msg %d'\n", msgidin);
+	  perror ("Unable to exec: ");
+	  printf ("Please run 'ipcrm msg %d'\n", msgidin);
 	}
     }
   else
     {
-      sprintf(buffer, "%d", msgidout);
-      fprintf(stderr, "Killing message queue with id %s...", buffer);
-      if (execlp("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
+      sprintf (buffer, "%d", msgidout);
+      fprintf (stderr, "Killing message queue with id %s...", buffer);
+      if (execlp ("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
 	{
-	  perror("Unable to exec: ");
-	  printf("Please run 'ipcrm msg %d'\n", msgidout);
+	  perror ("Unable to exec: ");
+	  printf ("Please run 'ipcrm msg %d'\n", msgidout);
 	}
     }
-  
+
   return 0;
 }

@@ -18,7 +18,7 @@
 * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/  
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,18 +31,18 @@ extern int randomnum (int min, int max);
 int flip = 1;
 
 char *
-randomname (char *name) 
+randomname (char *name)
 {
   char nm[50];
   strcpy (nm, firstSyllable[randomnum (0, 99)]);
   strcat (nm, middleSyllable[randomnum (0, 49)]);
   strcat (nm, lastSyllable[randomnum (0, 99)]);
-  sprintf(name,"%s",nm);
+  sprintf (name, "%s", nm);
   return name;
 }
 
 char *
-consellationName (char *name) 
+consellationName (char *name)
 {
   char nm[50];
   int randIndex;
@@ -58,20 +58,14 @@ consellationName (char *name)
   strcpy (nm, nameCollection[randIndex]);
   nameCount++;
   usedNames[nameCount] = randIndex;
-  sprintf(name, "%s", nm);
+  sprintf (name, "%s", nm);
   return name;
 }
 
 void
-init_usedNames () 
+init_usedNames ()
 {
   int a;
   for (a = 0; a < 500; a++)
     usedNames[a] = -1;
 }
-
-
-
-
-
-

@@ -26,25 +26,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern struct config *configdata;
 
-int init_config(char *filename)
+int
+init_config (char *filename)
 {
-   FILE *configfile;
-   char buffer[BUFF_SIZE];
-   
-   if ((configdata=(struct config *)malloc(sizeof(struct config)))==NULL)
-   {
-      fprintf(stderr, "Unable to allocate enough memory for configuration data\n");
-      exit(-1);
-   }
-	   
-   configfile = fopen(filename, "r");
-   fgets(buffer, BUFF_SIZE, configfile);
-   configdata->turnsperday = popint(buffer, ":");
-   configdata->maxwarps = popint(buffer, ":");
-   configdata->startingcredits = popint(buffer, ":");
-   configdata->startingfighters = popint(buffer, ":");
-   configdata->startingholds = popint(buffer, ":");
-   configdata->processinterval = popint(buffer, ":");
-   configdata->autosave = popint(buffer, ":");
-return(1);
+  FILE *configfile;
+  char buffer[BUFF_SIZE];
+
+  if ((configdata =
+       (struct config *) malloc (sizeof (struct config))) == NULL)
+    {
+      fprintf (stderr,
+	       "Unable to allocate enough memory for configuration data\n");
+      exit (-1);
+    }
+
+  configfile = fopen (filename, "r");
+  fgets (buffer, BUFF_SIZE, configfile);
+  configdata->turnsperday = popint (buffer, ":");
+  configdata->maxwarps = popint (buffer, ":");
+  configdata->startingcredits = popint (buffer, ":");
+  configdata->startingfighters = popint (buffer, ":");
+  configdata->startingholds = popint (buffer, ":");
+  configdata->processinterval = popint (buffer, ":");
+  configdata->autosave = popint (buffer, ":");
+  return (1);
 }
