@@ -207,8 +207,7 @@ struct citadel
   int qCannonSector;		/* Value percent to shoot sector with Q-Cannon */
   int qCannonAtmosphere;	/* Value percent to shoot atmosphere with Q-Cannon */
   int militaryReactionLevel;	/* like is says on the tin */
-  int shields;			/* number of planetary shields */
-  int treasuryFunds;
+  unsigned long treasuryFunds;
 };
 
 enum listtype

@@ -33,10 +33,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
-extern struct player *players[MAX_PLAYERS];
-extern struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
-extern struct ship *ships[MAX_SHIPS];
-extern struct port *ports[MAX_PORTS];
+extern struct player **players;
+extern struct sp_shipinfo **shiptypes;
+extern struct ship **ships;
+extern struct port **ports;
 extern struct config *configdata;
 extern time_t starttime;
 extern int sectorcount;

@@ -81,7 +81,7 @@ init_config (char *filename)
 
   fgets (buffer, BUFF_SIZE, configfile);
   configdata->turnsperday = popint (buffer, ":");
-  configdata->maxwarps = popint (buffer, ":");
+  configdata->maxwarps = popint(buffer, ":");
   configdata->startingcredits = popint (buffer, ":");
   configdata->startingfighters = popint (buffer, ":");
   configdata->startingholds = popint (buffer, ":");
