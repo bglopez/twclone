@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.29 $
- * Last Modified: $Date: 2003-10-23 17:47:17 $
+ * $Revision: 1.30 $
+ * Last Modified: $Date: 2003-10-24 01:36:42 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.29 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-23 17:47:17 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.30 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-24 01:36:42 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -805,18 +805,23 @@ int getsectorinfo (int sockid, struct sector *cursector)
     }
     else
         porttype = popint (buffer + position, ":");
-	 if (beacon != NULL || nebulae != NULL)
+	 if (beacon != NULL)
 	 {
 	 	if (strlen(beacon)!=0)
 	 	{
     		if (cursector->beacontext == NULL)
-        		cursector->beacontext = (char *) malloc (strlen (beacon) + 1);
+        		cursector->beacontext = (char *) 
+						  malloc (sizeof(char)*(strlen (beacon) + 1));
 	 		strncpy (cursector->beacontext, beacon, strlen (beacon) + 1);
 	 	}
+	 }
+	 if (nebulae!=NULL)
+	 {
 		if (strlen(nebulae)!=0)
 	 	{
     		if (cursector->nebulae == NULL)
-        		cursector->nebulae = (char *) malloc (strlen (nebulae) + 1);
+        		cursector->nebulae = (char *) 
+						  malloc(sizeof(char)*(strlen (nebulae) + 1));
 	  		strncpy (cursector->nebulae, nebulae, strlen (nebulae) + 1);
 	 	}
 	 }
@@ -826,7 +831,8 @@ int getsectorinfo (int sockid, struct sector *cursector)
     	{
         if ((curport = (struct port *) malloc (sizeof (struct port))) != NULL)
         {
-            curport->name = (char *) malloc (strlen (portname) + 1);
+            curport->name = (char *) 
+					malloc(sizeof(char)*(strlen (portname) + 1));
             strncpy (curport->name, portname, strlen (portname) + 1);
             if (porttype != 10)
                 curport->type = porttype;
@@ -952,13 +958,16 @@ int printsector (struct sector *cursector)
     printf ("%s", cursector->nebulae);
     free (cursector->nebulae);
     cursector->nebulae = NULL;
-    if ((len = strlen (cursector->beacontext)) != 0)
-    {
+	 if (cursector->beacontext != NULL)
+	 {
+    	if ((len = strlen (cursector->beacontext)) != 0)
+    	{
         printf ("\n%sBeacon  %s:%s ", KMAG, KLTYLW, KRED);
         printf ("%s %s", cursector->beacontext, KNRM);
         free(cursector->beacontext);
         cursector->beacontext = NULL;
-    }
+    	}
+	 }
     if (cursector->ports != NULL)
     {
         printf ("\n%sPorts   %s:%s ", KMAG, KLTYLW, KLTCYN);
