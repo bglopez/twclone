@@ -878,10 +878,10 @@ void processcommand (char *buffer, struct msgcommand *data)
 						buyship(buffer, curplayer);
 						break;
 					case p_sellship:
-						sellship(buffer, curplayer);
+						sellship(buffer, curplayer, curport->location);
 						break;
 					case p_priceship:
-						priceship(buffer, curplayer);
+						priceship(buffer, curplayer->ship);
 						break;
 					case p_listships:
 						listships(buffer);
@@ -944,10 +944,10 @@ void processcommand (char *buffer, struct msgcommand *data)
 						buyship(buffer, curplayer);
 						break;
 					case p_sellship:
-						sellship(buffer, curplayer);
+						sellship(buffer, curplayer, curport->location);
 						break;
 					case p_priceship:
-						priceship(buffer, curplayer);
+						priceship(buffer, curplayer->ship);
 						break;
 					case p_listships:
 						listships(buffer);
@@ -1010,6 +1010,24 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  //Check other flags here
         buildnewplanet (curplayer, buffer,
                         (int) ships[curplayer->ship - 1]->location);
+        break;
+    case ct_attack:
+
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD: Couldn't find player\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy(buffer, "BAD: Moving you can't do that!\n");
+            return;
+        }
+		  strcpy(buffer, data->buffer);
+		  //Check other flags here
+		  parse_attack(buffer, curplayer); 
         break;
     default:
         //fprintf(stderr, "processcommand: Got a bogus command\n");
@@ -1119,6 +1137,34 @@ void builddescription (int sector, char *buffer, int playernum)
         else
             addstring (buffer, "", ':', BUFF_SIZE);
     }
+	 addstring(buffer, "", ':', BUFF_SIZE);  //armid mines
+	 addstring(buffer, "", ':', BUFF_SIZE);  //armid mines owner
+	 addstring(buffer, "", ':', BUFF_SIZE);  //limpid mines 
+	 addstring(buffer, "", ':', BUFF_SIZE);  //limpid mines owner
+	 //Now for empty ships!
+	 p = 0;
+    element = sectors[sector - 1]->shiplist[0];
+    if (element == NULL)
+        addstring (buffer, "", ':', BUFF_SIZE);
+    else
+    {
+        do
+        {
+           if (p != 0)
+              addint (buffer, p, ',', BUFF_SIZE);
+            p = ((struct player *) element->item)->number;
+            element = element->listptr;
+        }
+        while (element != NULL);
+        if (p != 0)
+            addint (buffer, p, ':', BUFF_SIZE);
+        else
+            addstring (buffer, "", ':', BUFF_SIZE);
+    }
+
+	 //Then aliens!
+	 //Then ferrengi
+	 //Then feds!
 
     /*
      *This works but for testing purposes I'm taking it out
@@ -2198,7 +2244,7 @@ void buildportinfo (int portnumb, char *buffer)
     addint (buffer, ports[portnumb - 1]->type, ':', BUFF_SIZE);
 }
 
-void sellship(char *buffer, struct player *curplayer)
+void sellship(char *buffer, struct player *curplayer, int port_location)
 {
 	const int price_per_fighter = 218;
 	const int price_per_shield = 131;
@@ -2211,9 +2257,10 @@ void sellship(char *buffer, struct player *curplayer)
 	const float multiplier = 0.75;
 	int total = 0;
 	
-	curship = ships[curplayer->ship - 1];
-	curplayer->sector = curship->location;
-	priceship(buffer, curplayer);
+	shipnum = popint(buffer, ":");
+	curship = ships[shipnum - 1];
+	curplayer->sector = port_location;
+	priceship(buffer, shipnum);
 	total = popint(buffer, ":");
 	curplayer->credits= curplayer->credits + total;
 	buffer[0]='\0';
@@ -2222,12 +2269,13 @@ void sellship(char *buffer, struct player *curplayer)
 	shipnum = curship->number;
 	free(curship->name);
 	delete(shipname, ship, symbols, HASH_LENGTH);
+	free(curship);
 	curplayer->ship = 0;
 	ships[shipnum-1]=NULL;
 	return;
 }
 
-void priceship(char *buffer, struct player *curplayer)
+void priceship(char *buffer, int shipnum)
 {
 	const int price_per_fighter = 218;
 	const int price_per_shield = 131;
@@ -2241,7 +2289,7 @@ void priceship(char *buffer, struct player *curplayer)
 	const float multiplier = 0.75;
 	int total = 0;
 	
-	curship = ships[curplayer->ship - 1];
+	curship = ships[shipnum - 1];
 	holds_to_sell = curship->holds - shiptypes[curship->type - 1]->initialholds;
 	//Taken from do_ship_upgrade
 	price_holds = base_hold_price*holds_to_sell + 
@@ -2371,8 +2419,12 @@ void buyship(char *buffer, struct player *curplayer)
 	{
 		curship->flags = 0;
 		curship->ported = 0;
+		//Since the ship is unmanned this works!
+		curship->location = ships[curplayer->ship-1]->location;
 		//I hope this doesn't break
-		insertitem(curship, ship, sectors[curship->location]->shiplist, 1);
+		insertitem(curship, ship, sectors[curship->location-1]->shiplist, 1);
+		fprintf(stderr,"Buying an unmanned ship in sector %d\n", curship->location);
+		saveship(curship->number, "./ships.data");
 		strcpy(buffer, "OK: You own an unmanned ship in this sector");
 	}
 	curplayer->credits = curplayer->credits - shiptypes[type -1]->basecost;
@@ -3208,3 +3260,232 @@ void nodetravel(char *buffer, struct player *curplayer)
 	strcpy(buffer, "OK: Moving to a new node!");
 	return;
 }
+
+void parse_attack(char *buffer, struct player *curplayer)
+{
+	int to;
+	int num_figs;
+
+	to = popint(buffer, ":");
+	num_figs = popint(buffer, ":");
+
+	if (to > configdata->max_players)
+	{
+		//send alien stuff here
+	}
+	else
+	{
+		attack(curplayer, players[to-1], num_figs, buffer);
+	}
+}
+
+void attack(struct player *from, struct player *to, int num_figs, char *buffer)
+{
+	float attacker_lost;
+	float defender_lost;
+	int attack_lost;
+	int defense_lost;
+	int shields_lost=0;
+	int defense;
+	int offense;
+	int captured = 0;
+	int destroyed = 0;
+	struct ship *curship = NULL;
+	struct ship *oldship = NULL;
+	char name[255];
+	int loop=1;
+	int done=0;
+	int random_sector=0;
+	
+	if (ships[from->ship-1]->fighters < num_figs)
+	{
+		strcpy(buffer, "BAD: Not enough fighters!");
+		return;
+	}
+	if (num_figs > shiptypes[ships[from->ship-1]->type-1]->maxattack)
+	{
+		strcpy(buffer, "BAD: Can't attack with that many fighters!");
+		return;
+	}
+	if (num_figs > shiptypes[ships[from->ship-1]->type-1]->maxfighters)
+	{
+		strcpy(buffer, "BAD: Can't attack with more fighters than the ship can hold!");
+		return;
+	}
+	
+	defense = shiptypes[ships[to->ship-1]->type-1]->defense;
+	offense = shiptypes[ships[from->ship-1]->type-1]->offense;
+
+	//Base number that the defender lost before adding in random amount.
+	defender_lost = (float)offense/(float)defense*(float)num_figs*1.0;
+	defender_lost = box_muller(defender_lost, 0.05*defender_lost);
+	//new base number for amount attacker lost
+	attacker_lost = (float)num_figs*(float)num_figs/(float)ships[to->ship-1]->fighters;
+	attacker_lost = box_muller(attacker_lost, 0.05*attacker_lost);
+	
+	attack_lost = (int)attacker_lost;
+	defense_lost = (int)defender_lost;
+	
+	if (attack_lost > num_figs)
+		attack_lost = num_figs;
+	
+	//This may need some tweaking
+	if (defense_lost > (ships[to->ship-1]->shields+ships[to->ship-1]->fighters))
+	{
+		if (defense_lost > 1.05*(ships[to->ship-1]->shields+ships[to->ship-1]->fighters))
+		{
+			captured = 0;
+			destroyed = 1;
+			fprintf(stderr, "Ship destroyed!\n");
+			curship = ships[to->ship -1];
+			strcpy(name, curship->name);
+      	if (to->sector == 0)
+      	{
+		  		fprintf(stderr, "Removing player from sector %d", ships[to->ship-1]->location);
+        		to = delete (to->name, player, 
+					sectors[ships[to->ship - 1]->location - 1]->playerlist,1);
+			}
+			else
+      	{
+         	to = delete (to->name, player, 
+					sectors[to->sector - 1]->playerlist, 1);
+			}
+			free(curship->name);
+			delete(name, ship, symbols, HASH_LENGTH);
+			free(curship);
+			ships[to->ship -1 ] = NULL;
+			to->ship = 0;
+			fprintf(stderr, "No more ship in database!\n");
+		}
+		else
+		{
+			captured = 1;
+			destroyed = 0;
+			oldship = curship;
+			insertitem(oldship, ship, sectors[oldship->location-1]->shiplist,1);
+			fprintf(stderr, "Ship captured!\n");
+		}
+		loop=1;
+		strcpy(name, "\0");
+		do
+		{
+		strcpy(name, "\0");
+		sprintf(name, "%s's Gallileo #%d", to->name, loop);
+		loop++;
+		}while ((curship =
+			(struct ship *)find(name, ship, symbols, HASH_LENGTH)) != NULL);
+
+		fprintf(stderr, "Found ship with name %s\n", name);
+		done=0;
+		loop=0;
+		if ((curship = 
+			(struct ship *)insert(name, ship, symbols, HASH_LENGTH)) == NULL)
+		{
+			//This should never be reached because of the previous do-while.
+			fprintf(stderr, "attack: duplicate shipanme");
+			return;
+		}
+
+		while (!done)
+		{
+			if (loop > configdata->max_ships)
+			{
+				done=1;
+				fprintf(stderr, "\nattack: Max ships reached! Whoa problems!");
+            if (to->sector == 0)
+            {
+               to = delete (to->name, player, 
+						sectors[ships[to->ship - 1]->location - 1]->playerlist,1);
+               ships[to->ship - 1]->location = 1;
+					insertitem(to, player, sectors[ships[to->ship-1]->location-1]->playerlist,1);
+            }
+            else
+            {
+               to = delete (to->name, player, 
+						sectors[to->sector - 1]->playerlist, 1);
+               to->sector = 1;
+					insertitem(to, player, sectors[to->sector-1]->playerlist,1);
+				}
+
+			}
+			else
+			{
+				if (ships[loop] == NULL)
+				{
+					fprintf(stderr, "Found empty ship number %d\n", loop+1);
+					fflush(stderr);
+					ships[loop] = curship;
+					curship->number = loop+1;
+					to->ship = curship->number;
+					done = 1;
+					
+				}
+				else
+				{
+					fprintf(stderr, "Ship number %d not NULL\n", loop+1);
+				}
+			}
+			loop++;
+		}
+		done = 0;
+		if (configdata->numnodes != 1)
+		{
+			random_sector = randomnum(nodes[innode(ships[to->ship-1]->location)-1]->min,
+								 			  nodes[innode(ships[to->ship-1]->location)-1]->max);
+		}
+		else
+		{
+			random_sector = randomnum(1,sectorcount);
+		}
+		fprintf(stderr, "Putting new ship in sector %d\n", random_sector);
+		curship->name = (char *)malloc(sizeof(char)*(strlen(name) +1));
+		strcpy(curship->name, name);
+		curship->location = random_sector;
+		curship->type = 1;
+		curship->shields = 0;
+		curship->fighters = 10;
+		curship->holds = 5;
+		curship->colonists=0;
+		curship->equipment=0;
+		curship->organics=0;
+		curship->ore=0;
+		curship->owner = to->number;
+		fprintf(stderr, "Finished Initializing ship\n");
+      if (to->sector == 0)
+      {
+		  fprintf(stderr, "Inserting player to sector %d", ships[to->ship-1]->location);
+		  insertitem(to, player, sectors[ships[to->ship-1]->location-1]->playerlist,1);
+		}
+		else
+      {
+         to->sector = random_sector;
+			insertitem(to, player, sectors[to->sector-1]->playerlist,1);
+		}
+	}
+	else if (ships[to->ship-1]->shields >= defense_lost)
+	{
+		ships[to->ship-1]->shields -= defense_lost;
+		shields_lost = defense_lost;
+		defense_lost = 0;
+	}
+	else
+	{
+		defense_lost -= ships[to->ship-1]->shields;
+		shields_lost = ships[to->ship-1]->shields;
+		ships[to->ship-1]->fighters -= defense_lost;
+		ships[from->ship-1]->fighters -= attack_lost;
+	}
+
+	strcpy(buffer,"\0");
+	addint(buffer, shields_lost, ':', BUFF_SIZE);
+	addint(buffer, defense_lost, ':', BUFF_SIZE);
+	addint(buffer, attack_lost, ':', BUFF_SIZE);
+	addint(buffer, captured, ':' , BUFF_SIZE);
+	addint(buffer, destroyed, ':', BUFF_SIZE);
+	//xp
+	//alignment
+	//
+	//Move defender if not online
+	//send message to defender
+}
+

@@ -26,8 +26,8 @@ void fedcommlink (int playernum, char *message);
 void bank_deposit(char *buffer, struct player *curplayer);
 void bank_balance(char *buffer, struct player *curplayer);
 void bank_withdrawl(char *buffer, struct player *curplayer);
-void sellship(char *buffer, struct player *curplayer);
-void priceship(char *buffer, struct player *curplayer);
+void sellship(char *buffer, struct player *curplayer, int port_location);
+void priceship(char *buffer, int shipnum);
 void listships(char *buffer);
 void buyship(char *buffer, struct player *curplayer);
 void listhardware(char *buffer, struct player *curplayer);
@@ -42,5 +42,7 @@ void saveallports (char *filename);
 int innode(int sector);
 void listnodes(char *buffer, struct port *curport);
 void nodetravel(char *buffer, struct player *curplayer);
+void parse_attack(char *buffer, struct player *curplayer);
+void attack(struct player *from, struct player *to, int num_figs, char *buffer);
 
 #endif

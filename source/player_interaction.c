@@ -332,6 +332,8 @@ void *handle_player (void *threadinfo)
 	       && loggedin)
 	{
 	  data.command = ct_attack;
+	  popstring(inbuffer, temp, " ", BUFF_SIZE);
+	  strcpy(data.buffer, inbuffer);
 	  commandgood = 1;
 	}
       else if (strncmp (inbuffer, "ETHERPROBE", strlen ("ETHERPROBE")) == 0

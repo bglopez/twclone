@@ -264,12 +264,12 @@ void init_playerinfo (char *filename)
 
 		  if (ships[curplayer->ship-1]->onplanet == 0)
 		  {
-        if (insertitem (curplayer, player,
+        	if (insertitem (curplayer, player,
                         sectors[(curplayer->sector == 0) ?
                                 ships[curplayer->ship - 1]->location - 1 :
                                 (curplayer->sector - 1)]->playerlist,
                         1) == NULL)
-        {
+        	{
             fprintf (stderr,
                      "init_playerinfo: unable to add player '%s'to playerlist in sector %d!\n",
                      name,
@@ -277,7 +277,9 @@ void init_playerinfo (char *filename)
                       0) ? ships[curplayer->ship -
                                  1]->location : (curplayer->sector));
             exit (-1);
-        }
+        	}
+		  delete(ships[curplayer->ship-1]->name, ship, sectors[(curplayer->sector == 0) ? 
+					ships[curplayer->ship-1]->location - 1 : (curplayer->sector)]->shiplist,1);
 		  }
 
 
@@ -359,6 +361,16 @@ void init_shipinfo (char *filename)
 		  {
         ships[x - 1] = curship;
 		  }
+        
+		  if (insertitem (curship, ship,
+                        sectors[curship->location - 1]->shiplist, 1) == NULL)
+        {
+            fprintf (stderr,
+                     "init_shipinfo: unable to add ship '%s'to shiplist in sector %d!\n",
+                     name, curship->location);
+            exit (-1);
+        }
+
     }
     fclose (shipfile);
 

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.54 $
- * Last Modified: $Date: 2004-01-21 04:16:55 $
+ * $Revision: 1.55 $
+ * Last Modified: $Date: 2004-06-18 05:40:06 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.54 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-21 04:16:55 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.55 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-06-18 05:40:06 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -2337,6 +2337,7 @@ void buyship(int sockid, struct player *curplayer)
 	}
 	//Should this be (C)orporage or (P)ersonal Ship?
 	strcpy(buffer, "STARDOCK SELLSHIP:");
+	addint(buffer, curplayer->pship->number, ':', BUFF_SIZE);
 	sendinfo(sockid, buffer);
 	recvinfo(sockid, buffer);
 	done = 0;
