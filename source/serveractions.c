@@ -430,7 +430,7 @@ processcommand (char *buffer, struct msgcommand *data)
         }
         else
         {
-            strcpy (buffer, "BAD\n");
+            strcpy (buffer, "BAD: No Port in this sector!");
             return;
         }
         break;
@@ -1078,6 +1078,17 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 	int price_holds = 0;  //Since the price for holds is complicated 
 	//This is the price of the holds the player is buying
 
+	if (sectors[curship->location - 1]->portptr == NULL)
+	{
+		strcpy(buffer, "BAD: No port in this sector!");
+		return;
+	}
+	else if (sectors[curship->location - 1]->portptr->type != 0 ||
+			sectors[curship->location - 1]->portptr->type != 9)
+	{
+		strcpy(buffer, "BAD: No Class 0 or 9 port in this sector!");
+		return;
+	}
 	product = popint(buffer, ":");
 	amount = popint(buffer, ":");
 	buying = popint(buffer, ":");
