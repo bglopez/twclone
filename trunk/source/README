@@ -1,0 +1,17 @@
+Readme for TWClone
+Website: http://twclone.sourceforge.net
+
+Instructions on Installation can be found in the Install file.
+
+Files to note:
+
+1) PROTOCOL
+	This file lists the various commands to and from the server.
+	Good thing to read for those who are interested in helping,
+	or making their own clients. Don't forget about UPDATE
+	It's what allows for real time messages and movement.
+2) INSTALL
+	How to install.
+3) LICENSE
+	The GNU Public License
+
