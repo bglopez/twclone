@@ -47,5 +47,5 @@ test_client : common.o test_client.c
 bigbang : universe.h
 	gcc $(FLAGS) -o bigbang bigbang.c 
 clean : 
-	rm -f *.o server test_client test_server client
+	rm -f *.o server test_client test_server client bigbang
 
