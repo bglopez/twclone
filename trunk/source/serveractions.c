@@ -3292,6 +3292,7 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 	int destroyed = 0;
 	struct ship *curship = NULL;
 	struct ship *oldship = NULL;
+	int oldlocation=0;
 	char name[255];
 	int loop=1;
 	int done=0;
@@ -3318,24 +3319,44 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 	defense = shiptypes[ships[to->ship-1]->type-1]->defense;
 	offense = shiptypes[ships[from->ship-1]->type-1]->offense;
 
-	//Base number that the defender lost before adding in random amount.
-	defender_lost = (float)offense/(float)defense*(float)num_figs*1.0;
-	defender_lost = box_muller(defender_lost, 0.05*defender_lost);
-	//new base number for amount attacker lost
-	attacker_lost = (float)num_figs*(float)num_figs/(float)ships[to->ship-1]->fighters;
-	attacker_lost = box_muller(attacker_lost, 0.05*attacker_lost);
+	if (ships[to->ship-1]->fighters != 0)
+	{
+		//Base number that the defender lost before adding in random amount.
+		defender_lost = (float)offense/(float)defense*(float)num_figs*1.0;
+		defender_lost = box_muller(defender_lost, 0.05*defender_lost);
+		//new base number for amount attacker lost
+		attacker_lost = (float)num_figs*(float)num_figs/(float)ships[to->ship-1]->fighters;
+		attacker_lost = box_muller(attacker_lost, 0.05*attacker_lost);
 	
-	attack_lost = (int)attacker_lost;
-	defense_lost = (int)defender_lost;
+		attack_lost = (int)attacker_lost;
+		defense_lost = (int)defender_lost;
 	
-	if (attack_lost > num_figs)
-		attack_lost = num_figs;
+		if (attack_lost > num_figs)
+			attack_lost = num_figs;
+	}
+	else
+	{
+		defense_lost = 0;
+		attack_lost = 0;
+		if (num_figs < 5)
+		{
+			captured = 1;
+			destroyed = 0;
+		}
+		else
+		{
+			captured = 0;
+			destroyed = 1;
+		}
+		
+	}
 	toshields = ships[to->ship-1]->shields;
 	tofighters = ships[to->ship-1]->fighters;
+	curship = ships[to->ship-1];
 	//This may need some tweaking
-	if (defense_lost > (toshields+tofighters))
+	if ((defense_lost > (toshields+tofighters)) || captured || destroyed )
 	{
-		if (defense_lost > max(toshields+tofighters+5, (toshields+tofighters)*1.05))
+		if ((defense_lost > max(toshields+tofighters+5, (toshields+tofighters)*1.05)) || destroyed)
 		{
 			captured = 0;
 			destroyed = 1;
@@ -3368,20 +3389,21 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
 			fflush(stderr);
 			captured = 1;
 			destroyed = 0;
-			oldship = curship;
+			oldship = ships[to->ship-1];
       	if (to->sector == 0)
       	{
-		  		fprintf(stderr, "Removing player from sector %d", ships[to->ship-1]->location);
+		  		fprintf(stderr, "Removing player from sector %d\n", ships[to->ship-1]->location);
+				oldlocation = ships[to->ship-1]->location;
         		to = delete (to->name, player, 
 					sectors[ships[to->ship - 1]->location - 1]->playerlist,1);
+				fprintf(stderr, "Player removed!\n");
 			}
 			else
       	{
+				oldlocation = to->sector;
          	to = delete (to->name, player, 
 					sectors[to->sector - 1]->playerlist, 1);
 			}
-			insertitem(oldship, ship, sectors[oldship->location-1]->shiplist,1);
-			fprintf(stderr, "Ship captured!\n");
 		}
 		loop=1;
 		strcpy(name, "\0");
@@ -3482,6 +3504,9 @@ void attack(struct player *from, struct player *to, int num_figs, char *buffer)
          to->sector = random_sector;
 			insertitem(to, player, sectors[to->sector-1]->playerlist,1);
 		}
+			fprintf(stderr,"Inserting captured ship!\n");
+			insertitem(oldship, ship, sectors[oldlocation-1]->shiplist,1);
+			fprintf(stderr, "Finished!\n");
 	}
 	else if (ships[to->ship-1]->shields >= defense_lost)
 	{
