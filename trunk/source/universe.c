@@ -223,6 +223,7 @@ init_playerinfo (char *filename)
         //curplayer->credits = popint(buffer, ":");
 		  popstring(buffer, balance, ":", 100);
 		  curplayer->bank_balance = strtoul(balance,NULL,10);
+		  curplayer->flags = popint(buffer, ":");
 		  //curplayer->bank_balance = popint(buffer, ":");
         curplayer->name = (char *) malloc (strlen (name) + 1);
         curplayer->passwd = (char *) malloc (strlen (passwd) + 1);
