@@ -23,5 +23,8 @@ $ make install
 
 Developers
 ==========
-Run "./gen" to generate Makefile.in, configure, and other files.
+Run "./gen" to generate Makefile.in, configure, and other files.  Note
+that if you run "make" and Makefile.am or configure.in have been
+changed, autoconf and automake will be automatically run, so there is
+really no need to do this.
 

@@ -1,5 +1,5 @@
 dnl -*- autoconf -*-
-dnl $Id: configure.in,v 1.1 2002-06-11 21:03:18 eryndil Exp $
+dnl $Id: configure.in,v 1.2 2002-06-15 06:19:54 npsimons Exp $
 dnl Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 dnl 
 dnl This program is free software; you can redistribute it and/or modify
@@ -37,12 +37,15 @@ AC_PROG_CC
 
 dnl Checks for libraries.
 AC_CHECK_LIB(m, pow, , AC_MSG_ERROR("I need a math library."))
-AC_CHECK_LIB(pthread, pthread_create, , AC_MSG_ERROR("I need a pthread library."))
+AC_CHECK_LIB(pthread, pthread_create, , \
+	AC_MSG_ERROR("I need a pthread library."))
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(ctype.h errno.h math.h pthread.h stdio.h \
-	stdlib.h string.h termios.h time.h, , \
+AC_CHECK_HEADERS(ctype.h errno.h getopt.h math.h netdb.h netinet/in.h \
+	pthread.h stdio.h stdlib.h string.h sys/ipc.h sys/msg.h \
+	sys/poll.h sys/socket.h sys/time.h sys/types.h termios.h \
+	time.h unistd.h, , \
 	AC_MSG_ERROR("Missing essential header!"))
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -52,3 +55,4 @@ dnl Checks for library functions.
 AC_OUTPUT([
 Makefile
 ])
+

@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.am,v 1.1 2002-06-11 21:03:18 eryndil Exp $
+# $Id: Makefile.am,v 1.2 2002-06-15 06:19:54 npsimons Exp $
 # Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,38 +18,76 @@
 #
 # Alternatively, the GPL can be found at 
 # http://www.gnu.org/copyleft/gpl.html
-#
-# Standard automake Makefile.am template.
 
-bin_PROGRAMS = server test_server test_client client bigbang
+EXTRA_DIST = \
+	config.data
 
-server_SOURCES = server.c \
-	common.c \
-	universe.c \
-	msgqueue.c \
-	player_interaction.c \
-	sysop_interaction.c \
-	hashtable.c \
-	parse.c \
-	serveractions.c \
-	shipinfo.c \
-	planet.c \
+pkgdata_DATA = \
+	config.data
+
+bin_PROGRAMS = \
+	bigbang \
+	client \
+	server \
+	test_client \
+	test_server
+
+bigbang_SOURCES = \
+	bigbang.c \
 	config.c \
-	maint.c
-
-client_SOURCES = client.c \
-	common.c \
-	parse.c
-
-bigbang_SOURCES = bigbang.c \
+	config.h \
 	namegen.c \
-	planet.c \
+	namegen.h \
 	parse.c \
-	config.c
-	
-test_server_SOURCES = test_server.c \
-	common.c
+	parse.h \
+	planet.c \
+	planet.h
 
-test_client_SOURCES = test_client.c \
-	common.c
+client_SOURCES = \
+	ansi.h \
+	client.c \
+	client.h \
+	common.c \
+	common.h \
+	parse.c \
+	parse.h
 
+server_SOURCES = \
+	boxmuller.c \
+	boxmuller.h \
+	common.c \
+	common.h \
+	config.c \
+	config.h \
+	hashtable.c \
+	hashtable.h \
+	maint.c \
+	maint.h \
+	msgqueue.c \
+	msgqueue.h \
+	parse.c \
+	parse.h \
+	planet.c \
+	planet.h \
+	player_interaction.c \
+	player_interaction.h \
+	portinfo.h \
+	server.c \
+	serveractions.c \
+	serveractions.h \
+	shipinfo.c \
+	shipinfo.h \
+	sysop_interaction.c \
+	sysop_interaction.h \
+	universe.c \
+	universe.h
+
+test_client_SOURCES = \
+	common.c \
+	common.h \
+	test_client.c
+
+test_server_SOURCES = \
+	common.c \
+	common.h \
+	test_server.c

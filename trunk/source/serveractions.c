@@ -12,7 +12,7 @@
 #include "serveractions.h"
 #include "common.h"
 #include "portinfo.h"
-#include "boxmuller.c"
+#include "boxmuller.h"
 #include "config.h"
 
 extern struct sector **sectors;
