@@ -18,18 +18,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#ifdef HAVE_CONFIG_H
+#  include <autoconf.h>
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif /* HAVE_STDIO_H */
+
+#ifdef HAVE_STDIO_H
+#  include <stdio.h>
+#endif /* HAVE_STDIO_H */
+
+#ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+#endif /* HAVE_STDLIB_H */
+
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif /* HAVE_UNISTD_H */
+
 #include "config.h"
 #include "parse.h"
 
 extern struct config *configdata;
 
+#define init_config_cleanup() \
+  {\
+    if (configfile != NULL)\
+      {\
+        fclose (configfile);\
+        configfile = NULL;\
+      }\
+  }
+
+#define init_config_error(a) \
+  {\
+    perror (a);\
+    init_config_cleanup ();\
+    return (errno);\
+  }
+
 int
 init_config (char *filename)
 {
-  FILE *configfile;
+  FILE *configfile = NULL;
   char buffer[BUFF_SIZE];
 
   if ((configdata =
@@ -40,7 +73,12 @@ init_config (char *filename)
       exit (-1);
     }
 
-  configfile = fopen (filename, "r");
+  configfile = fopen (filename, "rb");
+  if (configfile == NULL)
+    {
+      init_config_error (filename);
+    }
+
   fgets (buffer, BUFF_SIZE, configfile);
   configdata->turnsperday = popint (buffer, ":");
   configdata->maxwarps = popint (buffer, ":");
