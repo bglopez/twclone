@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.am,v 1.4 2002-07-14 00:00:24 npsimons Exp $
+# $Id: Makefile.am,v 1.5 2004-01-21 04:00:53 eryndil Exp $
 # Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,14 @@
 # http://www.gnu.org/copyleft/gpl.html
 
 EXTRA_DIST = \
-	config.data
+	config.data \
+	planettypes.data \
+	shiptypes.data
 
 pkgdata_DATA = \
-	config.data
+	config.data \
+	planettypes.data \
+	shiptypes.data
 
 bin_PROGRAMS = \
 	bigbang \
