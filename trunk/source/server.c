@@ -52,9 +52,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct sector **sectors;
 int sectorcount;
 struct list *symbols[HASH_LENGTH];
-struct player *players[MAX_PLAYERS];
-struct ship *ships[MAX_SHIPS];
-struct port *ports[MAX_PORTS];
+struct player **players;
+struct ship **ships;
+struct port **ports;
 struct config *configdata;
 time_t *timeptr;
 time_t starttime;

@@ -43,13 +43,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "universe.h"
 #include "common.h"
 #include "planet.h"
+#include "config.h"
 
 extern struct list *symbols[HASH_LENGTH];
-extern struct player *players[MAX_PLAYERS];
-extern struct planet *planets[MAX_TOTAL_PLANETS];
-extern struct ship *ships[MAX_SHIPS];
-extern struct port *ports[MAX_PORTS];
+extern struct player **players;
+extern struct planet **planets;
+extern struct ship **ships;
+extern struct port **ports;
 extern struct sector **sectors;
+extern struct config *configdata;
 
 int
 init_universe (char *filename, struct sector ***array)
@@ -171,8 +173,7 @@ init_universe (char *filename, struct sector ***array)
     return sectorcount;
 }
 
-void
-init_playerinfo (char *filename)
+void init_playerinfo (char *filename)
 {
     FILE *playerinfo;
     char name[MAX_NAME_LENGTH], passwd[MAX_NAME_LENGTH];
@@ -182,7 +183,9 @@ init_playerinfo (char *filename)
     int playernum;
     struct player *curplayer;
 
-    for (playernum = 0; playernum < MAX_PLAYERS; playernum++)
+	 players = (struct player **)
+			malloc(sizeof(struct player *)*configdata->max_players);
+    for (playernum = 0; playernum < configdata->max_players; playernum++)
         players[playernum] = NULL;
 
     playerinfo = fopen (filename, "r");
@@ -279,8 +282,7 @@ init_playerinfo (char *filename)
     fclose (playerinfo);
 }
 
-void
-init_shipinfo (char *filename)
+void init_shipinfo (char *filename)
 {
     FILE *shipfile;
     char buffer[BUFF_SIZE];
@@ -288,7 +290,9 @@ init_shipinfo (char *filename)
     int x;
     struct ship *curship;
 
-    for (x = 0; x < MAX_SHIPS; x++)
+	 ships = (struct ship **)
+				malloc(sizeof(struct ship *)*configdata->max_ships);
+    for (x = 0; x < configdata->max_ships; x++)
         ships[x] = NULL;
 
     shipfile = fopen (filename, "r");
@@ -314,7 +318,8 @@ init_shipinfo (char *filename)
         curship->number = x;
         curship->name = (char *) malloc (strlen (name) + 1);
         strcpy (curship->name, name);
-        if ((curship->type = popint (buffer, ":")) > SHIP_TYPE_COUNT)
+        if ((curship->type = popint (buffer, ":")) > 
+								configdata->ship_type_count)
         {
             fprintf (stderr, "init_shipinfo: bad ship type number\n");
             exit (-1);
@@ -350,8 +355,7 @@ init_shipinfo (char *filename)
     return;
 }
 
-void
-init_portinfo (char *filename)
+void init_portinfo (char *filename)
 {
 
     FILE *portfile;
@@ -360,7 +364,9 @@ init_portinfo (char *filename)
     char name[MAX_NAME_LENGTH];
     struct port *curport;
 
-    for (counter = 0; counter <= MAX_PORTS; counter++)
+	 ports = (struct port **)
+			malloc(sizeof(struct port *)*configdata->max_ports);
+    for (counter = 0; counter <= configdata->max_ports; counter++)
         ports[counter] = NULL;
 
     portfile = fopen (filename, "r");
@@ -412,8 +418,7 @@ init_portinfo (char *filename)
 }
 
 //This stuff isn't used right now.
-int
-verify_universe (struct sector **array, int sectorcount)
+int verify_universe (struct sector **array, int sectorcount)
 {
     int i;
 
@@ -431,8 +436,7 @@ verify_universe (struct sector **array, int sectorcount)
     return 0;
 }
 
-int
-verify_sector_links (struct sector *test)
+int verify_sector_links (struct sector *test)
 {
     int i, j, good;
 

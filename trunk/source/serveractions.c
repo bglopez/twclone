@@ -18,19 +18,18 @@
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
-extern struct player *players[MAX_PLAYERS];
+extern struct player **players;
 extern struct sp_shipinfo **shiptypes;
-extern struct ship *ships[MAX_SHIPS];
-extern struct port *ports[MAX_PORTS];
-extern struct planet *planets[MAX_TOTAL_PLANETS];
+extern struct ship **ships;
+extern struct port **ports;
+extern struct planet **planets;
 extern struct config *configdata;
 
 extern int sectorcount;
 extern int WARP_WAIT; 
 struct timeval begin, end;
 
-void
-processcommand (char *buffer, struct msgcommand *data)
+void processcommand (char *buffer, struct msgcommand *data)
 {
     struct player *curplayer;
     struct port *curport;
@@ -640,8 +639,7 @@ processcommand (char *buffer, struct msgcommand *data)
 }
 
 //This wants the sector number, not array posistion
-void
-builddescription (int sector, char *buffer, int playernum)
+void builddescription (int sector, char *buffer, int playernum)
 {
     int linknum = 1;
     struct list *element;
@@ -897,8 +895,7 @@ int intransit (struct msgcommand *data)
 	All of it's deleted now since it's bad junk!
 */
 
-void
-findautoroute (int from, int to, char *buffer)
+void findautoroute (int from, int to, char *buffer)
 {
     int *length = (int *) malloc ((sectorcount + 1) * sizeof (int));
     int *prev = (int *) malloc ((sectorcount + 1) * sizeof (int));
@@ -1078,8 +1075,7 @@ void saveplayer (int pnumb, char *filename)
     free (stufftosave);
 }
 
-void
-saveship (int snumb, char *filename)
+void saveship (int snumb, char *filename)
 {
     char *intptr = (char *) malloc (10*sizeof(char));
     char *buffer = (char *) malloc (BUFF_SIZE*sizeof(char));
@@ -1158,8 +1154,7 @@ saveship (int snumb, char *filename)
 
 }
 
-void
-saveallports ()
+void saveallports ()
 {
     char *intptr = (char *) malloc (10);
     char *buffer = (char *) malloc (BUFF_SIZE);
@@ -1207,8 +1202,7 @@ saveallports ()
 }
 
 
-void
-buildplayerinfo (int playernum, char *buffer)
+void buildplayerinfo (int playernum, char *buffer)
 {
     buffer[0] = '\0';
     if (players[playernum - 1] == NULL)
@@ -1224,8 +1218,7 @@ buildplayerinfo (int playernum, char *buffer)
     return;
 }
 
-void
-buildshipinfo (int shipnum, char *buffer)
+void buildshipinfo (int shipnum, char *buffer)
 {
     buffer[0] = '\0';
     if (ships[shipnum - 1] == NULL)
@@ -1242,8 +1235,7 @@ buildshipinfo (int shipnum, char *buffer)
 
 }
 
-void
-buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
+void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 {
 
     buffer[0] = '\0';
@@ -1292,8 +1284,7 @@ buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 
 }
 
-void
-buildportinfo (int portnumb, char *buffer)
+void buildportinfo (int portnumb, char *buffer)
 {
     buffer[0] = '\0';
     addint (buffer, ports[portnumb - 1]->number, ':', BUFF_SIZE);
@@ -1393,7 +1384,7 @@ void priceship(char *buffer, struct player *curplayer)
 void listships(char *buffer)
 {
 	int index=0;
-	for(index=0;index<=SHIP_TYPE_COUNT-1;index++)
+	for(index=0;index<=configdata->ship_type_count-1;index++)
 	{
 		addstring(buffer, shiptypes[index]->name, ',', BUFF_SIZE);
 		addint(buffer, shiptypes[index]->basecost, ':', BUFF_SIZE);
@@ -1439,7 +1430,7 @@ void buyship(char *buffer, struct player *curplayer)
 	}
 	while(!done)
 	{
-		if (i>MAX_SHIPS-1)
+		if (i>configdata->max_ships-1)
 		{
 			done=1;
 			strcpy(buffer, "BAD: No more ships allowable!");
@@ -1949,7 +1940,7 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
     p_owner = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
-    for (i = 0; i <= MAX_TOTAL_PLANETS; i++)
+    for (i = 0; i <= configdata->max_total_planets; i++)
     {
         if (planets[i] == NULL)
         {
@@ -1960,7 +1951,7 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
 
 	 //This should really be a probability distribution with M being at the top
 	 // followed by L, O, K, H, U, C. But for now this will work
-	 p_type = randomnum(1,NUMBER_OF_PLANET_TYPES-1);
+	 p_type = randomnum(1,configdata->number_of_planet_types-1);
     strcpy (p_name, planetname);
     planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet *));
     planets[p_num-1]->num = p_num;
@@ -1993,7 +1984,7 @@ buildnewplayer (struct player *curplayer, char *shipname)
 
     int i;			//A counter
     struct ship *curship;
-    for (i = 0; i <= MAX_PLAYERS; i++)
+    for (i = 0; i <= configdata->max_players; i++)
     {
         if (players[i] == NULL)
             break;
@@ -2001,7 +1992,7 @@ buildnewplayer (struct player *curplayer, char *shipname)
     curplayer->number = i + 1;
     players[i] = curplayer;
 
-    for (i = 0; i <= MAX_SHIPS; i++)
+    for (i = 0; i <= configdata->max_ships; i++)
     {
         if (ships[i] == NULL)
             break;

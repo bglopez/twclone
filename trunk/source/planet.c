@@ -3,7 +3,9 @@
 #include <string.h>
 #include "planet.h"
 #include "parse.h"
+#include "config.h"
 
+extern struct config *configdata;
 /*
  *	init_planets(filename, secarray)
  *	loads planet info from file.  returns number
@@ -19,7 +21,9 @@ int init_planets (char *filename, struct sector **secarray)
 
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
-    for (i = 0; i < MAX_TOTAL_PLANETS; i++)
+	 planets = (struct planet **)
+			malloc(sizeof(struct planet *)*configdata->max_total_planets);
+    for (i = 0; i < configdata->max_total_planets; i++)
         planets[i] = NULL;
 
     planetfile = fopen (filename, "r");
@@ -63,8 +67,7 @@ int init_planets (char *filename, struct sector **secarray)
  *	returns the sector number it was inserted in, and
  *	-1 if called with a NULL sector
 */
-int
-insert_planet (struct planet *p, struct sector *s, int playernumber)
+int insert_planet (struct planet *p, struct sector *s, int playernumber)
 {
     struct list *p_list, *newp_list;
     if (s == NULL)
