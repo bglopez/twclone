@@ -186,6 +186,9 @@ void init_playerinfo(char *filename)
       curplayer->ported = 0;
       curplayer->lastprice = 0;
       curplayer->firstprice = 0;
+		curplayer->intransit = 0;
+		curplayer->beginmove = 0;
+		curplayer->movingto = 0;
 
       if (players[playernum - 1] != NULL)
 	{

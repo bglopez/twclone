@@ -137,6 +137,12 @@ void *handle_player(void *threadinfo)
 	  data.command = ct_playerinfo;
 	  commandgood = 1;
 	}
+		else if (strncmp(inbuffer, "UPDATE", 6) == 0 && loggedin)
+		{
+			strcpy(data.name, name);
+			data.command = ct_update;
+			commandgood = 1;
+		}
       else if (strncmp(inbuffer, "SHIPINFO", 8) == 0 && loggedin)
 	{
 	  popstring(inbuffer, temp, " ", BUFF_SIZE);
