@@ -1,0 +1,86 @@
+-----------------------------------------------------------
+-----------------------------------------------------------
+| client<->server protocol ideas, please make suggestions |
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+client commands:
+----------------
+
+DESCRIPTION
+please give me a description of the current sector
+
+<#>
+please move me to this sector, if it is adjacent, the move is 
+immediate, otherwise, a list of sectors conprising the path
+is returned
+
+PLAYERINFO <player number>:
+
+SHIPINFO <ship number>:
+
+USER <user name>:<password>:
+this is the user that wants to play, and his password.  If this is 
+successful, the current sector's description will be returned.
+
+NEW <user name>:<password>:
+This is to make a new user.
+
+QUIT
+This is the logout command.
+
+PORT <TRADE, LAND, NEGOTIATE, ROB, SMUGGLE, ATTACK>:<ore, organics, equipment, credits>:<holds of stuff>:<price you offer or steal>:
+Trade at a port
+
+MYINFO
+Gets information for you and your ship
+
+PORTINFO
+Gets information on the port in the current sector
+
+server responses:
+-----------------
+
+DESCRIPTION response:
+:<current sector number>:<, adjacent sectors>:<beacon text>:<nebulae>:<port name>:<port type>:<players in sector delimited by ,>:<fighters in sector>:<mode of such fighters>:<, planets in sector>:<armid mines in sector>:<owner of armid mines>:<limpid mines in sector>:<, empty ships in sector>:<, aliens in sector>:<, feds in sector>:
+
+<#> response
+if the move was made, a description of the new sector is returned
+if the new sector is not adjacent, this is returned
+:<, delimited list of sectors comprising path>:
+
+PLAYERINFO response:
+:<Player name>:<Experience>:<Alignment>:<Current ship number>:
+
+SHIPINFO response:
+:<owned by(number)>:<ship name>:<ship type>:<fighters>:<shields>:
+
+PORT response:
+  For Trade :<price offered>:<accepted or not accepted>:<exp gained from good trading>:
+            Note: accepted = 1, not accepted = 0
+
+PORTINFO response:
+:<port number>:<port name>:<max ore>:<max organics>:<max equipment>:<current ore>:<current organics>:<current equipment>:<credits>:<type>:
+
+MYINFO response:
+:<player number>:<name>:<ship number>:<experience>:<alignment>:<turns>:<credits>:<ship number>:<ship name>:<ship type>:<fighters>:<shields>:<holds>:<colonists>:<equipment>:<organics>:<ore>:<owner>:<location>:<turns per warp>:
+
+BAD
+This is sent if the client does something that doesn't succed
+
+OK
+The command was good, but no info needs to be exchanged
+
+-----------------------------------------------------------
+-----------------------------------------------------------
+| server<->server protocol ideas, please make suggestions |
+-----------------------------------------------------------
+-----------------------------------------------------------
+
+minor thread commands:
+----------------------
+These will all be encapsulated in a data structure, so no need for a protocol
+
+major thread responses:
+-----------------------
+These will always be the buffer that is to be passed back to the client.
