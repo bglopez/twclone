@@ -34,13 +34,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "planet.h"
 #include "serveractions.h"
 #include "shipinfo.h"
- 
+#include "config.h"
+
 struct sector **sectors;
 int sectorcount;
 struct list *symbols[HASH_LENGTH];
 struct player *players[MAX_PLAYERS];
 struct ship *ships[MAX_SHIPS];
 struct port *ports[MAX_PORTS];
+struct config *configdata;
+time_t *starttime, *curtime;
 
 int main(int argc, char *argv[])
 {
@@ -51,6 +54,7 @@ int main(int argc, char *argv[])
   struct msgcommand data;
   char buffer[BUFF_SIZE];
 
+  time(starttime);
   //reading the port to run on from the command line
   if (argc > 1)
     {
@@ -66,6 +70,11 @@ int main(int argc, char *argv[])
 
   init_hash_table(symbols, HASH_LENGTH);
 
+  printf("initializing configuration data from 'config.data'...");
+  fflush(stdout);
+  init_config("config.data");
+  printf(" Done\n");
+  
   printf("initializing the universe from '%s'...", "universe.data");
   fflush(stdout);
   sectorcount = init_universe("universe.data", &sectors);
@@ -140,8 +149,23 @@ int main(int argc, char *argv[])
 
   //process the commands from the threads
   senderid = getdata(msgidin, &data, 0);
-  while(data.command != ct_quit || senderid != threadid)
+  while(data.command != ct_quit || senderid != threadid)  //Main game loop
     {
+      time(curtime);
+      if ((curtime - starttime)% configdata->autosave * 60) //Autosave
+	      saveall();
+      if ((curtime - starttime)% 3600 == 0)
+	      ;//Regen turns;
+      if ((curtime - starttime)% 86400 == 0)
+	      ;//Regen fractional turns leftover
+      if ((curtime - starttime)% configdata->processinterval == 0)
+      {
+	//Process real time stuff?
+      }
+      if ((curtime - starttime)% 3*configdata->processinterval == 0)
+      {
+	//Alien movement here.
+      }
       processcommand(buffer, &data);
       sendmsg(msgidout, buffer, senderid);
       senderid = getdata(msgidin, &data, 0);

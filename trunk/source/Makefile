@@ -26,11 +26,14 @@ parse.o : parse.h parse.c
 shipinfo.o : shipinfo.h shipinfo.c
 	gcc $(FLAGS) -c -o shipinfo.o shipinfo.c
 
-serveractions.o : shipinfo.h common.h parse.h msgqueue.h universe.h hashtable.h portinfo.h serveractions.h serveractions.c planet.h planet.c
+serveractions.o : shipinfo.h common.h parse.h msgqueue.h universe.h hashtable.h portinfo.h serveractions.h serveractions.c planet.h planet.c config.h
 	gcc $(FLAGS) -c -o serveractions.o serveractions.c
 
-server : server.c common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o
-	gcc $(FLAGS) -lm -o server server.c -lpthread common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o
+config.o : common.h parse.h config.h config.c
+	gcc $(FLAGS) -c -o config.o config.c
+	
+server : server.c common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o
+	gcc $(FLAGS) -lm -o server server.c -lpthread common.o universe.o msgqueue.o player_interaction.o sysop_interaction.o hashtable.o parse.o serveractions.o shipinfo.o planet.o config.o
 
 client : client.c common.o client.h ansi.h common.h parse.h
 	gcc $(FLAGS) -lm -o client client.c common.o parse.o 
