@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.53 $
- * Last Modified: $Date: 2004-01-21 03:55:24 $
+ * $Revision: 1.54 $
+ * Last Modified: $Date: 2004-01-21 04:16:55 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.53 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-21 03:55:24 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.54 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-21 04:16:55 $\0";
 int MAXWARPS = 5000;
 int MAX_PLANETS = 500;
 
@@ -344,7 +344,7 @@ void printwelcome ()
     printf ("\n");
     printf ("\nTWClone Hompage: %shttp://twclone.sourceforge.net%s", KLTCYN,
             KGRN);
-    printf ("\nCurrent Release: 0.12");
+    printf ("\nCurrent Release: 0.14");
     printf ("\n");
 }
 
@@ -541,7 +541,7 @@ void printhelp ()
      KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN,
      KMAG, KLTCYN, KGRN);
     printf
-    ("\n%s|==============================%s0.13 beta%s================================|",
+    ("\n%s|==============================%s0.14 beta%s================================|",
      KGRN, KLTRED, KGRN);
 
 }
