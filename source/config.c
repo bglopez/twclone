@@ -87,18 +87,16 @@ init_config (char *filename)
   configdata->startingholds = popint (buffer, ":");
   configdata->processinterval = popint (buffer, ":");
   configdata->autosave = popint (buffer, ":");
-  //This is for later use.
-  /*
-  configdata->MAX_PLAYERS = popint(buffer, ":");
-  configdata->MAX_SHIPS = popint(buffer, ":");
-  configdata->MAX_PORTS = popint(buffer, ":");
-  configdata->MAX_PLANETS = popint(buffer, ":");
-  configdata->MAX_TOTAL_PLANETS = popint(buffer, ":");
-  configdata->MAX_SAFE_PLANETS = popint(buffer, ":");
-  configdata->MAX_CITADEL_LEVEL = popint(buffer, ":");
-  configdata->NUMBER_OF_PLANET_TYPES = popint(buffer, ":");
-  configdata->MAX_SHIP_NAME_LENGTH = popint(buffer, ":");
-  configdata->SHIP_TYPE_COUNT = popint(buffer, ":");*/
+  configdata->max_players = popint(buffer, ":");
+  configdata->max_ships = popint(buffer, ":");
+  configdata->max_ports = popint(buffer, ":");
+  configdata->max_planets = popint(buffer, ":");
+  configdata->max_total_planets = popint(buffer, ":");
+  configdata->max_safe_planets = popint(buffer, ":");
+  configdata->max_citadel_level = popint(buffer, ":");
+  configdata->number_of_planet_types = popint(buffer, ":");
+  configdata->max_ship_name_length = popint(buffer, ":");
+  configdata->ship_type_count = popint(buffer, ":");
 
   return (1);
 }
