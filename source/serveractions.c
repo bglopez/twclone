@@ -981,6 +981,17 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         buildtotalinfo (curplayer->number, buffer, data);
         break;
+	 case ct_gameinfo:
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+		  buildgameinfo(buffer);
+        break;
+
     case ct_genesis:
 
         if ((curplayer =
@@ -1255,7 +1266,14 @@ void findautoroute (int from, int to, char *buffer)
 	 {
 		if (configdata->numnodes != 1)
 		{
-			findautoroute(from, nodes[nodefrom-1]->portptr->location, buffer);
+			if (from != nodes[nodefrom-1]->portptr->location)
+			{
+				findautoroute(from, nodes[nodefrom-1]->portptr->location, buffer);
+			}
+			else
+			{
+				strcpy(buffer, "BAD: You are already at the closest Node Station.");
+			}
 		}
 		else
 		{
@@ -2038,6 +2056,74 @@ void buildshipinfo (int shipnum, char *buffer)
     addint (buffer, ships[shipnum - 1]->fighters, ':', BUFF_SIZE);
     addint (buffer, ships[shipnum - 1]->shields, ':', BUFF_SIZE);
 
+}
+
+void buildgameinfo(char *buffer)
+{
+  time_t datenow;
+  time_t difference;
+  int numports=0;
+  int numplayers=0;
+  int numgood=0;
+  float percent;
+  unsigned long portworth=0;
+  int numplanets=0;
+  int numcitadels=0;
+  int stardocksector=0;
+  int index=0;
+
+  for (index=0; index < configdata->max_players; index++)
+  {
+		if (players[index]!=NULL)
+		{
+			numplayers++;
+			if (players[index]->alignment > 0)
+				numgood++;
+		}
+  }
+  for (index=0; index < configdata->max_ports; index++)
+  {
+		if (ports[index]!=NULL)
+		{
+			numports++;
+			portworth = portworth + ports[index]->credits;
+			if (ports[index]->type == 9)
+				stardocksector = ports[index]->location;
+		}
+  }
+  for (index=0; index < configdata->max_total_planets; index++)
+  {
+		if (planets[index]!=NULL)
+		{
+			numplanets++;
+			if (planets[index]->citdl->level != 0)
+				numcitadels++;
+		}
+  }
+  datenow = time(NULL);
+  difference = (datenow - configdata->bangdate)/(24*3600);
+  
+  buffer[0] = '\0';
+  addint(buffer, sectorcount, ':', BUFF_SIZE);
+  addint(buffer, configdata->turnsperday, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingcredits, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingfighters, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingholds, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_players, ':', BUFF_SIZE);
+  addint(buffer, numplayers, ':', BUFF_SIZE);
+  percent = ((float)numgood/(float)numplayers)*100;
+  addint(buffer, percent, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_ports, ':', BUFF_SIZE);
+  addint(buffer, numports, ':', BUFF_SIZE);
+  addint(buffer, portworth, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_total_planets, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_safe_planets, ':', BUFF_SIZE);
+  addint(buffer, numplanets, ':', BUFF_SIZE);
+  percent = ((float)numcitadels/(float)numplanets)*100;
+  addint(buffer, percent, ':', BUFF_SIZE);
+  addint(buffer, configdata->numnodes, ':', BUFF_SIZE);
+  addint(buffer, stardocksector, ':', BUFF_SIZE);
+  addint(buffer, difference, ':', BUFF_SIZE);
 }
 
 void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
