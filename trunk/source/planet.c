@@ -39,7 +39,7 @@ init_planets (char *filename, struct sector *secarray[])
       planets[p_num - 1]->owner = p_owner;
       planets[p_num - 1]->ownertype = p_ownertype;
       planets[p_num - 1]->type = p_type;
-      insert_planet (planets[p_num - 1], secarray[p_sec - 1]);
+      insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
     }
 
 }
@@ -51,7 +51,7 @@ init_planets (char *filename, struct sector *secarray[])
  *	-1 if called with a NULL sector
 */
 int
-insert_planet (struct planet *p, struct sector *s, int owner)
+insert_planet(struct planet *p, struct sector *s, int playernumber)
 {
   struct list *p_list;
   if (s == NULL)

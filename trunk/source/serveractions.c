@@ -21,6 +21,7 @@ extern struct player *players[MAX_PLAYERS];
 extern struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 extern struct ship *ships[MAX_SHIPS];
 extern struct port *ports[MAX_PORTS];
+extern struct planet *planets[MAX_TOTAL_PLANETS];
 extern struct config *configdata;
 
 extern int sectorcount;
@@ -31,6 +32,7 @@ processcommand (char *buffer, struct msgcommand *data)
 {
   struct player *curplayer;
   struct port *curport;
+  struct planet *curplanet;
   struct realtimemessage *curmessage;
   float fsectorcount = (float) sectorcount;	//For rand() stuff in newplayer
   int linknum = 0;
@@ -440,7 +442,7 @@ processcommand (char *buffer, struct msgcommand *data)
       buildtotalinfo (curplayer->number, buffer, data);
       break;
     case ct_genesis:
-      strcpy (buffer, "Got GENESIS REQUEST\n");
+
       if ((curplayer =
 	   (struct player *) find (data->name, player, symbols,
 				   HASH_LENGTH)) == NULL)
@@ -448,8 +450,11 @@ processcommand (char *buffer, struct msgcommand *data)
 	  strcpy (buffer, "BAD\n");
 	  return;
 	}
-      
+
       /* Insert planet and assign player as the owner */
+      /* planet,sector,owner */
+      buildnewplanet (curplayer, data->buffer, (int) curplayer->sector);
+      //insert_planet(struct planet *p, struct sector *s, curplayer);
       break;
 
     default:
@@ -1244,6 +1249,28 @@ trading (struct player *curplayer, struct port *curport, char *buffer,
   addint (buffer, accepted, ':', BUFF_SIZE);
   addint (buffer, xpgained, ':', BUFF_SIZE);
 }
+
+/**************** WORKING *************************/
+void
+buildnewplanet (struct player *curplayer, char *planetname, int sector )
+{
+  /* extern struct planet *planets[MAX_TOTAL_PLANETS]; */
+
+  int i;			//A counter
+  for (i = 0; i <= MAX_TOTAL_PLANETS; i++)
+    {
+      if (planets[i] == NULL)
+	break;
+    }
+
+  fprintf(stderr, "Sector passed: %d\n", sector );
+  fprintf(stderr, "%s\n", curplayer->name );
+  curplayer->sector = sector;
+  fprintf(stderr, "%d\n", curplayer->sector );
+  insert_planet(planets[i+1], curplayer->sector , curplayer->number);
+
+}
+/*****************************************/
 
 void
 buildnewplayer (struct player *curplayer, char *shipname)

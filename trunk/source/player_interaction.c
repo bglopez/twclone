@@ -200,7 +200,8 @@ handle_player (void *threadinfo)
 	}
       else if (strncmp (inbuffer, "GENESIS", 7) == 0 && loggedin)
 	{
-	  strcpy (data.name, name);	//badstuff will happen
+	  popstring(inbuffer, temp, " ", BUFF_SIZE);
+	  popstring(inbuffer, data.buffer, ":", BUFF_SIZE);
 	  data.command = ct_genesis;
 	  commandgood = 1;
 	}

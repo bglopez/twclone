@@ -18,6 +18,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+
+/* Modification History **
+**************************
+** 
+** LAST MODIFICATION DATE: 22 June 2002
+** Author: Rick Dearman
+** 1) Modified arguments to use getopt
+**
+*/
+
+
 #define _REENTRANT
 #include <pthread.h>
 #include <stdio.h>
@@ -50,7 +61,8 @@ time_t starttime;
 int
 main (int argc, char *argv[])
 {
-  int sockid, port = DEFAULT_PORT, msgidin, msgidout, senderid;
+  int c;
+  int sockid, port, msgidin, msgidout, senderid;
   pthread_t threadid;
   struct connectinfo *threadinfo =
     (struct connectinfo *) malloc (sizeof (struct connectinfo));
@@ -58,19 +70,39 @@ main (int argc, char *argv[])
   struct msgcommand data;
   char buffer[BUFF_SIZE];
 
-  starttime = time (timeptr);
-  //reading the port to run on from the command line
-  if (argc > 1)
+
+  char *usageinfo = "Usage: server [options]
+    Options:
+    -p < integer >
+       the port number the server will listen on (Default 1234)\n ";
+
+  port = DEFAULT_PORT;
+  opterr = 0;
+
+  while ((c = getopt (argc, argv, "p:")) != -1)
     {
-      //change the string to a long
-      port = strtoul (argv[1], NULL, 10);
-      if (port == 0)		//if it wasn't possible to change to an int
+      switch (c)
 	{
-	  //quit, and tell the user how to use us
-	  printf ("usage:  %s [port_num]\n", argv[0]);
-	  exit (-1);
+	case 'p':
+	  port = strtoul (optarg, NULL, 10);
+	  break;
+	case '?':
+	  if (isprint (optopt))
+	    fprintf (stderr, "Unknown option `-%c'.\n\n%s", optopt,
+		     usageinfo);
+	  else
+	    fprintf (stderr,
+		     "Unknown option character `\\x%x'.\n\n%s",
+		     optopt, usageinfo);
+	  return 1;
+	default:
+	  abort ();
 	}
     }
+
+
+
+  starttime = time (timeptr);
 
   init_hash_table (symbols, HASH_LENGTH);
 
