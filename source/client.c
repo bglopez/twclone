@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.25 $
- * Last Modified: $Date: 2003-10-09 22:36:19 $
+ * $Revision: 1.26 $
+ * Last Modified: $Date: 2003-10-10 03:15:09 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.25 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-09 22:36:19 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.26 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-10 03:15:09 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -308,7 +308,7 @@ whosplaying (int sockid)
     int pnumb = 0;
 
     char *name = (char *) malloc (BUFF_SIZE * sizeof (char));
-    int exp = 0;
+    int exper = 0;
     int align = 0;
     int rank;
 
@@ -328,9 +328,9 @@ whosplaying (int sockid)
         sendinfo (sockid, buffer);
         recvinfo (sockid, buffer);
         popstring (buffer, name, ":", BUFF_SIZE);
-        exp = popint (buffer, ":");
+        exper = popint (buffer, ":");
         align = popint (buffer, ":");
-        rank = log (exp) / log (2);	//Since exp ranks go by mod 2...
+        rank = (int)(log (exper) / log (2));	//Since exp ranks go by mod 2...
         if (align < 0)
             printf ("\n%s%s %s", KRED, evil_ranks[rank], name);
         else
@@ -496,7 +496,7 @@ getmyinfo (int sockid, struct player *curplayer)
     curplayer->number = popint (buffer + position, ":");
     popstring (buffer + position, pname, ":", 70);
     curplayer->shipnumb = popint (buffer + position, ":");
-    curplayer->exp = popint (buffer + position, ":");
+    curplayer->exper = popint (buffer + position, ":");
     curplayer->align = popint (buffer + position, ":");
     curplayer->turns = popint (buffer + position, ":");
     curplayer->credits = popint (buffer + position, ":");
@@ -514,7 +514,7 @@ getmyinfo (int sockid, struct player *curplayer)
     curplayer->pship->location = popint (buffer + position, ":");
     curplayer->pship->turnsperwarp = popint (buffer + position, ":");
 
-    curplayer->rank = log (curplayer->exp) / log (2);	//Since exp ranks go by mod 2...
+    curplayer->rank = log (curplayer->exper) / log (2);	//Since exp ranks go by mod 2...
     curplayer->blownup = 0;
     curplayer->pship->ported = 0;
     curplayer->pship->kills = 0;
@@ -555,7 +555,7 @@ printmyinfo (struct player *curplayer)
     printf ("\n%sTrader Name    %s:%s %s %s", KMAG, KLTYLW, KGRN,
             curplayer->title, curplayer->name);
     printf ("\n%sRank and Exp   %s:%s %ld %spoints%s,%s Alignment%s=%s%ld",
-            KMAG, KLTYLW, KLTCYN, curplayer->exp, KGRN, KLTYLW, KGRN, KLTYLW,
+            KMAG, KLTYLW, KLTCYN, curplayer->exper, KGRN, KLTYLW, KGRN, KLTYLW,
             KLTCYN, curplayer->align);
     printf ("\n%sTimes Blown Up %s:%s %d", KMAG, KLTYLW, KGRN,
             curplayer->blownup);
@@ -637,7 +637,7 @@ psinfo (int sockid, int pnumb, struct player *p)
         return;
     }
     popstring (buffer + position, pname, ":", 70);
-    p->exp = popint (buffer + position, ":");
+    p->exper = popint (buffer + position, ":");
     p->align = popint (buffer + position, ":");
     if ((curship = (struct ship *) malloc (sizeof (struct ship))) != NULL)
     {
@@ -664,7 +664,7 @@ psinfo (int sockid, int pnumb, struct player *p)
         popstring (buffer + position, type, ":", 70);
         curship->fighters = popint (buffer + position, ":");
         curship->shields = popint (buffer + position, ":");
-        p->rank = log (p->exp) / log (2);	//Since exp ranks go by mod 2...
+        p->rank = (int)(log (p->exper) / log (2));	//Since exp ranks go by mod 2...
         if (p->align < 0)
         {
             strcpy (title, KRED);
