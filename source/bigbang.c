@@ -139,21 +139,7 @@ main (int argc, char **argv)
   char *randomPlanetInfo;
   int ferringhiSector;
 
-  char *usageinfo = "Usage: bigbang [options]
-    Options:-t < integer >
-    indicate the max length of tunnels and dead ends.(default /minimum 6)
-    - s < integer >
-    indicate the max number of sectors.(default /minimum 500)
-    - p < integer >
-    indicate the max number of ports which MUST be at least 10 LESS than the
-    number of sectors.(default /minimum 190)
-    - o < integer >
-    indicate the percentage chance that a final jump will be a one -
-    way.(default /minimum 3)
-    - d < integer >
-    indicate the percentage chance that a tunnel will be a dead end.
-    (default /minimum 30)
-    - g < integer > generate a number of random planets.(default 0) \ n ";
+  char *usageinfo = "Usage: bigbang [options]\n    Options:-t < integer >\n    indicate the max length of tunnels and dead ends.(default /minimum 6)\n    - s < integer >\n    indicate the max number of sectors.(default /minimum 500)\n    - p < integer >\n    indicate the max number of ports which MUST be at least 10 LESS than the\n    number of sectors.(default /minimum 190)\n    - o < integer >\n    indicate the percentage chance that a final jump will be a one -\n    way.(default /minimum 3)\n    - d < integer >\n    indicate the percentage chance that a tunnel will be a dead end.\n    (default /minimum 30)\n    - g < integer > generate a number of random planets.(default 0) \n ";
   /* This has to be taken out because of the knockon affect it was having with the rest of the program.
      -j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
    */
