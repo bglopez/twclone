@@ -27,24 +27,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "player_interaction.h"
 #include "sysop_interaction.h"
 
-void *getsysopcommands(void *threadinfo)
+void *
+getsysopcommands (void *threadinfo)
 {
-  int msgidin = ((struct connectinfo *)threadinfo)->msgidin;
+  int msgidin = ((struct connectinfo *) threadinfo)->msgidin;
   struct msgcommand data;
   char buffer[BUFF_SIZE];
-  
-  free(threadinfo);
+
+  free (threadinfo);
 
   while (1)
     {
-      printf("> ");
-      fgets(buffer, BUFF_SIZE, stdin);
-      buffer[strcspn(buffer, "\n")] = '\0';
-      if (strcmp(buffer, "QUIT") == 0)
-		{
-	  		data.command = ct_quit;
-	  		senddata(msgidin, &data, pthread_self());
-		}
+      printf ("> ");
+      fgets (buffer, BUFF_SIZE, stdin);
+      buffer[strcspn (buffer, "\n")] = '\0';
+      if (strcmp (buffer, "QUIT") == 0)
+	{
+	  data.command = ct_quit;
+	  senddata (msgidin, &data, pthread_self ());
+	}
     }
   return NULL;
 }

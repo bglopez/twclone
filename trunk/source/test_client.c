@@ -26,65 +26,66 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <sys/types.h>
 #include "common.h"
 
-int main(int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
   char buffer[BUFF_SIZE];
   int sockid, port = DEFAULT_PORT;
 
-  switch(argc)
+  switch (argc)
     {
-    case 3:  //specified port and host
+    case 3:			//specified port and host
       //change the string to a long
-      port = strtoul(argv[2], NULL, 10);
-      if (port == 0) //if it wasn't possible to change to an int
+      port = strtoul (argv[2], NULL, 10);
+      if (port == 0)		//if it wasn't possible to change to an int
 	{
 	  //quit, and tell the user how to use us
-	  printf("usage:  %s server [port_num]\n", argv[0]);
-	  exit(-1);
+	  printf ("usage:  %s server [port_num]\n", argv[0]);
+	  exit (-1);
 	}
-      printf("port %d specified\n", port);
-    case 2:  //specified host only
+      printf ("port %d specified\n", port);
+    case 2:			//specified host only
       break;
-    default:  //something else entirely
-      printf("usage: %s server [port_num]\n", argv[0]);
-      exit(-1);
+    default:			//something else entirely
+      printf ("usage: %s server [port_num]\n", argv[0]);
+      exit (-1);
     };
-  
-  sockid = init_clientnetwork(argv[1], port);
+
+  sockid = init_clientnetwork (argv[1], port);
 
   //tell the server hi
   buffer[0] = '\0';
-  printf("What do you want to tell the server: ");
+  printf ("What do you want to tell the server: ");
 
-  fgets(buffer, BUFF_SIZE, stdin);
-  buffer[strcspn(buffer, "\n")] = '\0';
+  fgets (buffer, BUFF_SIZE, stdin);
+  buffer[strcspn (buffer, "\n")] = '\0';
 
-  if (sendinfo(sockid, buffer) == -1)
-    exit(-1);
-  
-  fprintf(stderr, "I just told the server '%s'\n", buffer);
+  if (sendinfo (sockid, buffer) == -1)
+    exit (-1);
+
+  fprintf (stderr, "I just told the server '%s'\n", buffer);
 
   do
     {
-      if (recvinfo(sockid, buffer) == -1)
-	exit(-1);
-      
-      fprintf(stderr, "The server said '%s', what do you want to say: ", buffer);
+      if (recvinfo (sockid, buffer) == -1)
+	exit (-1);
 
-      fgets(buffer, BUFF_SIZE, stdin);
-      buffer[strcspn(buffer, "\n")] = '\0';
+      fprintf (stderr, "The server said '%s', what do you want to say: ",
+	       buffer);
 
-      if (sendinfo(sockid, buffer) == -1)
-	exit(-1);
+      fgets (buffer, BUFF_SIZE, stdin);
+      buffer[strcspn (buffer, "\n")] = '\0';
 
-      fprintf(stderr, "I just told the server '%s'\n", buffer);
+      if (sendinfo (sockid, buffer) == -1)
+	exit (-1);
+
+      fprintf (stderr, "I just told the server '%s'\n", buffer);
 
     }
-  while(strcmp(buffer, "QUIT") != 0);
+  while (strcmp (buffer, "QUIT") != 0);
 
   //close the one and only socket that the client ever opened
-  close(sockid);
+  close (sockid);
 
   return 0;
 }
-
