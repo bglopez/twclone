@@ -1,0 +1,24 @@
+CC=gcc
+
+all: 	server
+
+server: server.o listen.o backend.o console.o player.o
+		${CC} -o server server.c listen.o backend.o console.o player.o solaris_inet_aton.O -lpthread -lsocket -lnsl
+
+server.o: server.c
+		${CC} -c server.c
+
+listen.o: listen.c
+		${CC} -c listen.c
+
+backend.o: backend.c
+		${CC} -c backend.c
+
+console.o:	console.c
+		${CC} -c console.c
+
+player.o:	player.c
+		${CC} -c player.c
+
+clean:
+		rm -rf server *.o
