@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.6 $
- * Last Modified: $Date: 2002-04-26 03:40:11 $
+ * $Revision: 1.7 $
+ * Last Modified: $Date: 2002-05-09 03:56:19 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.6 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-04-26 03:40:11 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.7 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-05-09 03:56:19 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -990,7 +990,7 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
    int counter, foo;
    char tempsec[5]="\0";
    int warps[25]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-   char *intptr = (char *)malloc(4);
+   char *intptr = (char *)malloc(10);
 	char *duplicate = NULL; 
    int foobar;
    struct pollfd checkin[1];
