@@ -99,6 +99,7 @@ const int fedspace[10][6] = {
 };
 
 struct sector **sectorlist;
+struct sector **sectors;
 struct config *configdata;
 /*  struct port *portlist[NUMPORTS]; */
 struct port **portlist;
@@ -227,6 +228,7 @@ strcpy(terraInfo,"1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:");
   printf ("Creating sector array...");
 
   sectorlist = malloc (numSectors * sizeof (struct sector *));
+  sectors = sectorlist;
 
   for (x = 0; x < numSectors; x++)
     sectorlist[x] = malloc (sizeof (struct sector));

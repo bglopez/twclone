@@ -56,6 +56,8 @@ struct player **players;
 struct ship **ships;
 struct port **ports;
 struct config *configdata;
+struct sp_shipinfo **shiptypes;
+
 time_t *timeptr;
 time_t starttime;
 int WARP_WAIT = 1;
@@ -106,41 +108,41 @@ int main (int argc, char *argv[])
 
     printf ("initializing configuration data from 'config.data'...");
     fflush (stdout);
-    init_config ("config.data");
+    init_config ("./config.data");
     printf (" Done!\n");
 
 	 printf("initializing planet type data from 'planettypes.data' ...");
 	 fflush(stdout);
-	 init_planetinfo("planettypes.data");
+	 init_planetinfo("./planettypes.data");
 	 printf(" Done!\n");
 
     printf ("initializing the universe from '%s'...", "universe.data");
     fflush (stdout);
-    sectorcount = init_universe ("universe.data", &sectors);
+    sectorcount = init_universe ("./universe.data", &sectors);
     printf (" Done!\n");
 
     printf ("Reading in planet information from 'planets.data'...\n");
     fflush (stdout);
-    init_planets ("planets.data", sectors);
+    init_planets ("./planets.data");
     printf ("... Done!\n");
 
 	 printf("initializing ship type data from 'shiptypes.data'...");
-    init_shiptypeinfo ("shiptypes.data");
+    init_shiptypeinfo("./shiptypes.data");
 	 printf("... Done!\n");
 
     printf ("Reading in ship information from 'ships.data'...");
     fflush (stdout);
-    init_shipinfo ("ships.data");
+    init_shipinfo ("./ships.data");
     printf (" Done!\n");
 
     printf ("Reading in player information from 'players.data'...");
     fflush (stdout);
-    init_playerinfo ("players.data");
+    init_playerinfo ("./players.data");
     printf (" Done!\n");
 
     printf ("Reading in port information from 'ports.data'...");
     fflush (stdout);
-    init_portinfo ("ports.data");
+    init_portinfo ("./ports.data");
     printf (" Done!\n");
 
     /*looks like maybe I shouldn't do this

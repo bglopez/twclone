@@ -100,6 +100,7 @@ int init_config (char *filename)
   popstring(buffer, bangdate, ":", BUFF_SIZE);
   configdata->bangdate = strtoul(bangdate,NULL,10); 
 
+  fclose(configfile);
   return (1);
 }
 
@@ -115,6 +116,7 @@ int saveconfig(char *filename)
   strcpy(bangdate, "\0");
 
   addint(buffer, configdata->turnsperday, ':', BUFF_SIZE);
+  addint(buffer, configdata->maxwarps, ':', BUFF_SIZE);
   addint(buffer, configdata->startingcredits, ':', BUFF_SIZE);
   addint(buffer, configdata->startingfighters, ':', BUFF_SIZE);
   addint(buffer, configdata->startingholds, ':', BUFF_SIZE);
@@ -131,6 +133,7 @@ int saveconfig(char *filename)
   addint(buffer, configdata->ship_type_count, ':', BUFF_SIZE);
   sprintf(bangdate, "%ld", configdata->bangdate);
   addstring(buffer, bangdate, ':', BUFF_SIZE);
+  strcat(buffer, "\n");
 
   fprintf(configfile, buffer);
 
