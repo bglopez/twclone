@@ -670,22 +670,22 @@ void makeports()
 		if (loop==0)
 		{
 			strcpy(curport->name, "Sol");
-			curport->type = 0;
+			type = 0;
 		}
 		else if (loop==1)
 		{
 			strcpy(curport->name, "Alpha Centauri");
-			curport->type = 0;
+			type = 0;
 		}
 		else if (loop==2)
 		{
 			strcpy(curport->name, "Rylos");
-			curport->type = 0;
+			type = 0;
 		}
 		else if (loop==3)
 		{
-			strcpy(curport->name, "Stargate Alpha 1");
-			curport->type = 9;
+			strcpy(curport->name, "Stargate Alpha I");
+			type = 9;
       	curport->maxproduct[0] = randomnum (2800, 3000);
       	curport->maxproduct[1] = randomnum (2800, 3000);
       	curport->maxproduct[2] = randomnum (2800, 3000);
