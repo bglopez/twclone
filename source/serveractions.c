@@ -178,6 +178,7 @@ void processcommand(char *buffer, struct msgcommand *data)
 			}
 		if (curplayer->messages != NULL)
 			{  //This handles the realtime messages
+				fprintf(stderr, "\nprocesscommand: Lookie we have messages!");
 				curmessage = curplayer->messages;
 				strcpy(buffer, "OK:");
 				strcat(buffer, curmessage->message);
@@ -427,7 +428,7 @@ int intransit(struct msgcommand *data)
 	struct player *curplayer;
 	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
 	  return(-1);
-	fprintf(stderr,"\nintransit: Checking transit");
+	//fprintf(stderr,"\nintransit: Checking transit");
 		  
    gettimeofday(&end, 0);
 		if (curplayer->intransit == 1)
@@ -976,25 +977,35 @@ int move_player(struct player *p, struct msgcommand *data, char *buffer)
 	return data->to;
 }
 
-void addmessage(struct realtimemessage *basemessage, char *message)
+void addmessage(struct player *curplayer, char *message)
 {
    struct realtimemessage *curmessage=NULL, *newmessage=NULL;
 	
-	curmessage=basemessage;
+	curmessage=curplayer->messages;
 	newmessage = (struct realtimemessage *)malloc(sizeof(struct realtimemessage));
+	if (curmessage != NULL)
+	{
    while(curmessage->nextmessage != NULL)
 		  curmessage=curmessage->nextmessage;
+	}
 	newmessage->message = (char *)malloc(BUFF_SIZE);
 	newmessage->nextmessage = NULL;
 	strcpy(newmessage->message, message);
-	curmessage->nextmessage = newmessage;
+	//fprintf(stderr, "\naddmessage: Adding message %s", message);
+	if (curplayer->messages == NULL)
+	{
+		curplayer->messages=newmessage;
+		//fprintf(stderr,"\naddmessage: Look '%s's basemessage is NULL", curplayer->name);
+	}
+	else
+		curmessage->nextmessage = newmessage;
 	
 }
 
 void sendtosector(int sector, int playernum, int direction)
 {
    struct list *element;
-	char *buffer = (char *)malloc(sizeof(BUFF_SIZE));
+	char buffer[50];
 	char temp[5];
 	struct realtimemessage *curmessage=NULL;
 	int p=0;	
@@ -1005,22 +1016,24 @@ void sendtosector(int sector, int playernum, int direction)
 	strcpy(buffer, players[playernum -1]->name);
 	strcat(buffer, temp);
   	if (element == NULL)
-    return;
+	{
+   	return;
+	}
   	else
 	{
       do
 		{
 	  		if (((struct player *)element->item)->number != playernum)
 	    	{
-	      	if (p != 0)
-					addmessage(((struct player *)element->item)->messages, buffer);
+	      	if ((p != 0) && (players[p-1]->loggedin))
+					addmessage(players[p-1], buffer);
 	      	p = ((struct player *)element->item)->number;
 	    	}
 	  		element = element->listptr;
 		}
       while(element != NULL);
-      if (p != 0)
-			addmessage(((struct player *)element->item)->messages, buffer);
+      if ((p != 0) && (players[p-1]->loggedin))
+		  addmessage(players[p-1], buffer);
       else
 			;
 	}

@@ -38,6 +38,9 @@ Gets information for you and your ship
 PORTINFO
 Gets information on the port in the current sector
 
+UPDATE
+Gets realtime messages from the server
+
 server responses:
 -----------------
 
@@ -65,6 +68,14 @@ PORTINFO response:
 MYINFO response:
 :<player number>:<name>:<ship number>:<experience>:<alignment>:<turns>:<credits>:<ship number>:<ship name>:<ship type>:<fighters>:<shields>:<holds>:<colonists>:<equipment>:<organics>:<ore>:<owner>:<location>:<turns per warp>:
 
+UPDATE response:
+If the player is in the middle of moving And there are no messages
+	OK: Still in transit
+If there are messages
+	OK:<message type stuff>
+If there are no messages and they are not moving
+	Same as from DESCRIPTION
+	
 BAD
 This is sent if the client does something that doesn't succed
 

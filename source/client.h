@@ -140,6 +140,7 @@ void printhelp();
 void printwelcome();
 void doporting(int sockid, struct player *curplayer);
 void debugmode(int sockid);
+void getmessages(char *buffer);
 //these are added for invisible passwords
 int init_nowait_io(void);
 int kbhit(void);
