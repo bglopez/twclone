@@ -230,7 +230,6 @@ init_playerinfo (char *filename)
         strncpy (curplayer->name, name, strlen (name) + 1);
         strncpy (curplayer->passwd, passwd, strlen (passwd) + 1);
         curplayer->loggedin = 0;
-        curplayer->ported = 0;
         curplayer->lastprice = 0;
         curplayer->firstprice = 0;
         curplayer->intransit = 0;

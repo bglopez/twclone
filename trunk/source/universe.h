@@ -127,6 +127,7 @@ struct ship
   int ore;			/* poopy, can't remember then name */
   int owner;
   int flags;
+  int ported;
 };
 
 enum planettype
