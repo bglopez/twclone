@@ -16,10 +16,12 @@ int init_planets (char *filename, struct sector **secarray)
 {
     FILE *planetfile;
     int i, p_num, p_sec, p_type, p_owner;
-    char *p_name, dummy[3], buffer[BUFF_SIZE];
+    char *p_name, dummy[3], buffer[BUFF_SIZE], *temp;
     int count = 0;
+	 int done=0;
 
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
+	 temp = (char *)malloc(sizeof(char)*30);
 
 	 planets = (struct planet **)
 			malloc(sizeof(struct planet *)*configdata->max_total_planets);
@@ -32,30 +34,55 @@ int init_planets (char *filename, struct sector **secarray)
         fprintf (stderr, "init_planets: No %s file!", filename);
         return (0);
     }
-    while (1)
+    while (!done)
     {
         buffer[0] = '\0';
         fgets (buffer, BUFF_SIZE, planetfile);
         if (strlen (buffer) == 0)
-            break;
+            done=1;
+		  else
+		  {
         p_num = popint (buffer, ":");
         p_sec = popint (buffer, ":");
         popstring (buffer, p_name, ":", MAX_NAME_LENGTH);
-        //popstring (buffer, dummy, ":", MAX_NAME_LENGTH);
-        //popstring (buffer, p_owner, ":", MAX_NAME_LENGTH);
+		  p_type = popint(buffer, ":");
 		  p_owner = popint(buffer, ":"); //Owner should be a number!
-        p_type = popint (buffer, ":");
 
         planets[p_num - 1] =
-            (struct planet *) malloc (sizeof (struct planet *));
+            (struct planet *) malloc (sizeof (struct planet));
         planets[p_num - 1]->num = p_num;
         planets[p_num - 1]->name =
             (char *) malloc (strlen (p_name) * sizeof (char));
+		  planets[p_num - 1]->creator =
+				(char *)malloc(sizeof(char)*MAX_NAME_LENGTH);
+		  planets[p_num - 1]->citdl = 
+				(struct citadel *)malloc(sizeof(struct citadel));
+		  planets[p_num - 1]->pClass = planetTypes[p_type];
         planets[p_num - 1]->sector = p_sec;
         planets[p_num - 1]->owner = p_owner;
         strcpy (planets[p_num - 1]->name, p_name);
         planets[p_num - 1]->type = p_type;
-        insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
+
+		  popstring(buffer, planets[p_num -1]->creator, ":", MAX_NAME_LENGTH);
+		  planets[p_num - 1]->fuelColonist = popint(buffer, ":");
+		  planets[p_num - 1]->organicsColonist = popint(buffer, ":");
+		  planets[p_num - 1]->equipmentColonist = popint(buffer, ":");
+		  planets[p_num - 1]->fuel = popint(buffer, ":");
+		  planets[p_num - 1]->organics = popint(buffer, ":");
+		  planets[p_num - 1]->equipment = popint(buffer, ":");
+		  planets[p_num - 1]->fighters = popint(buffer, ":");
+		  planets[p_num - 1]->citdl->level = popint(buffer, ":");
+		  popstring(buffer, temp, ":", BUFF_SIZE);
+		  planets[p_num - 1]->citdl->treasury = strtoul(temp,NULL,10);
+		  planets[p_num - 1]->citdl->militaryReactionLevel = popint(buffer, ":");
+		  planets[p_num - 1]->citdl->qCannonAtmosphere = popint(buffer, ":");
+ 		  planets[p_num - 1]->citdl->qCannonSector = popint(buffer, ":");
+ 		  planets[p_num - 1]->citdl->planetaryShields = popint(buffer, ":");
+		  planets[p_num - 1]->citdl->transporterlvl = popint(buffer, ":");
+		  planets[p_num - 1]->citdl->interdictor = popint(buffer, ":");
+        
+		  insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
+		  }
     }
     free (p_name);
     return (0);
@@ -126,7 +153,7 @@ char *tdesc[NUMBER_OF_PLANET_TYPES] = {
                                           " (C)\n	      -Glacial / Ice Extremely thin Oxygen -\n		Nitrogen atmospheres.Specific gravity from 0.5 to 1.7 Earth\n		normal.Meteorologically unstable causing violent conditions.\n		Temps range from - 10 to -\n		190 degrees Celsius.\n		Full life support necessary for colonies and death rates are high.No\n		workable soil base so hydroponic Organics are limited.\n		Modest mineral and chemicals exist so production of Ore and Equipment\n		will be below average to none.\n		Class C planets NOT recommended for colonization,\n	      their violent condition makes it extremely hazardous.\n		\n		Some Class C planets have been adopted by the Federation and\n		used as prison colonies with very effective results."
                                       };
 
-int ciduptm[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int ciduptm[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {-1, -1, -1, -1, -1, -1, -1},	/* terra */
             {4, 4, 5, 10, 5, 15},		/* M */
             {2, 5, 5, 8, 5, 12},		/* L */
@@ -138,7 +165,7 @@ int ciduptm[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
         };
 
 
-int cidupcolonist[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int cidupcolonist[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {1000000, 1000000, 1000000, 1000000, 1000000, 1000000},	/* terra */
             {1000000, 2000000, 4000000, 6000000, 6000000, 6000000},	/* M */
             {400000, 1400000, 3600000, 5600000, 7000000, 5600000},	/* L */
@@ -150,7 +177,7 @@ int cidupcolonist[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
         };
 
 
-int cidupore[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int cidupore[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {-1, -1, -1, -1, -1, -1, -1},	/* terra */
             {300, 200, 500, 1000, 300, 1000},	/* M */
             {150, 200, 600, 1000, 300, 1000},	/* L */
@@ -161,7 +188,7 @@ int cidupore[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
             {400, 300, 600, 700, 300, 700},	/* C */
         };
 
-int ciduporganic[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int ciduporganic[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {-1, -1, -1, -1, -1, -1, -1},	/* terra */
             {200, 50, 250, 1200, 400, 1200},	/* M */
             {100, 50, 250, 1200, 400, 1200},	/* L */
@@ -172,7 +199,7 @@ int ciduporganic[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
             {300, 80, 400, 900, 400, 900},	/* C */
         };
 
-int cidupeq[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int cidupeq[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {-1, -1, -1, -1, -1, -1, -1},	/* terra */
             {250, 250, 500, 1000, 1000, 2000},	/* M */
             {150, 250, 700, 1000, 1000, 2000},	/* L */
@@ -184,7 +211,7 @@ int cidupeq[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
         };
 
 
-int numColonistPerProduct[NUMBER_OF_PLANET_TYPES][MAX_CIDADEL_LEVEL] = {
+int numColonistPerProduct[NUMBER_OF_PLANET_TYPES][MAX_CITADEL_LEVEL] = {
             {-1, -1, -1},			/* terra */
             {100000, 100000, 100000},	/* M */
             {200000, 200000, 100000},	/* L */
@@ -270,3 +297,168 @@ struct planetType_struct
   float breeding;
 };
 */
+void save_planetinfo(char *filename)
+{
+	FILE *planetinfo;
+	char *stufftosave = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int done=0;
+	int index=0;
+	int loop=0;
+
+	planetinfo = fopen(filename, "w");
+
+	for (index=0; index < configdata->number_of_planet_types; index++)
+	{
+	strcpy(stufftosave, "\0");
+	addstring(stufftosave, planetTypes[index]->typeClass,':', BUFF_SIZE);
+	addstring(stufftosave, planetTypes[index]->typeName, ':', BUFF_SIZE);
+	for (loop=0;loop<MAX_CITADEL_LEVEL-1; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->citadelUpgradeTime[loop],
+							 ',', BUFF_SIZE);
+	}
+	addint(stufftosave, planetTypes[index]->citadelUpgradeTime[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
+	for (loop=0;loop<MAX_CITADEL_LEVEL-1; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->citadelUpgradeOre[loop],
+							 ',', BUFF_SIZE);
+	}
+	addint(stufftosave, planetTypes[index]->citadelUpgradeOre[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
+	for (loop=0;loop<MAX_CITADEL_LEVEL-1; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->citadelUpgradeOrganics[loop],
+							 ',', BUFF_SIZE);
+	}
+	addint(stufftosave, planetTypes[index]->citadelUpgradeOrganics[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
+	for (loop=0;loop<MAX_CITADEL_LEVEL-1; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->citadelUpgradeEquipment[loop],
+							 ',', BUFF_SIZE);
+	}
+		addint(stufftosave, planetTypes[index]->citadelUpgradeEquipment[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
+	for (loop=0;loop<MAX_CITADEL_LEVEL-1; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->citadelUpgradeColonist[loop],
+							 ',', BUFF_SIZE);
+	}
+	addint(stufftosave, planetTypes[index]->citadelUpgradeColonist[MAX_CITADEL_LEVEL-1], ':', BUFF_SIZE);
+	for (loop=0;loop<2; loop++)
+	{
+		addint(stufftosave, planetTypes[index]->maxColonist[loop],
+							 ',', BUFF_SIZE);
+	}
+	addint(stufftosave, planetTypes[index]->citadelUpgradeTime[2], ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->fuelProduction, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->organicsProduction, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->equipmentProduction, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->fighterProduction, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->maxore, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->maxorganics, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->maxequipment, ':', BUFF_SIZE);
+	addint(stufftosave, planetTypes[index]->maxfighters, ':', BUFF_SIZE);
+	addint(stufftosave, (int)(planetTypes[index]->breeding*1000), ':', BUFF_SIZE);
+
+	for (loop=1; loop < 399 - strlen(stufftosave); loop++)
+		strcat(stufftosave, " ");
+	strcat(stufftosave, "\n");
+	fprintf(planetinfo, "%s", stufftosave);
+	}
+	fclose(planetinfo);
+	free(stufftosave);
+}
+void init_planetinfo(char *filename)
+{
+	FILE *planetinfo;
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *temp = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int done=0;
+	int index=0;
+	int loop=0;
+
+	planetTypes = (planetClass **)
+		malloc(sizeof(planetClass *)*configdata->number_of_planet_types);
+	
+	planetinfo = fopen(filename, "r");
+	if (planetinfo == NULL)
+	{
+		fprintf(stderr, "init_planetinfo: No %s file!", filename);
+		exit(-1);
+	}
+	while(!done)
+	{
+		buffer[0] = '\0';
+		fgets(buffer,BUFF_SIZE, planetinfo);
+		if (strlen(buffer)==0)
+		{
+			done = 1;
+		}
+		else
+		{
+			planetTypes[index] =
+				(planetClass *)malloc(sizeof(planetClass));
+			planetTypes[index]->typeClass = 
+				(char *)malloc(sizeof(char)*MAX_NAME_LENGTH*2);
+			planetTypes[index]->typeName =
+				(char *)malloc(sizeof(char)*MAX_NAME_LENGTH*2);
+
+			popstring(buffer,planetTypes[index]->typeClass, ":", MAX_NAME_LENGTH*2);
+			popstring(buffer,planetTypes[index]->typeName, ":", MAX_NAME_LENGTH*2);
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop<MAX_CITADEL_LEVEL;loop++)
+			{
+				planetTypes[index]->citadelUpgradeTime[loop] = 
+						  popint(temp, ",");
+			}
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop<MAX_CITADEL_LEVEL;loop++)
+			{
+				planetTypes[index]->citadelUpgradeOre[loop] = 
+						  popint(temp, ",");
+			}
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop<MAX_CITADEL_LEVEL;loop++)
+			{
+				planetTypes[index]->citadelUpgradeOrganics[loop] = 
+						  popint(temp, ",");
+			}
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop<MAX_CITADEL_LEVEL;loop++)
+			{
+				planetTypes[index]->citadelUpgradeEquipment[loop] = 
+						  popint(temp, ",");
+			}
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop<MAX_CITADEL_LEVEL;loop++)
+			{
+				planetTypes[index]->citadelUpgradeColonist[loop] = 
+						  popint(temp, ",");
+			}
+			temp[0] = '\0';
+			popstring(buffer,temp,":", BUFF_SIZE);
+			for (loop=0;loop< 3;loop++)
+			{
+				planetTypes[index]->maxColonist[loop] = 
+						  popint(temp, ",");
+			}
+			
+			planetTypes[index]->fuelProduction = popint(buffer, ":");
+			planetTypes[index]->organicsProduction = popint(buffer, ":");
+			planetTypes[index]->equipmentProduction = popint(buffer, ":");
+			planetTypes[index]->fighterProduction = popint(buffer, ":");
+			planetTypes[index]->maxore = popint(buffer, ":");
+			planetTypes[index]->maxorganics = popint(buffer, ":");
+			planetTypes[index]->maxequipment = popint(buffer, ":");
+			planetTypes[index]->maxfighters = popint(buffer, ":");
+			
+			planetTypes[index]->breeding = (float)popint(buffer, ":")/1000.0;
+
+		}
+		index++;
+	}
+	fclose(planetinfo);
+}

@@ -20,6 +20,7 @@ extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
 extern struct player **players;
 extern struct sp_shipinfo **shiptypes;
+extern planetClass **planetTypes;
 extern struct ship **ships;
 extern struct port **ports;
 extern struct planet **planets;
@@ -384,6 +385,10 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  switch(data->plcommand)
 		  {
 			case pl_display:
+				fprintf(stderr,"processcommand: building planet info for (%d)\n",
+						ships[curplayer->ship - 1]->onplanet);
+				fflush(stderr);
+				totalplanetinfo(ships[curplayer->ship - 1]->onplanet, buffer);
 				break;
 			case pl_ownership:
 				break;
@@ -417,6 +422,9 @@ void processcommand (char *buffer, struct msgcommand *data)
 							ships[curplayer->ship - 1]->onplanet);
 					ships[curplayer->ship - 1]->onplanet = 0;
 				}
+				break;
+			default:
+				strcpy(buffer, "BAD: Unknown PLANET command");
 				break;
 		  }
 		  break;
@@ -735,16 +743,22 @@ void processcommand (char *buffer, struct msgcommand *data)
                     (struct player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
-            strcpy (buffer, "BAD\n");
+            strcpy (buffer, "BAD: Couldn't find player\n");
             return;
         }
+        if (intransit (data))
+        {
+            strcpy(buffer, "BAD: Moving you can't do that!\n");
+            return;
+        }
+		  //Check other flags here
 
         buildnewplanet (curplayer, data->buffer,
                         (int) ships[curplayer->ship - 1]->location);
         break;
     default:
         //fprintf(stderr, "processcommand: Got a bogus command\n");
-        strcpy (buffer, "BAD\n");
+        strcpy (buffer, "BAD: Unknown Command\n");
     }
     return;
 }
@@ -1313,7 +1327,45 @@ void saveallports ()
 
 }
 
-
+void totalplanetinfo(int pnumb, char *buffer)
+{
+	buffer[0] = '\0';
+	if (planets[pnumb - 1] == NULL)
+	{
+		strcpy(buffer, "BAD: No such planet!");
+		return;
+	}
+	addstring(buffer, planets[pnumb - 1]->name, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->num, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->sector, ':', BUFF_SIZE);
+	//class type
+	addstring(buffer, planets[pnumb - 1]->pClass->typeName, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->owner, ':', BUFF_SIZE);
+	addstring(buffer, planets[pnumb - 1]->creator, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->fuelColonist, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->organicsColonist, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->equipmentColonist, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->fuel, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->organics, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->equipment, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->fighters, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->pClass->fuelProduction, ':', BUFF_SIZE); 
+	addint(buffer, planets[pnumb - 1]->pClass->organicsProduction, ':', BUFF_SIZE); 
+	addint(buffer, planets[pnumb - 1]->pClass->equipmentProduction, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->pClass->fighterProduction, ':', BUFF_SIZE); 
+	addint(buffer, planets[pnumb - 1]->pClass->maxore, ':', BUFF_SIZE); 
+	addint(buffer, planets[pnumb - 1]->pClass->maxorganics, ':', BUFF_SIZE); 
+	addint(buffer, planets[pnumb - 1]->pClass->maxequipment, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->pClass->maxfighters, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->level, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->treasury, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->militaryReactionLevel, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->qCannonAtmosphere, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->qCannonSector, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->planetaryShields, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->transporterlvl, ':', BUFF_SIZE);
+	addint(buffer, planets[pnumb - 1]->citdl->interdictor, ':', BUFF_SIZE);
+}
 void buildplayerinfo (int playernum, char *buffer)
 {
     buffer[0] = '\0';
@@ -2050,7 +2102,6 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
     char *p_name, *p_owner;
     char p_ownertype = 'p', dummy;
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
-    p_owner = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
     for (i = 0; i <= configdata->max_total_planets; i++)
     {
@@ -2064,15 +2115,33 @@ void buildnewplanet (struct player *curplayer, char *planetname, int sector)
 	 //This should really be a probability distribution with M being at the top
 	 // followed by L, O, K, H, U, C. But for now this will work
 	 p_type = randomnum(1,configdata->number_of_planet_types-1);
-    strcpy (p_name, planetname);
     planets[p_num-1] = (struct planet *) malloc (sizeof (struct planet *));
     planets[p_num-1]->num = p_num;
     planets[p_num-1]->name = (char *) malloc (strlen (p_name) * sizeof (char));
-    //planets[p_num]->owner =  (char *) malloc (strlen (p_owner) * sizeof (char));
-    planets[p_num-1]->name = p_name;
+    strcpy(planets[p_num-1]->name, planetname);
     planets[p_num-1]->owner = curplayer->number;
-    //planets[p_num]->ownertype = p_ownertype;
+	 planets[p_num-1]->sector = sector;
+	 planets[p_num-1]->creator = 
+			(char *)malloc(sizeof(char)*(MAX_NAME_LENGTH+1));
+	 strcpy(planets[p_num-1]->creator, curplayer->name);
     planets[p_num-1]->type = p_type;
+	 planets[p_num-1]->citdl = (struct citadel *)malloc(sizeof(struct citadel));
+	 planets[p_num-1]->pClass = planetTypes[p_type];
+	 planets[p_num - 1]->fuelColonist = 0;
+	 planets[p_num - 1]->organicsColonist = 0;
+	 planets[p_num - 1]->equipmentColonist = 0;
+	 planets[p_num - 1]->fuel = 0;
+	 planets[p_num - 1]->organics = 0;
+	 planets[p_num - 1]->equipment = 0;
+	 planets[p_num - 1]->fighters = 0;
+	 planets[p_num - 1]->citdl->level = 0;
+	 planets[p_num - 1]->citdl->treasury = 0;
+	 planets[p_num - 1]->citdl->militaryReactionLevel = 0;
+	 planets[p_num - 1]->citdl->qCannonAtmosphere = 0;
+ 	 planets[p_num - 1]->citdl->qCannonSector = 0;
+ 	 planets[p_num - 1]->citdl->planetaryShields = 0;
+	 planets[p_num - 1]->citdl->transporterlvl = 0;
+	 planets[p_num - 1]->citdl->interdictor = 0;
 
     /* The above is wrong! The planet init reads the player number as a
        ** planet type. Need to modify the bigbang to to insert a planet type at
@@ -2146,8 +2215,7 @@ void buildnewplayer (struct player *curplayer, char *shipname)
     ships[i] = curship;
 }
 
-int
-move_player (struct player *p, struct msgcommand *data, char *buffer)
+int move_player (struct player *p, struct msgcommand *data, char *buffer)
 {
     int linknum = 0;
 

@@ -164,6 +164,7 @@ init_universe (char *filename, struct sector ***array)
             strcpy ((*array)[sectornum - 1]->nebulae, "\0");
         init_hash_table ((*array)[sectornum - 1]->playerlist, 1);
 		  init_hash_table ((*array)[sectornum - 1]->shiplist, 1);
+		  //init_hash_table ((*array)[sectornum - 1]->planets, 1);
         (*array)[sectornum - 1]->portptr = NULL;
         (*array)[sectornum - 1]->planets = NULL;
     }

@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "common.h"
 
 #define NUMBER_OF_PLANET_TYPES 8
-#define MAX_CIDADEL_LEVEL 7
+#define MAX_CITADEL_LEVEL 7
 
 //Here go flags for ships
 #define S_INTRANSIT 1 
@@ -163,18 +163,23 @@ enum planettype
 struct planetType_struct
 {
   char *typeDescription;
+  char *typeClass;
   char *typeName;
-  int citadelUpgradeTime[MAX_CIDADEL_LEVEL];
-  int citadelUpgradeOre[MAX_CIDADEL_LEVEL];
-  int citadelUpgradeOrganics[MAX_CIDADEL_LEVEL];
-  int citadelUpgradeEquipment[MAX_CIDADEL_LEVEL];
-  int citadelUpgradeColonist[MAX_CIDADEL_LEVEL];
-  int maxColonist[2];		/* max colonist in ore,organics,equp */
+  int citadelUpgradeTime[MAX_CITADEL_LEVEL];
+  int citadelUpgradeOre[MAX_CITADEL_LEVEL];
+  int citadelUpgradeOrganics[MAX_CITADEL_LEVEL];
+  int citadelUpgradeEquipment[MAX_CITADEL_LEVEL];
+  int citadelUpgradeColonist[MAX_CITADEL_LEVEL];
+  int maxColonist[3];		/* max colonist in ore,organics,equp */
   int fighters;
   int fuelProduction;
   int organicsProduction;
   int equipmentProduction;
   int fighterProduction;
+  int maxore;
+  int maxorganics;
+  int maxequipment;
+  int maxfighters;
   float breeding;
 };
 
@@ -183,32 +188,33 @@ typedef struct planetType_struct planetClass;
 struct planet
 {
   int num;
+  int sector;
   char *name;
-  int sector;			//What sector its in!
-  enum planettype type;
-  planetClass *pClass;
   int owner;
-  /*char ownertype; */
-  /*char *corp; /* Don't think this is needed since owner should be corp # or player # */
-  struct citadel *ctd;
+  enum planettype type;
+  char *creator;
   int fuelColonist;		/* Amount of people assigned (All go to fuel by default) */
   int organicsColonist;		/* Amount of people assigned */
-  int equimentColonist;		/* Amount of people assigned */
+  int equipmentColonist;		/* Amount of people assigned */
   int fuel;			/* Amount actually on the planet. */
   int organics;
   int equipment;
   int fighters;
+  planetClass *pClass;
+  struct citadel *citdl;
 };
 
 struct citadel
 {
   int level;
-  float upgradePercent;		/* how far along your upgrade is */
-  int planetaryShields;		/* number of planetary shields */
-  int qCannonSector;		/* Value percent to shoot sector with Q-Cannon */
-  int qCannonAtmosphere;	/* Value percent to shoot atmosphere with Q-Cannon */
+  unsigned long treasury;
   int militaryReactionLevel;	/* like is says on the tin */
-  unsigned long treasuryFunds;
+  int qCannonAtmosphere;	/* Value percent to shoot atmosphere with Q-Cannon */
+  int qCannonSector;		/* Value percent to shoot sector with Q-Cannon */
+  int planetaryShields;		/* number of planetary shields */
+  int transporterlvl;
+  int interdictor;
+  float upgradePercent;		/* how far along your upgrade is */
 };
 
 enum listtype
