@@ -1348,10 +1348,10 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector )
   planets[p_num] = (struct planet *) malloc (sizeof (struct planet *));
   planets[p_num]->num = p_num;
   planets[p_num]->name = (char *) malloc (strlen (p_name) * sizeof (char));
-  planets[p_num]->owner =  (char *) malloc (strlen (p_owner) * sizeof (char));
+  //planets[p_num]->owner =  (char *) malloc (strlen (p_owner) * sizeof (char));
   planets[p_num]->name = p_name;
-  planets[p_num]->owner = curplayer->name;
-  planets[p_num]->ownertype = p_ownertype;
+  planets[p_num]->owner = curplayer->number;
+  //planets[p_num]->ownertype = p_ownertype;
   planets[p_num]->type = p_type;
 
   /* The above is wrong! The planet init reads the player number as a
