@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ** 1) Modified all comments from // to C comments in case a users complier isn't C99 
 **    compliant. (like some older Sun or HP compilers)
 **
+** 2) Added owner to insert planet
 ** 
 */
 
@@ -45,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 struct planet *planets[MAX_TOTAL_PLANETS];
 
 int init_planets(char *filename, struct sector *secarray[]);
-int insert_planet(struct planet *p, struct sector *s);
+int insert_planet(struct planet *p, struct sector *s, int owner);
 
 
 #endif
