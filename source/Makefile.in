@@ -14,7 +14,7 @@
 @SET_MAKE@
 
 # -*- makefile -*-
-# $Id: Makefile.in,v 1.7 2002-11-18 04:12:00 npsimons Exp $
+# $Id: Makefile.in,v 1.8 2004-01-21 04:00:53 eryndil Exp $
 # Copyright (C) 2002, Nathan Paul Simons (npsimons@hardcorehackers.com)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -93,11 +93,15 @@ am__quote = @am__quote@
 install_sh = @install_sh@
 
 EXTRA_DIST = \
-	config.data
+	config.data \
+	planettypes.data \
+	shiptypes.data
 
 
 pkgdata_DATA = \
-	config.data
+	config.data \
+	planettypes.data \
+	shiptypes.data
 
 
 bin_PROGRAMS = \
