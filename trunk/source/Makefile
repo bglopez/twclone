@@ -50,5 +50,5 @@ test_client : common.o test_client.c
 bigbang : universe.h bigbang.c
 	gcc $(FLAGS) -o bigbang bigbang.c parse.o config.o 
 clean : 
-	rm -f *.o server test_client test_server client bigbang
+	rm -f *.o server test_client test_server client bigbang core
 
