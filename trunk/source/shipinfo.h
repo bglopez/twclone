@@ -27,5 +27,6 @@ struct sp_shipinfo
 };
 
 void init_shiptypeinfo ();
+void saveshipinfo();
 
 #endif

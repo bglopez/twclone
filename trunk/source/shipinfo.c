@@ -1,12 +1,100 @@
 #include <string.h>
+#include <stdio.h>
 #include "shipinfo.h"
+#include "common.h"
 
 struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 
-void
-init_shiptypeinfo ()
+void saveshipinfo()
 {
-  strcpy (shiptypes[0].name, "\x1B[0;32mMerchant Cruiser\x1B[0m");
+	FILE *shipfile;
+	char *stufftosave=(char *)malloc(sizeof(char)*BUFF_SIZE);
+	int index=0;
+	int len=0;
+	int loop;
+
+	shipfile = fopen("./shipinfo.data", "w");
+
+	for (index=0; index < SHIP_TYPE_COUNT; index++)
+	{
+		strcpy(stufftosave, "\0");
+		addstring(stufftosave, shiptypes[index].name, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].basecost, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].maxattack, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].initialholds, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].maxholds, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].maxfighters, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].turns, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].mines, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].genesis, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].twarp, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].transportrange, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].maxshields, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].offense, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].defense, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].beacons, ':', BUFF_SIZE);
+ 		addint(stufftosave, shiptypes[index].holo, ':', BUFF_SIZE);
+		addint(stufftosave, shiptypes[index].planet, ':', BUFF_SIZE);
+ 		addint(stufftosave, shiptypes[index].photons, ':', BUFF_SIZE);
+		
+		len = strlen(stufftosave);
+		for (loop=1; loop <= 300 - len; loop++)
+			strcat(stufftosave, " ");
+		strcat(stufftosave, "\n");
+		fprintf(shipfile, "%s", stufftosave);
+	}
+	fclose(shipfile);
+	free(stufftosave);
+
+}
+
+void init_shiptypeinfo ()
+{
+	int index=0;
+	FILE *shipfile=NULL;
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int done=0;
+
+	shipfile = fopen("shipinfo.data", "r");
+	if (shipfile==NULL)
+	{
+		fprintf(stderr, "\ninit_shiptypeinfo: No shipinfo file!");
+		return;
+	}
+	
+	while(!done)
+	{
+		strcpy(buffer, "\0");
+		fgets(buffer, BUFF_SIZE,shipfile);
+		if (strlen(buffer)==0)
+			done=1;
+		else
+		{
+			popstring(buffer, shiptypes[index].name, ":", BUFF_SIZE);
+			shiptypes[index].basecost = popint(buffer, ":");
+			shiptypes[index].maxattack = popint(buffer, ":");
+			shiptypes[index].initialholds = popint(buffer, ":");
+			shiptypes[index].maxholds = popint(buffer, ":");
+			shiptypes[index].maxfighters = popint(buffer, ":");
+			shiptypes[index].turns = popint(buffer, ":");
+			shiptypes[index].mines = popint(buffer, ":");
+			shiptypes[index].genesis = popint(buffer, ":");
+			shiptypes[index].twarp = popint(buffer, ":");
+			shiptypes[index].transportrange = popint(buffer, ":");
+			shiptypes[index].maxshields = popint(buffer, ":");
+			shiptypes[index].offense = popint(buffer, ":");
+			shiptypes[index].defense = popint(buffer, ":");
+			shiptypes[index].beacons = popint(buffer, ":");
+			shiptypes[index].holo = popint(buffer, ":");
+			shiptypes[index].planet = popint(buffer, ":");
+			shiptypes[index].photons = popint(buffer, ":");
+			index++;
+		}
+	}
+	fclose(shipfile);
+	free(buffer);
+		  
+		  /*  strcpy (shiptypes[0].name, "\x1B[0;32mMerchant Cruiser\x1B[0m");
   shiptypes[0].basecost = 41300;
   shiptypes[0].maxattack = 750;
   shiptypes[0].initialholds = 20;
@@ -289,7 +377,7 @@ init_shiptypeinfo ()
   shiptypes[14].beacons = 100;
   shiptypes[14].holo = 1;
   shiptypes[14].planet = 1;
-  shiptypes[14].photons = 0;
+  shiptypes[14].photons = 0;*/
 
   return;
 }

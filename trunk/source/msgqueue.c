@@ -98,7 +98,7 @@ void clean_msgqueues(int msgidin, int msgidout, char *filename)
 	return;
 }
 
-void sendmsg (int msgid, char *buffer, long mtype)
+void sendmesg (int msgid, char *buffer, long mtype)
 {
   void *msg = malloc (sizeof (struct msgbuffer));
 
