@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.7 $
- * Last Modified: $Date: 2002-05-09 03:56:19 $
+ * $Revision: 1.8 $
+ * Last Modified: $Date: 2002-06-04 19:40:55 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.7 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-05-09 03:56:19 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.8 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-04 19:40:55 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1280,6 +1280,7 @@ printf("\nPlease enter your username and password");
        {
          strcpy(buffer,"NEW ");   //Just to make sure everything is good
 	 newplayer = 1;
+	 printf("\nNote: Please save after entering the game so the server can save you correctly\n");
 	 printf("\nPlease enter your desired User Name and Password");
 	 printf("\nUser: ");
 	 for (counter=4; (ch=getchar())!='\n'; counter++)
