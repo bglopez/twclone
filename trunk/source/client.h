@@ -80,7 +80,7 @@ struct player
   int number;
   char *name;
   int shipnumb;
-  unsigned long exp;
+  unsigned long exper;
   long align;
   int turns;
   int credits;
