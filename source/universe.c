@@ -58,6 +58,11 @@ int init_universe(char *filename, struct sector ***array)
   char buffer[BUFF_SIZE], temp[BUFF_SIZE];
 
   univinfo = fopen(filename, "r");
+  if (univinfo == NULL)
+  {
+		fprintf(stderr, "\ninit_universe: No sector data file. Please rerun bigbang!");
+		exit(-1);
+  }
   (* array) = NULL;
 
   do
@@ -152,6 +157,11 @@ void init_playerinfo(char *filename)
     players[playernum] = NULL;
 
   playerinfo = fopen(filename, "r");
+  if (playerinfo == NULL)
+  {
+		fprintf(stderr, "\ninit_playerinfo: No playerfile.");
+		return;
+  }
   while (1)
     {
       buffer[0] = '\0';
@@ -232,6 +242,11 @@ void init_shipinfo(char *filename)
     ships[x] = NULL;
 
   shipfile = fopen(filename, "r");
+  if (shipfile==NULL)
+  {
+		fprintf(stderr, "\ninit_shipinfo: No ship file");
+		return;
+  }
   while (1)
     {
       buffer[0] = '\0';
@@ -287,6 +302,11 @@ void init_portinfo(char *filename)
       ports[counter]=NULL;
   
   portfile = fopen(filename, "r");
+  if (portfile == NULL)
+  {
+		fprintf(stderr, "\ninit_portinfo: No port file! Please rerun bigbang!");
+		exit(-1);
+  }
   while(1)
   {
     buffer[0]='\0';
