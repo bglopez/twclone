@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.31 $
- * Last Modified: $Date: 2003-10-29 23:57:51 $
+ * $Revision: 1.32 $
+ * Last Modified: $Date: 2003-11-04 23:37:28 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.31 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-29 23:57:51 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.32 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-04 23:37:28 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -677,7 +677,10 @@ void psinfo (int sockid, int pnumb, struct player *p)
         popstring (buffer + position, type, ":", 70);
         curship->fighters = popint (buffer + position, ":");
         curship->shields = popint (buffer + position, ":");
-        p->rank = (int)(log (p->exper) / log (2));	//Since exp ranks go by mod 2...
+		  if (p->exper != 0)
+        	p->rank = (int)(log (p->exper) / log (2));	//Since exp ranks go by mod 2...
+		  else
+			p->rank = 0;
         if (p->align < 0)
         {
             strcpy (title, KRED);
@@ -689,13 +692,13 @@ void psinfo (int sockid, int pnumb, struct player *p)
             strcat (title, good_ranks[p->rank]);
         }
         if (curship->name == NULL)
-            curship->name = (char *) malloc (strlen (name) + 1);
+            curship->name = (char *) malloc (sizeof(char)*(strlen (name) + 1));
         if (curship->type == NULL)
-            curship->type = (char *) malloc (strlen (type) + 1);
+            curship->type = (char *) malloc (sizeof(char)*(strlen (type) + 1));
         if (p->title == NULL)
-            p->title = (char *) malloc (strlen (title) + 1);
+            p->title = (char *) malloc (sizeof(char)*(strlen (title) + 1));
         if (p->name == NULL)
-            p->name = (char *) malloc (strlen (pname) + 1);
+            p->name = (char *) malloc (sizeof(char)*(strlen (pname) + 1));
         strncpy (curship->name, name, strlen (name) + 1);
         strncpy (curship->type, type, strlen (type) + 1);
         strncpy (p->title, title, strlen (title) + 1);
@@ -705,7 +708,6 @@ void psinfo (int sockid, int pnumb, struct player *p)
         free (temp);
 		  free(intptr);
         p->pship = curship;
-		  free(curship);
     }
     else
     {
@@ -864,8 +866,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
         strncpy (temp, tempbuf, strlen (tempbuf));
         for (counter = 0; counter <= MAX_PLAYERS; counter++)
         {
-            if ((curplayer =
-                        (struct player *) malloc (sizeof (struct player))) != NULL)
+            if ((curplayer = (struct player *) malloc (sizeof (struct player))) != NULL)
             {
                 tempplayer = popint (temp, ",");
                 curplayer->name = NULL;
@@ -880,10 +881,14 @@ int getsectorinfo (int sockid, struct sector *cursector)
                     cursector->players = curplayer;
                 else
 					 {
-						if (place != NULL)
-                    place->next = curplayer;
+					   place=cursector->players;
+						while(place->next!=NULL)
+						{
+							place=place->next;
+						}
 					 }
-                place = curplayer;
+					 if (place != NULL)
+                	place->next = curplayer;
                 curplayer = NULL;
                 if (strlen (temp) == 0)	//If we're beyond the length of
                     counter = MAX_PLAYERS + 1;	//the string, then no more loop
@@ -1032,6 +1037,7 @@ int printsector (struct sector *cursector)
                 counter = MAX_PLAYERS + 1;
             else
                 after = place->next;
+				fflush(stdout);
             clearplayer (place);
             place = after;
         }
@@ -1052,15 +1058,20 @@ int printsector (struct sector *cursector)
 
 void clearplayer (struct player *curplayer)
 {
-    free (curplayer->pship->name);
-    free (curplayer->pship->type);
-    free (curplayer->pship);
-    free (curplayer->name);
-    free (curplayer->title);
-    free (curplayer);
+	 newfree(curplayer->pship->name);
+    newfree(curplayer->pship->type);
+    newfree(curplayer->pship);
+    newfree(curplayer->name);
+    newfree(curplayer->title);
+    newfree(curplayer);
     return;
 }
 
+void newfree(void *item)
+{
+	if (item != NULL)
+		free(item);
+}
 void do_ship_upgrade(int sockid, struct player *curplayer)
 {
 	char *buffer = (char *)malloc(BUFF_SIZE);

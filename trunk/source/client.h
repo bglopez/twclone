@@ -141,6 +141,7 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid);
 int getyes (char *answer);
 void psinfo (int sockid, int pnumb, struct player *p);
 void clearplayer (struct player *curplayer);
+void newfree(void *item);
 void getmyinfo (int sockid, struct player *curplayer);
 void printmyinfo (struct player *curplayer);
 void printhelp ();
