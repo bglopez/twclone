@@ -62,7 +62,7 @@ init_universe (char *filename, struct sector ***array)
   if (univinfo == NULL)
     {
       fprintf (stderr,
-	       "\ninit_universe: No sector data file. Please rerun bigbang!");
+	       "\ninit_universe: No sector data file. Please rerun bigbang!\n");
       exit (-1);
     }
   (*array) = NULL;
