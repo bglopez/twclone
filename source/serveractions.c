@@ -1598,6 +1598,7 @@ void buyship(char *buffer, struct player *curplayer)
 	strcpy(curship->name, name);
 	curship->location = curplayer->sector;
 	curship->type = type;
+	curship->shields = 0;
 	curship->fighters = 0;
 	curship->holds = shiptypes[type -1]->initialholds;
 	curship->colonists = 0;
