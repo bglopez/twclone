@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "planet.h"
 
 /*
@@ -11,7 +12,6 @@ int
 init_planets (char *filename, struct sector *secarray[])
 {
   FILE *planetfile;
-  struct sector *foo;
   int i, p_num, p_sec, p_type;
   char *p_name, *p_owner, p_ownertype, dummy;
   int count;
@@ -41,7 +41,7 @@ init_planets (char *filename, struct sector *secarray[])
       planets[p_num - 1]->type = p_type;
       insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
     }
-
+	return(0);
 }
 
 

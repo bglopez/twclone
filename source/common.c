@@ -138,7 +138,7 @@ int
 acceptnewconnection (int sockid)
 {
   int sockaid, clnt_length;
-  struct sockaddr_in *clnt_sockaddr;
+  struct sockaddr_in *clnt_sockaddr=NULL;
 
   clnt_length = sizeof (*clnt_sockaddr);
 

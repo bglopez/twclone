@@ -14,6 +14,7 @@
 #include "portinfo.h"
 #include "boxmuller.h"
 #include "config.h"
+#include "planet.h"
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
@@ -32,7 +33,6 @@ processcommand (char *buffer, struct msgcommand *data)
 {
   struct player *curplayer;
   struct port *curport;
-  struct planet *curplanet;
   struct realtimemessage *curmessage;
   float fsectorcount = (float) sectorcount;	//For rand() stuff in newplayer
   int linknum = 0;
@@ -773,8 +773,8 @@ void saveplayer (int pnumb, char *filename)
   strcpy (intptr, "\0");
   strcpy (stufftosave, "\0");
 
-  sprintf (intptr, "%d:\0", pnumb - 1);
-  sprintf (stufftosave, "%d:", pnumb);
+  sprintf(intptr, "%d:", pnumb - 1);
+  sprintf(stufftosave, "%d:", pnumb);
   addstring (stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
   addstring (stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
   addint (stufftosave, players[pnumb - 1]->sector, ':', BUFF_SIZE);
@@ -847,7 +847,7 @@ saveship (int snumb, char *filename)
   strcpy (intptr, "\0");
   strcpy (stufftosave, "\0");
 
-  sprintf (intptr, "%d:\0", snumb - 1);
+  sprintf (intptr, "%d:", snumb - 1);
   sprintf (stufftosave, "%d:", snumb);
   addstring (stufftosave, ships[snumb - 1]->name, ':', BUFF_SIZE);
   addint (stufftosave, ships[snumb - 1]->type, ':', BUFF_SIZE);
@@ -1328,7 +1328,7 @@ trading (struct player *curplayer, struct port *curport, char *buffer,
 void
 buildnewplanet (struct player *curplayer, char *planetname, int sector )
 {
-  int i, p_num, p_sec, p_type;
+  int i, p_num=0, p_sec, p_type;
   char *p_name, *p_owner;
   char p_ownertype = 'p', dummy;
   p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
