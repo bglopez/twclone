@@ -28,3 +28,7 @@ that if you run "make" and Makefile.am or configure.in have been
 changed, autoconf and automake will be automatically run, so there is
 really no need to do this.
 
+Run "./cvs2cl" to generate the ChangeLog file off of the CVS log
+messages.  Something that bears noting: when checking in the ChangeLog,
+please do not use a message.  Otherwise, the ChangeLog will turn into
+some recursive nightmare filled with messages about itself.
