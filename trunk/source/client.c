@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.8 $
- * Last Modified: $Date: 2002-06-04 19:40:55 $
+ * $Revision: 1.9 $
+ * Last Modified: $Date: 2002-06-08 23:35:04 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.8 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-04 19:40:55 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.9 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-08 23:35:04 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -121,6 +121,8 @@ int main(int argc, char *argv[])
   //recvinfo(sockid, buffer);    //Gets rid of the stuff login sends
   buffer = NULL;
   printwelcome();
+  whosplaying(sockid);
+  printf("\n");
   if ((cursector=(struct sector *)malloc(sizeof(struct sector)))!=NULL)
   {                             //Need memory
   cursector->players = NULL;    
@@ -212,11 +214,17 @@ int main(int argc, char *argv[])
 	    case '?':
 	      printhelp();
 	      break;
+		 case '`':
+			fedcommlink(sockid);
+			break;
+		 case '#':
+			whosplaying(sockid);
+			break;
 	    case '~':
 	      if (strncmp(goofey, "~debug", 6)==0)
 	      {
 	         printf("\nEntering debug mode.");
-		 debugmode(sockid);
+		 		debugmode(sockid);
 	      }
 	      getmyinfo(sockid, curplayer);
   	      sector = getsectorinfo(sockid, cursector);
@@ -237,10 +245,67 @@ return(0);
 
 void printwelcome()
 {
-printf("\nWelcome to twclone.");
+printf("\n%sWelcome to TWClone.", KGRN);
 printf("\n\n%s", CVS_REVISION);
-printf("\nLast Modified on: %s", LAST_MODIFIED);
+printf("\nClient Last Modified on: %s", LAST_MODIFIED);
 printf("\n");
+printf("\nTWClone Hompage: %shttp://twclone.sourceforge.net%s", KLTCYN, KGRN);
+printf("\nCurrent Release: 0.10");
+printf("\n");
+}
+
+void fedcommlink(int sockid)
+{
+	char message[BUFF_SIZE], buffer[BUFF_SIZE];
+		  
+	printf("\n\n%sFederation comm-link:", KGRN);
+	printf("\n\n%s`%s", KMAG, KYLW);
+	fgets(message, BUFF_SIZE, stdin);
+	message[strcspn(message, "\n")] = '\0';
+	strcpy(buffer, "FEDCOMM ");
+	strcat(buffer, message);
+	strcat(buffer, ":\0");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	
+}
+
+void whosplaying(int sockid)
+{
+   char *buffer=(char *)malloc(BUFF_SIZE*sizeof(char));
+	char *temp=(char *)malloc(BUFF_SIZE*sizeof(char));
+	int pnumb=0;
+	
+	char *name=(char *)malloc(BUFF_SIZE*sizeof(char));
+	int exp=0;
+	int align=0;
+	int rank;
+
+	strcpy(temp, "\0");
+	printf("\n%s%s                             Who's Playing                             %s", KBBLU, KFWHT,KNRM);
+	printf("\n");
+	strcpy(buffer, "ONLINE");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	popstring(buffer, temp, ":", BUFF_SIZE);
+	while(strlen(temp)>0)
+	{
+		pnumb = popint(temp, ",");
+		sprintf(buffer, "PLAYERINFO %d:", pnumb);
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		popstring(buffer, name, ":", BUFF_SIZE);
+		exp = popint(buffer, ":");
+		align = popint(buffer, ":");
+   	rank = log(exp)/log(2);    //Since exp ranks go by mod 2...
+    	if (align < 0)
+		 	printf("\n%s%s %s", KRED, evil_ranks[rank], name);
+    else
+			printf("\n%s%s %s", KLTCYN, good_ranks[rank], name);
+	}
+	
+	free(buffer);
+	free(temp);
 }
 
 void debugmode(int sockid)
@@ -307,13 +372,18 @@ void junkline()
 void printhelp()
 {
   printf("\n%s|===============================%stwclone%s===============================|", KGRN, KLTBLU, KGRN);
+  printf("\n%s|                           %sGlobal Commands%s                           |", KGRN, KMAG, KGRN);
+  printf("\n%s|                           %s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s                           |", KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN);
+  printf("\n%s| %s<%s`%s>%s Fed. Comm-Link                                                  %s|", KGRN, KMAG, KGRN, KMAG, KLTRED, KGRN);
+  printf("\n%s| %s<%s#%s>%s Who's Playing                                                   %s|", KGRN, KMAG, KGRN, KMAG, KLTRED, KGRN);
+  printf("\n%s| ------------------------------------------------------------------- |", KGRN);
   printf("\n%s|        %sNavigation             Computer              Tactical        %s|", KGRN, KMAG, KGRN);
   printf("\n%s|        %s=%s-%s=%s-%s==%s-%s=%s-%s=             %s=%s-%s=%s--%s=%s-%s=              %s=%s-%s=%s--%s=%s-%s=        %s|", KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN);
   printf("\n%s| %s<%sD%s>%s Re-Display Sector %s<%sI%s>%s Ship Information                          %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
   printf("\n%s| %s<%sP%s>%s Port and Trade                                                  %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
   printf("\n%s| %s<%sM%s>%s Move to a Sector                                                %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
   printf("\n%s| %s<%sQ%s>%s Quit and Exit                                                   %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
-  printf("\n%s|=============================%s0.56 alpha%s==============================|", KGRN, KLTRED, KGRN);
+  printf("\n%s|=============================%s0.10 alpha%s==============================|", KGRN, KLTRED, KGRN);
   
 }
 
@@ -1376,17 +1446,39 @@ void getmessages(char *buffer)
 {
 	char temp[10];
 	char name[50];
-	int direction=0;
+	char message[BUFF_SIZE];
+	int direction=-255;
 
-	popstring(buffer, temp, ":", 50);
-	popstring(buffer, name, ":", 50);
+	if (strncmp(buffer, "OK:", 3) != 0)
+		return;
+	//fprintf(stderr, "\ngetmessages: Buffer is '%s'", buffer);
+	popstring(buffer, temp, ":", BUFF_SIZE);
+	popstring(buffer, name, ":", BUFF_SIZE);
 	direction = popint(buffer, ":");
+	popstring(buffer, message, ":", BUFF_SIZE);
 
-	if (direction == 1)
-		printf("\n%s%s%s warps into the sector.\n", KLTCYN, name, KGRN);
-	else if (direction == -1)
-		printf("\n%s%s%s warps out of the sector.\n", KLTCYN, name, KGRN);
-	
+	switch(direction)
+	{
+	  case 1:
+		 	printf("\n%s%s%s warps into the sector.", KLTCYN, name, KGRN);
+		 	break;
+	  case -1:
+		 	printf("\n%s%s%s warps out of the sector.", KLTCYN, name, KGRN);
+			break;
+	  case 0:
+			printf("\n\n%sIncoming transmission from %s%s%s on Federation comm-link:", KGRN, KLTCYN, name, KGRN);
+			printf("\n%s%s", KLTYLW, message);
+			printf("\n");
+			break;
+	  case 2:
+			printf("\n%s%s%s enters the game.", KLTCYN, name, KGRN);
+			break;
+	  case -2:
+			printf("\n%s%s%s leaves the game.", KLTCYN, name, KGRN);
+			break;
+	  default:
+			break;
+	}
 }
 int init_nowait_io()
 {

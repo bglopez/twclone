@@ -42,7 +42,9 @@ enum commandtype
   ct_port,
   ct_info,
   ct_portinfo,
-  ct_update
+  ct_update,
+  ct_fedcomm,
+  ct_online
 };
   
 struct msgbuffer
