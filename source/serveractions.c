@@ -139,12 +139,16 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  return;
 	}
       curplayer->loggedin = 1;
-
       if (curplayer->sector == 0)
-	builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
+		{
+			builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
+			sendtosector(ships[curplayer->ship - 1]->location, curplayer->number, 2);
+		}
       else
-	builddescription(curplayer->sector, buffer, curplayer->number);
-
+		{
+			builddescription(curplayer->sector, buffer, curplayer->number);
+			sendtosector(curplayer->sector, curplayer->number, 2);
+		}
       break;
     case ct_newplayer:
       //fprintf(stderr, "processcommand: Got a newplayer command\n");
@@ -165,9 +169,15 @@ void processcommand(char *buffer, struct msgcommand *data)
 		      : (curplayer->sector - 1)]->playerlist, 1);
 
       if (curplayer->sector == 0)
-	builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
+		{
+			builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
+			sendtosector(ships[curplayer->ship - 1]->location, curplayer->number, 2);
+		}
       else
-	builddescription(curplayer->sector, buffer, curplayer->number);
+		{
+			builddescription(curplayer->sector, buffer, curplayer->number);
+			sendtosector(curplayer->sector, curplayer->number, 2);
+		}
       break;
 	 case ct_update:
     	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
@@ -195,6 +205,22 @@ void processcommand(char *buffer, struct msgcommand *data)
 		}
 		else
 			strcpy(buffer, "OK: Still in Transit");
+		break;
+	 case ct_fedcomm:
+      if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
+      {
+			strcpy(buffer, "BAD");
+			return;
+      }
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Moving you can't do that");
+			return;
+		}
+		fedcommlink(curplayer->number, data->buffer);
+		break;
+	 case ct_online:
+		whosonline(buffer);
 		break;
     case ct_playerinfo:
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
@@ -227,6 +253,10 @@ void processcommand(char *buffer, struct msgcommand *data)
 			strcpy(buffer, "BAD: Can't quit while moving!");
 			return;
 		}
+		if (curplayer->sector==0)
+			sendtosector(ships[curplayer->ship - 1]->location, curplayer->number, -2);
+		else
+			sendtosector(curplayer->sector, curplayer->number, -2);
 		fprintf(stderr, "\nprocesscommand Player number is '%d', '%d'", curplayer->number,
 				curplayer->ship);
 		saveplayer(curplayer->number, "./players.data");
@@ -424,6 +454,23 @@ void builddescription(int sector, char *buffer, int playernum)
     }
 
   return;
+}
+
+void whosonline(char *buffer)
+{
+	int playernum=1;
+	struct player *curplayer;
+	
+	strcpy(buffer, ":\0");
+	while(players[playernum-1]!=NULL)
+	{
+		curplayer=players[playernum-1];
+		if (curplayer->loggedin)
+			addint(buffer, curplayer->number, ',', BUFF_SIZE);
+		playernum++;
+	}
+	strcat(buffer, ":\0");
+	
 }
 
 int intransit(struct msgcommand *data)
@@ -1142,6 +1189,41 @@ int move_player(struct player *p, struct msgcommand *data, char *buffer)
 			}
       	findautoroute((p->sector == 0) ? ships[p->ship - 1]->location : (p->sector), data->to, buffer);
 	return data->to;
+}
+
+void fedcommlink(int playernum, char *message)
+{
+	char buffer[BUFF_SIZE];
+	struct player *curplayer;
+	int loop=1;
+ 
+	fprintf(stderr, "\nfedcommlink: Player # %d, sending '%s'", playernum, message);
+	fflush(stderr);
+	strcpy(buffer, players[playernum -1]->name);
+	strcat(buffer, ":0:");
+	strcat(buffer, message);
+	strcat(buffer, ":\0");
+	while(players[loop-1]!=NULL)
+	{
+		curplayer = players[loop-1];
+		if (curplayer->loggedin && (curplayer->number != playernum))
+			addmessage(curplayer, buffer);
+		loop++;
+	}
+}
+
+void sendtoallonline(char *message)
+{
+  int loop=1;
+  struct player *curplayer;
+  
+  while(players[loop-1]!=NULL)
+  {
+     curplayer = players[loop-1];
+	  if (curplayer->loggedin)
+			addmessage(curplayer, message);
+	  loop++;
+  }
 }
 
 void addmessage(struct player *curplayer, char *message)

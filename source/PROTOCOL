@@ -41,6 +41,12 @@ Gets information on the port in the current sector
 UPDATE
 Gets realtime messages from the server
 
+FEDCOMM <message>: 
+Sends a message via Fed Comm to all players
+
+ONLINE
+Gets a list of players online
+
 server responses:
 -----------------
 
@@ -76,11 +82,28 @@ If there are messages
 If there are no messages and they are not moving
 	Same as from DESCRIPTION
 	
+FEDCOMM response:
+OK:<player from>:0:<message>
+
+ONLINE response:
+:<list of players online delimeted by , >
+
 BAD
 This is sent if the client does something that doesn't succed
 
 OK
 The command was good, but no info needs to be exchanged
+
+Messaging notes!
+This is the general form of real time messages
+OK:<whatever from>:<type of message>:<message>
+for the types of messages
+1 is a being(player,alien, whatever) entering a sector
+-1 is a being exiting a sector.
+0 is a Federation comm-link message.
+2 is a player entering the game
+-2 is a player leaving the game
+
 
 -----------------------------------------------------------
 -----------------------------------------------------------
