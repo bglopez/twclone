@@ -143,6 +143,20 @@ void *handle_player(void *threadinfo)
 			data.command = ct_update;
 			commandgood = 1;
 		}
+		else if (strncmp(inbuffer, "ONLINE", 6) == 0)
+		{
+			data.command = ct_online;
+			commandgood = 1;
+		}
+		else if (strncmp(inbuffer, "FEDCOMM", 7) == 0 && loggedin)
+		{
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			popstring(inbuffer, temp, ":", BUFF_SIZE);
+			strcpy(data.buffer, temp);
+			data.command = ct_fedcomm;
+			commandgood = 1;
+		}
+							 
       else if (strncmp(inbuffer, "SHIPINFO", 8) == 0 && loggedin)
 	{
 	  popstring(inbuffer, temp, " ", BUFF_SIZE);
