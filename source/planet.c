@@ -4,8 +4,10 @@
 #include "planet.h"
 #include "parse.h"
 #include "config.h"
+#include "universe.h"
 
 extern struct config *configdata;
+extern struct sector **sectors;
 /*
  *	init_planets(filename, secarray)
  *	loads planet info from file.  returns number
@@ -64,15 +66,15 @@ void saveplanets(char *filename)
 	free(stufftosave);
 	free(treasury);
 }
-int init_planets (char *filename, struct sector **secarray)
+
+int init_planets (char *filename)
 {
     FILE *planetfile;
     int i, p_num, p_sec, p_type, p_owner;
-    char *p_name, dummy[3], buffer[BUFF_SIZE], *temp;
+    char dummy[3], buffer[BUFF_SIZE], *temp;
     int count = 0;
 	 int done=0;
 
-    p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 	 temp = (char *)malloc(sizeof(char)*30);
 
 	 planets = (struct planet **)
@@ -95,24 +97,23 @@ int init_planets (char *filename, struct sector **secarray)
 		  else
 		  {
         p_num = popint (buffer, ":");
-        p_sec = popint (buffer, ":");
-        popstring (buffer, p_name, ":", MAX_NAME_LENGTH);
-		  p_type = popint(buffer, ":");
-		  p_owner = popint(buffer, ":"); //Owner should be a number!
-
-        planets[p_num - 1] =
-            (struct planet *) malloc (sizeof (struct planet));
-        planets[p_num - 1]->num = p_num;
+        planets[p_num - 1] = (struct planet *) malloc (sizeof (struct planet));
         planets[p_num - 1]->name =
-            (char *) malloc (strlen (p_name) * sizeof (char));
+            (char *) malloc((MAX_NAME_LENGTH+1)* sizeof (char));
 		  planets[p_num - 1]->creator =
 				(char *)malloc(sizeof(char)*MAX_NAME_LENGTH);
 		  planets[p_num - 1]->citdl = 
 				(struct citadel *)malloc(sizeof(struct citadel));
+
+        p_sec = popint (buffer, ":");
+        popstring (buffer, planets[p_num - 1]->name, ":", MAX_NAME_LENGTH);
+		  p_type = popint(buffer, ":");
+		  p_owner = popint(buffer, ":"); //Owner should be a number!
+
+        planets[p_num - 1]->num = p_num;
 		  planets[p_num - 1]->pClass = planetTypes[p_type];
         planets[p_num - 1]->sector = p_sec;
         planets[p_num - 1]->owner = p_owner;
-        strcpy (planets[p_num - 1]->name, p_name);
         planets[p_num - 1]->type = p_type;
 
 		  popstring(buffer, planets[p_num -1]->creator, ":", MAX_NAME_LENGTH);
@@ -133,10 +134,10 @@ int init_planets (char *filename, struct sector **secarray)
 		  planets[p_num - 1]->citdl->transporterlvl = popint(buffer, ":");
 		  planets[p_num - 1]->citdl->interdictor = popint(buffer, ":");
         
-		  insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
+		  insert_planet (planets[p_num - 1], sectors[p_sec - 1], 0);
 		  }
     }
-    free (p_name);
+	 free(temp);
     return (0);
 }
 

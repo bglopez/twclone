@@ -4,8 +4,8 @@
 #include "common.h"
 #include "config.h"
 
-struct sp_shipinfo **shiptypes;
 extern struct config *configdata;
+extern struct sp_shipinfo **shiptypes;
 
 void saveshiptypeinfo(char *filename)
 {
@@ -59,6 +59,11 @@ void init_shiptypeinfo (char *filename)
 
 	shiptypes = (struct sp_shipinfo **)
 			  malloc(sizeof(struct sp_shipinfo *)*configdata->ship_type_count);
+	if (shiptypes == NULL);
+	{
+		fprintf(stderr, "init_shiptypeinfo: Not enough memory!\n");
+		exit(-1);
+	}
 	shipfile = fopen(filename, "r");
 	if (shipfile==NULL)
 	{
@@ -69,13 +74,17 @@ void init_shiptypeinfo (char *filename)
 	while(!done)
 	{
 		strcpy(buffer, "\0");
-		fgets(buffer, BUFF_SIZE,shipfile);
+		fgets(buffer, BUFF_SIZE, shipfile);
+		if (index >= configdata->ship_type_count)
+			done=1;
 		if (strlen(buffer)==0)
 			done=1;
-		else
+		else if (index < configdata->ship_type_count)
 		{
-			shiptypes[index] = (struct sp_shipinfo *)
-					 malloc(sizeof(struct sp_shipinfo));
+			shiptypes[index] = 
+				(struct sp_shipinfo *)malloc(sizeof(struct sp_shipinfo));
+			if (shiptypes[index] != NULL)
+			{
 			popstring(buffer, shiptypes[index]->name, ":", BUFF_SIZE);
 			shiptypes[index]->basecost = popint(buffer, ":");
 			shiptypes[index]->maxattack = popint(buffer, ":");
@@ -95,6 +104,7 @@ void init_shiptypeinfo (char *filename)
 			shiptypes[index]->planet = popint(buffer, ":");
 			shiptypes[index]->photons = popint(buffer, ":");
 			index++;
+			}
 		}
 	}
 	fclose(shipfile);
