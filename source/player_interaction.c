@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include <pthread.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -95,6 +96,8 @@ void *handle_player (void *threadinfo)
 
   free (threadinfo);
 
+  data.sockid = sockid;
+  data.threadid = pthread_self();
   printf ("Thread %d: Created\n", (int) pthread_self ());
   loggedin = 0;
 
@@ -105,7 +108,10 @@ void *handle_player (void *threadinfo)
       outbuffer[0] = '\0';
 
       if (recvinfo (sockid, inbuffer) == -1)
-	pthread_exit (NULL);
+		{
+			fprintf(stderr, "Thread %d: Exiting!\n", (int)pthread_self());
+			pthread_exit (NULL);
+		}
 
       //fprintf(stderr, "handle_player: I got '%s' as the messagem and loggedin = %d\n", 
       //inbuffer, loggedin);
@@ -227,6 +233,8 @@ void *handle_player (void *threadinfo)
 					  data.plcommand = pl_evict;
 			else if (strncmp(temp, "SWAP", strlen("SWAP")) == 0)
 					  data.plcommand = pl_swap;
+			else if (strncmp(temp, "UPGRADE", strlen("UPGRADE")) == 0)
+					  data.plcommand = pl_upgrade;
 			else if (strncmp(temp, "CQUIT", strlen("CQUIT")) == 0)
 					  data.plcommand = pl_cquit;
 			else if (strncmp(temp, "QUIT", strlen("QUIT")) == 0)

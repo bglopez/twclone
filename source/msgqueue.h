@@ -42,6 +42,7 @@ enum planetcmds
 	pl_qcannon,
 	pl_evict,
 	pl_swap,
+	pl_upgrade,
 	pl_cquit,
 	pl_quit
 };
@@ -136,6 +137,8 @@ struct msgcommand
   int playernum;
   int to;
   long senderid;
+  int sockid;
+  pthread_t threadid;
 };
 
 int init_msgqueue ();

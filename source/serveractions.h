@@ -6,6 +6,9 @@
 void processcommand (char *buffer, struct msgcommand *data);
 void builddescription (int sector, char *buffer, int playernum);
 void findautoroute (int from, int to, char *buffer);
+void planetupgrade(char *buffer, struct planet *curplanet);
+void planettake(char *buffer, struct player *curplayer);
+void planetleave(char *buffer, struct player *curplayer);
 void totalplanetinfo(int pnumb, char *buffer); 
 void buildplayerinfo (int playernum, char *buffer);
 void buildnewplanet (struct player *curplayer, char *planetname, int sector);
