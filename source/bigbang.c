@@ -17,34 +17,61 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-//This is the max length of tunnels and dead ends.
-#define MAXTUNLEN			6
+/* Modification History **
+**************************
+** 
+** DATE: 08 June 2002
+** Author: Rick Dearman
+** 1) Modified all defined items to allow them to be user defined instead. 
+**    With one exception which was the MAXJUMPPERCENT which was caused problems
+**    with other defined items in the universe.h file. 
+**
+** 2) Modified all comments from // to C comments in case a users complier isn't C99 
+**    complilant. (like some older Sun or HP compilers)
+**
+*/
 
-//Variables that will eventually be inputted by the user when this program
-//is initally run.
-#define NUMSECTORS			500
-
-//This is the number of ports 
-#define NUMPORTS				190
-
-//Percentage of sectors that will have the maximum number of warps in them 
-#define MAXJUMPPERCENT		3
-
-//Percentage chance that a final jump will be a one-way
-#define ONEWAYJUMPPERCENT	3
-
-//Percentage chance that a tunnel will be a dead end
-#define DEADENDPERCENT		30
-
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include "config.h"
 #include "universe.h"
 
-//These are the set-in-stone FedSpace links
-//Don't even think about touching these...
+
+
+/*  This is the max length of tunnels and dead ends. */
+#define MAXTUNLEN			6
+int maxTunnel=MAXTUNLEN;
+
+/*  Variables that will eventually be inputted by the user when this program */
+/*  is initally run. */
+#define NUMSECTORS			500
+int numSectors=NUMSECTORS;
+
+/*  This is the number of ports  */
+#define NUMPORTS				190
+int numPorts=NUMPORTS;
+
+/*  Percentage of sectors that will have the maximum number of warps in them  */
+#define MAXJUMPPERCENT		3
+/* Still hard-coded */
+int percentJump=MAXJUMPPERCENT;
+
+/*  Percentage chance that a final jump will be a one-way */
+#define ONEWAYJUMPPERCENT	3
+int percentDeadend=ONEWAYJUMPPERCENT;
+
+/*  Percentage chance that a tunnel will be a dead end */
+#define DEADENDPERCENT		30
+int percentOneway=DEADENDPERCENT;
+
+
+
+/*  THESE ARE THE SET-IN-STONE FEDSPACE LINKS */
+/*  DON'T EVEN THINK ABOUT TOUCHING THESE... */
 const int fedspace[10][6]={ {2,3,4,5,6,7},
 							{1,3,7,8,9,10},
 							{1,2,4,0,0,0},
@@ -57,9 +84,10 @@ const int fedspace[10][6]={ {2,3,4,5,6,7},
 							{2,9,0,0,0,0} };
 struct sector **sectorlist;
 struct config *configdata;
-struct port *portlist[NUMPORTS];
-
-int randsectornum[NUMSECTORS-10];
+/*  struct port *portlist[NUMPORTS]; */
+struct port **portlist;
+/*  int randsectornum[NUMSECTORS-10]; */
+int *randsectornum;
 
 int compsec(const void *cmp1, const void *cmp2);
 int randjump(int maxjumplen);
@@ -70,44 +98,116 @@ int warpsfull(int sector);
 int numwarps(int sector);
 void makeports();
 
-int main(void) 
-{	int x, y, z, tempint, randint, tosector, fromsector, startsec, secptrcpy, jumpsize;
-	int maxjumpsize = (int) (NUMSECTORS * ((double) MAXJUMPPERCENT / 100));
-	int usedsecptr = NUMSECTORS - 11;
+
+int
+main (int argc, char **argv)
+{
+  int c;
+	int x, y, z, tempint, randint, tosector, fromsector, startsec, secptrcpy, jumpsize;
+	int maxjumpsize;
+	int usedsecptr;
 	int len;
 	char *fileline, *tempstr;
 	FILE *file;
 	struct sector *secptr;
 
-	//Seed our randomizer
+  char *usageinfo = 
+"Usage: bigbang [options]
+Options:
+-t <integer>  indicate the max length of tunnels and dead ends. (default/minimum 6)
+-s <integer>  indicate the max number of sectors. (default/minimum 500)
+-p <integer>  indicate the max number of ports which MUST be at least 10 LESS than the number of sectors. (default/minimum 190)
+-o <integer>  indicate the percentage chance that a final jump will be a one-way. (default/minimum 3)
+-d <integer>  indicate the percentage chance that a tunnel will be a dead end. (default/minimum 30)
+\n";
+
+  /* This has to be taken out because of the knockon affect it was having with the rest of the program.
+-j <integer>  indicate the percentage of sectors that will have the maximum number of warps in them. (must be between 3 and 7) 
+  */
+  opterr = 0;
+
+/*    while ((c = getopt (argc, argv, "t:s:p:j:d:o:")) != -1) */
+  while ((c = getopt (argc, argv, "t:s:p:d:o:")) != -1)
+    {
+    switch (c)
+      {
+      case 't':
+		  maxTunnel = (MAXTUNLEN > atoi(optarg)) ? MAXTUNLEN : atoi(optarg);
+        break;
+      case 's':
+        numSectors = (NUMSECTORS > atoi(optarg)) ? NUMSECTORS : atoi(optarg);
+        break;
+      case 'p':
+        numPorts = (NUMPORTS > atoi(optarg)) ? NUMPORTS : atoi(optarg);
+        break;
+/*        case 'j': */
+/*          percentJump = (MAXJUMPPERCENT > atoi(optarg)) ? MAXJUMPPERCENT : atoi(optarg); */
+/*          percentJump = (7 > percentJump) ? 7 : percentJump; */
+/*          break; */
+      case 'd':
+        percentDeadend = (DEADENDPERCENT > atoi(optarg)) ? DEADENDPERCENT : atoi(optarg);
+        break;
+      case 'o':
+        percentOneway = (ONEWAYJUMPPERCENT > atoi(optarg)) ? ONEWAYJUMPPERCENT : atoi(optarg);
+        break;
+      case '?':
+        if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n\n%s", optopt,usageinfo);
+        else
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n\n%s",
+                   optopt,usageinfo);
+        return 1;
+      default:
+        abort ();
+      }
+    }
+
+
+if ( numPorts > (numSectors - 10))
+{
+  fprintf (stderr, "The max number of sectors MUST be greater than the number of ports. Program aborted.");
+   exit(0);	
+}
+maxjumpsize = (int) (numSectors * ((double) percentJump / 100));
+usedsecptr = numSectors - 11;
+ randsectornum =(int *)malloc((numSectors-11) *  sizeof(int));
+
+	/*  Seed our randomizer */
 	srand((unsigned long) time(NULL));
 	
-	//Reading config.data file for config data (Duh...)
+	/*  Reading config.data file for config data (Duh...) */
 	printf("\nReading in config.data...");
 	init_config("config.data");
 	printf("done.\n");
 	
 	printf("Creating sector array...");
-	sectorlist = malloc(NUMSECTORS * sizeof(struct sector *));
-	for(x = 0; x < NUMSECTORS; x++)
+	sectorlist = malloc(numSectors * sizeof(struct sector *));
+	for(x = 0; x < numSectors; x++)
 		sectorlist[x] = malloc(sizeof(struct sector));
 	printf("done.\n");
-	
+
 	printf("Creating port array...");
-	for(x = 0; x<NUMPORTS; x++)
+	portlist = malloc(numPorts * sizeof(struct port *));
+	for(x = 0; x < numPorts; x++)
+		portlist[x] = malloc(sizeof(struct port));
+	printf("done.\n");
+
+	printf("Creating port array...");
+	for(x = 0; x<numPorts; x++)
 	{
 		portlist[x]=NULL;
 		sectorlist[x]->portptr=NULL;
 	}
 	printf("done.\n");
 
-	//Fills in the randsectornum array with numbers 10 to (numsectors - 1)
-	for(x=0;x<NUMSECTORS-10;x++)
+	/*  Fills in the randsectornum array with numbers 10 to (numsectors - 1) */
+	for(x=0;x<numSectors-10;x++)
 		randsectornum[x]=x+10;
 
 	printf("Randomly picking sector numbers...");
-	//Randomly creates sector numbers to use:
-	for(x=NUMSECTORS-11;x>0;x--)
+	/*  Randomly creates sector numbers to use: */
+	for(x=numSectors-11;x>0;x--)
 	{	randint = randomnum(0,x);
 		tempint = randsectornum[randint];
 		randsectornum[randint] = randsectornum[x];
@@ -115,12 +215,12 @@ int main(void)
 	}
 	printf("done.\n");
 	
-	//Initalize sectorlist with data
-	for(x=0;x<NUMSECTORS;x++)
+	/*  Initalize sectorlist with data */
+	for(x=0;x<numSectors;x++)
 		sectorlist[x]->number = x+1;
 	
 	printf("Creating Fedspace...");
-	//Sets up Fed Space
+	/*  Sets up Fed Space */
 	for(x=0;x<10;x++)
 	{	for(y=0;y<6;y++)
 			if(fedspace[x][y]!=0)
@@ -131,7 +231,7 @@ int main(void)
 	printf("done.\n");
 			
 	printf("Setting up links from FedSpace out to other sectors...");
-	//Sets up 13 jumps from Fed Space to 6jump sectors 
+	/*  Sets up 13 jumps from Fed Space to 6jump sectors  */
 	for(x=0;x<=13;x++)
 	{	randint=randomnum(1,5);
 		do
@@ -157,11 +257,11 @@ int main(void)
 	printf("done.\n");
 
 	printf("Setting up the max warp sectors...");
-	//Sets up rest of links for the maxwarp sectors (the meat and potatoes)
+	/*  Sets up rest of links for the maxwarp sectors (the meat and potatoes) */
 	for(x=0;x<maxjumpsize;x++)
 	{	for(y=freewarp(x);y<configdata->maxwarps;y++)
 		{	randint = randomnum(1,100);
-			jumpsize = randjump(MAXTUNLEN);
+			jumpsize = randjump(maxTunnel);
 			startsec = randsectornum[x];
 			fromsector = startsec;
 			for(z=0;z<jumpsize;z++)
@@ -175,12 +275,12 @@ int main(void)
 				secjump(tosector,fromsector);
 				fromsector = tosector;
 			}
-			if(randint <= (100 - DEADENDPERCENT))
+			if(randint <= (100 - percentDeadend))
 			{	do
 				{	tosector = randsectornum[randomnum(0,maxjumpsize-1)];
 				} while(tosector == startsec);
 				secjump(fromsector,tosector);
-				if(randomnum(1,100) <= (100 - ONEWAYJUMPPERCENT) && !warpsfull(tosector))
+				if(randomnum(1,100) <= (100 - percentOneway) && !warpsfull(tosector))
 					secjump(tosector,fromsector);
 			}
 		}
@@ -195,13 +295,13 @@ int main(void)
 	}
 
 	printf("Using up leftover sector numbers...");	
-	while(usedsecptr>=0)  //finishes up creating other sector links...
+	while(usedsecptr>=0)  /*  finishes up creating other sector links... */
 	{	randint = randomnum(1,100);
-		tempint = MAXTUNLEN;
-		if(usedsecptr+1<MAXTUNLEN)
+		tempint = maxTunnel;
+		if(usedsecptr+1<maxTunnel)
 			tempint = usedsecptr + 1;
 		jumpsize = randjump(tempint);
-		startsec = randsectornum[randomnum(usedsecptr+1,NUMSECTORS-11)];
+		startsec = randsectornum[randomnum(usedsecptr+1,numSectors-11)];
 		if(freewarp(startsec))
 		{	fromsector = startsec;
 			secptrcpy = usedsecptr;
@@ -216,12 +316,12 @@ int main(void)
 				secjump(tosector,fromsector);
 				fromsector = tosector;
 			}
-			if(randint <= (100 - DEADENDPERCENT))
+			if(randint <= (100 - percentDeadend))
 			{	do
 				{	tosector = randsectornum[randomnum(0,secptrcpy)];
 				} while(tosector == startsec || warpsfull(tosector));
 				secjump(fromsector,tosector);
-				if(randomnum(1,100) <= (100 - ONEWAYJUMPPERCENT))
+				if(randomnum(1,100) <= (100 - percentOneway))
 					secjump(tosector,fromsector);
 			}
 		}
@@ -232,17 +332,17 @@ int main(void)
 	makeports();
 	printf("done.\n");
 
-	//Sorts each sector's warps into numeric order
-	for(x=0;x<NUMSECTORS;x++)
+	/*  Sorts each sector's warps into numeric order */
+	for(x=0;x<numSectors;x++)
 	{	qsort(sectorlist[x]->sectorptr, numwarps(x), sizeof(struct sector *), compsec);
 	}
 						
-	//Writing data to universe.data file
+	/*  Writing data to universe.data file */
 	printf("Saving universe to file...");	
 	file = fopen("./universe.data", "w");
 	fileline = malloc(1024*sizeof(char));
 	tempstr = malloc(10*sizeof(char));
-	for(x=0;x<NUMSECTORS;x++)
+	for(x=0;x<numSectors;x++)
 	{	sprintf(fileline, "%d", (x+1)) ;
 		fileline = strcat(fileline,":");
 		for(y=0;y<numwarps(x);y++)
@@ -259,20 +359,20 @@ int main(void)
 		if(sectorlist[x]->nebulae != NULL)
 			fileline = strcat(fileline, sectorlist[x]->nebulae);
 		fileline = strcat(fileline, ":\n");
-		//Later put in whitespace buffer for saving
-		//Not needed until user created beacons put in
+		/*  Later put in whitespace buffer for saving */
+		/*  Not needed until user created beacons put in */
 		fprintf(file,fileline);
 	}
 	fclose(file);
 	free(fileline);
 	free(tempstr);
 
-	//Writing data to ports.data file
+	/*  Writing data to ports.data file */
 	printf("Saving ports to file...");	
 	file = fopen("./ports.data", "w");
 	fileline = malloc(1024*sizeof(char));
 	tempstr = malloc(10*sizeof(char));
-	for(x=0;x<NUMPORTS;x++)
+	for(x=0;x<numPorts;x++)
 	{	
 		sprintf(fileline, "%d:%s:%d:%d:%d:%d:%d:%d:%d:%ld:%d:%d", (x+1),
 			portlist[x]->name, portlist[x]->location, portlist[x]->maxproduct[0],
@@ -305,7 +405,7 @@ int compsec(const void *cmp1, const void *cmp2)
 int randjump(int maxjumplen)
 {	if(maxjumplen > 2)
 	{	int temprandnum = randomnum(0,2+2+1+maxjumplen);
-		//int	temprandnum = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (2+2+1+maxjumplen)));
+		/*  int	temprandnum = 1 + ((int)((double)rand() / ((double) RAND_MAX + 1) * (2+2+1+maxjumplen))); */
 
 		if(temprandnum == 0)						return 0;
 		if(temprandnum >= 1 && temprandnum <= 3)	return 1;
@@ -362,14 +462,14 @@ void makeports()
 	int sector=0;
 	char name[50];
 	
-	for (loop=0; loop<NUMPORTS; loop++)
+	for (loop=0; loop<numPorts; loop++)
 	{
 		curport=(struct port *)malloc(sizeof(struct port));
 		curport->number = loop+1;
 		curport->name = (char *)malloc(sizeof(struct port));
 		strcpy(name, "\0");
-		//currently copying Unnamed Port into the names until a port names
-		//database can be initialized
+		/*  currently copying Unnamed Port into the names until a port names */
+		/*  database can be initialized */
 		sprintf(name, "Unnamed Port %d", loop+1);
 		strcpy(curport->name, name);
 		curport->maxproduct[0] = randomnum(2800, 3000);
@@ -382,7 +482,7 @@ void makeports()
 		curport->product[1]=0;
 		curport->product[2]=0;
 		curport->credits = 50000;
-		curport->invisible = 0;  //Only *special* ports are invisible;
+		curport->invisible = 0;  /*  Only *special* ports are invisible; */
 		
 		
 		switch(type)
@@ -417,8 +517,8 @@ void makeports()
 		portlist[loop] = curport;
 		curport = NULL;
 
-		//Now for assigning the port to a sector
-		sector=randomnum(0,NUMSECTORS-1);
+		/*  Now for assigning the port to a sector */
+		sector=randomnum(0,numSectors-1);
 		while (sectorlist[sector]->portptr != NULL)
 			sector=randomnum(0,NUMSECTORS-1);
 		portlist[loop]->location = sector+1;
