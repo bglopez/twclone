@@ -13,6 +13,7 @@
 #include "common.h"
 #include "portinfo.h"
 #include "boxmuller.c"
+#include "config.h"
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
@@ -20,6 +21,7 @@ extern struct player *players[MAX_PLAYERS];
 extern struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 extern struct ship *ships[MAX_SHIPS];
 extern struct port *ports[MAX_PORTS];
+extern struct config *configdata;
 
 extern int sectorcount;
 struct timeval begin,end;
@@ -808,7 +810,6 @@ void buildnewplayer(struct player *curplayer, char *shipname)
 
   int i;    //A counter
   struct ship *curship;
-  
   for (i=0; i<=MAX_PLAYERS; i++)
   {
     if (players[i] == NULL)
@@ -824,8 +825,8 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   }
   curplayer->experience = 0;
   curplayer->alignment = 0;
-  curplayer->turns = 30;
-  curplayer->credits = 300;
+  curplayer->turns = configdata->turnsperday; 
+  curplayer->credits = configdata->startingcredits;
   curplayer->lastprice = 0;
   curplayer->firstprice = 0;
   curplayer->ported = 0;
@@ -840,9 +841,9 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   strcpy(curship->name, shipname);
   curship->location = curplayer->sector;
   curship->type = 1;           //Start in a Merchant Cruiser
-  curship->fighters = 30;
+  curship->fighters = configdata->startingfighters;
   curship->shields = 0;
-  curship->holds = 30;
+  curship->holds = configdata->startingholds;
   curship->colonists = 0;
   curship->equipment = 0;
   curship->organics = 0;
