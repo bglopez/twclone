@@ -570,8 +570,6 @@ void saveplayer(int pnumb, char *filename)
   	addint(stufftosave, players[pnumb - 1]->alignment, ':', BUFF_SIZE);
   	addint(stufftosave, players[pnumb - 1]->turns, ':', BUFF_SIZE);
   	addint(stufftosave, players[pnumb - 1]->credits, ':', BUFF_SIZE);
-	strcat(stufftosave, "\n\0");
-	fprintf(stderr, "\nsaveplayer: Stuff is '%s'", stufftosave);
  
 	playerfile = fopen(filename, "r+");
 	while(1)
@@ -582,7 +580,6 @@ void saveplayer(int pnumb, char *filename)
 				  break;
 		if (strncmp(buffer, intptr, strlen(intptr))==0)
 				  fgetpos(playerfile, playerplace);
-		fprintf(stderr, "\nsaveplayer: Got to '%s'", buffer);
 	}
 	fsetpos(playerfile, playerplace);
 	fprintf(playerfile, "%s", stufftosave);
@@ -617,7 +614,6 @@ void saveship(int snumb, char *filename)
   	addint(stufftosave, ships[snumb - 1]->organics, ':', BUFF_SIZE);
   	addint(stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
   	addint(stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
-	strcat(stufftosave, "\n\0");
 
 	playerfile = fopen(filename, "r+");
 	while(1)
