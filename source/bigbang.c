@@ -142,6 +142,7 @@ main (int argc, char **argv)
   char *plout = malloc(sizeof(char)*400);
   char *randomPlanetInfo;
   int ferringhiSector;
+  time_t datenow;
 
   
   char *usageinfo =
@@ -446,6 +447,17 @@ strcpy(terraInfo,"1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:");
   (void) fclose (planetfile);
   printf ("done.\n");
 
+ 
+  if (numPorts > configdata->max_ports)
+  {
+		if (numPorts <= numSectors)
+			configdata->max_ports = (numSectors + numPorts)/2;
+  }
+  printf("Saving config data to file...");
+  datenow = time(NULL);
+  configdata->bangdate = (unsigned long)datenow;
+  saveconfig("config.data");
+  
 
   /*  Sorts each sector's warps into numeric order */
   for (x = 0; x < numSectors; x++)

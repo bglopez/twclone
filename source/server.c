@@ -214,11 +214,12 @@ int main (int argc, char *argv[])
         processcommand (buffer, &data);
         sendmesg (msgidout, buffer, senderid);
         senderid = getdata (msgidin, &data, 0);
-    }
+	 }
     saveallports ("ports.data");
 	 saveplanets("planets.data");
 	 saveshiptypeinfo("shiptypes.data");
 	 save_planetinfo("planettypes.data");
+	 saveconfig("config.data");
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
     //when we're done, clean up the msg queues

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.48 $
- * Last Modified: $Date: 2004-01-01 06:14:35 $
+ * $Revision: 1.49 $
+ * Last Modified: $Date: 2004-01-02 08:44:02 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.48 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-01 06:14:35 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.49 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-02 08:44:02 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
 		  {
         	sector = getsectorinfo (sockid, cursector);
         	printsector (cursector);
-        	for (; loop;)
+         while(loop==1)
         	{
             if (goofey != NULL)
                 free (goofey);
@@ -307,10 +307,14 @@ int main (int argc, char *argv[])
 				}
 			}
 		  }
+		  close(sockid);
         return (0);
     }
     else
+	 {
+		  close(sockid);
         return (-1);
+	 }
 
 }
 
@@ -1283,8 +1287,8 @@ int do_citadel_menu(int sockid, struct player *curplayer,
 				if ((yesno == 'y') || (yesno == 'Y'))
 				{
 					strcpy(buffer, "QUIT");
-					sendinfo(sockid,buffer);
-					recvinfo(sockid,buffer);
+					sendinfo(sockid, buffer);
+					recvinfo(sockid, buffer);
 					return(1);
 				}
 				break;

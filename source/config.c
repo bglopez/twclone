@@ -59,11 +59,11 @@ extern struct config *configdata;
     return (errno);\
   }
 
-int
-init_config (char *filename)
+int init_config (char *filename)
 {
   FILE *configfile = NULL;
   char buffer[BUFF_SIZE];
+  char bangdate[BUFF_SIZE];
 
   if ((configdata =
        (struct config *) malloc (sizeof (struct config))) == NULL)
@@ -97,6 +97,45 @@ init_config (char *filename)
   configdata->number_of_planet_types = popint(buffer, ":");
   configdata->max_ship_name_length = popint(buffer, ":");
   configdata->ship_type_count = popint(buffer, ":");
+  popstring(buffer, bangdate, ":", BUFF_SIZE);
+  configdata->bangdate = strtoul(bangdate,NULL,10); 
 
+  return (1);
+}
+
+int saveconfig(char *filename)
+{
+  FILE *configfile = NULL;
+  char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+  char *bangdate = (char *)malloc(sizeof(char)*BUFF_SIZE);
+  
+  configfile = fopen (filename, "w");
+
+  strcpy(buffer, "\0");
+  strcpy(bangdate, "\0");
+
+  addint(buffer, configdata->turnsperday, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingcredits, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingfighters, ':', BUFF_SIZE);
+  addint(buffer, configdata->startingholds, ':', BUFF_SIZE);
+  addint(buffer, configdata->processinterval, ':', BUFF_SIZE);
+  addint(buffer, configdata->autosave, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_players, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_ports, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_planets, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_total_planets, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_safe_planets, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_citadel_level, ':', BUFF_SIZE);
+  addint(buffer, configdata->number_of_planet_types, ':', BUFF_SIZE);
+  addint(buffer, configdata->max_ship_name_length, ':', BUFF_SIZE);
+  addint(buffer, configdata->ship_type_count, ':', BUFF_SIZE);
+  sprintf(bangdate, "%ld", configdata->bangdate);
+  addstring(buffer, bangdate, ':', BUFF_SIZE);
+
+  fprintf(configfile, buffer);
+
+  fclose(configfile);
+  free(buffer);
+  free(bangdate);
   return (1);
 }

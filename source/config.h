@@ -42,8 +42,10 @@ struct config
   int number_of_planet_types;
   int max_ship_name_length;
   int ship_type_count;
+  unsigned long bangdate;
 };
 
 int init_config (char *filename);
+int saveconfig(char *filename);
 
 #endif
