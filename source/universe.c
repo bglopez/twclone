@@ -116,19 +116,22 @@ int init_universe(char *filename, struct sector ***array)
       //set the last pointer to NULL if applicable
       if (sctptrcount < MAX_WARPS_PER_SECTOR) 
 	(* array)[sectornum - 1]->sectorptr[sctptrcount] = NULL;
-
       //copy the beacon info over
       popstring(buffer, temp, ":", BUFF_SIZE);
       (* array)[sectornum - 1]->beacontext = (char *) malloc(strlen(temp) + 1);
       strncpy((* array)[sectornum - 1]->beacontext, temp, strlen(temp) + 1);
       (* array)[sectornum - 1]->beacontext[strlen(temp)] = '\0';
+		if (strlen(temp) == 0)
+			strcpy((* array)[sectornum - 1]->beacontext, "\0");
 
       //copy the nebulae info over
       popstring(buffer, temp, ":", BUFF_SIZE);
       (* array)[sectornum - 1]->nebulae = (char *) malloc(strlen(temp) + 1);
       strncpy((* array)[sectornum - 1]->nebulae, temp, strlen(temp) + 1);
       (* array)[sectornum - 1]->nebulae[strlen(temp)] = '\0';
-      init_hash_table((* array)[sectornum - 1]->playerlist, 1);
+   	if (strlen(temp) == 0)
+			strcpy((* array)[sectornum -1]->nebulae, "\0");
+		init_hash_table((* array)[sectornum - 1]->playerlist, 1);
       (* array)[sectornum - 1]->portptr = NULL;
     }
   while (1); 
