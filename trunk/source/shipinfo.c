@@ -7,7 +7,7 @@
 struct sp_shipinfo **shiptypes;
 extern struct config *configdata;
 
-void saveshiptypeinfo()
+void saveshiptypeinfo(char *filename)
 {
 	FILE *shipfile;
 	char *stufftosave=(char *)malloc(sizeof(char)*BUFF_SIZE);
@@ -15,7 +15,7 @@ void saveshiptypeinfo()
 	int len=0;
 	int loop;
 
-	shipfile = fopen("./shipinfo.data", "w");
+	shipfile = fopen(filename, "w");
 
 	for (index=0; index < SHIP_TYPE_COUNT; index++)
 	{
@@ -50,7 +50,7 @@ void saveshiptypeinfo()
 
 }
 
-void init_shiptypeinfo ()
+void init_shiptypeinfo (char *filename)
 {
 	int index=0;
 	FILE *shipfile=NULL;
@@ -59,7 +59,7 @@ void init_shiptypeinfo ()
 
 	shiptypes = (struct sp_shipinfo **)
 			  malloc(sizeof(struct sp_shipinfo *)*configdata->ship_type_count);
-	shipfile = fopen("shipinfo.data", "r");
+	shipfile = fopen(filename, "r");
 	if (shipfile==NULL)
 	{
 		fprintf(stderr, "\ninit_shiptypeinfo: No shipinfo file!");

@@ -12,6 +12,57 @@ extern struct config *configdata;
  *	of planets in the universe when done
  */
 
+void saveplanets(char *filename)
+{
+	FILE *planetfile;
+	int loop;
+	int index=0;
+	char *treasury = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *stufftosave = (char *)malloc(sizeof(char)*BUFF_SIZE);
+
+	planetfile = fopen(planetfile, "w");
+	
+	for (index=0; index<configdata->max_total_planets; index++)
+	{
+		if (planets[index] != NULL)
+		{
+		strcpy(stufftosave, "\0");
+		strcpy(treasury, "\0");
+		addint(stufftosave, planets[index]->num, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->sector, ':', BUFF_SIZE);
+		addstring(stufftosave, planets[index]->name, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->type, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->owner, ':', BUFF_SIZE);
+		addstring(stufftosave, planets[index]->creator, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->fuelColonist, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->organicsColonist, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->equipmentColonist, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->fuel, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->organics, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->equipment, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->fighters, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->level, ':', BUFF_SIZE);
+		sprintf(treasury, "%ld", planets[index]->citdl->treasury);
+		addstring(stufftosave, treasury, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->militaryReactionLevel
+							 , ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->qCannonAtmosphere, ':'
+							 , BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->qCannonSector, ':', BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->planetaryShields, ':'
+							 , BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->transporterlvl, ':'
+							 , BUFF_SIZE);
+		addint(stufftosave, planets[index]->citdl->interdictor, ':', BUFF_SIZE);
+		for (loop=0; loop< 399 - strlen(stufftosave); loop++)
+			strcat(stufftosave, " ");
+		strcat(stufftosave, "\n");
+		fprintf(planetfile, stufftosave);
+		}
+	}
+	free(stufftosave);
+	free(treasury);
+}
 int init_planets (char *filename, struct sector **secarray)
 {
     FILE *planetfile;

@@ -119,6 +119,7 @@ If there are messages
 	-2/2 Means game exit/enter
 	-3/3 Means port leave/land
 	-4/4 Means stardock leave/land
+	-5/5 Means planet leave/land
 If there are no messages and they are not moving
 	Same as from DESCRIPTION
 	

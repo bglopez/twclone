@@ -107,20 +107,26 @@ int main (int argc, char *argv[])
     printf ("initializing configuration data from 'config.data'...");
     fflush (stdout);
     init_config ("config.data");
-    printf (" Done\n");
+    printf (" Done!\n");
+
+	 printf("initializing planet type data from 'planettypes.data' ...");
+	 fflush(stdout);
 	 init_planetinfo("planettypes.data");
+	 printf(" Done!\n");
 
     printf ("initializing the universe from '%s'...", "universe.data");
     fflush (stdout);
     sectorcount = init_universe ("universe.data", &sectors);
-    printf (" Done\n");
+    printf (" Done!\n");
 
     printf ("Reading in planet information from 'planets.data'...\n");
     fflush (stdout);
     init_planets ("planets.data", sectors);
     printf ("... Done!\n");
 
-    init_shiptypeinfo ();
+	 printf("initializing ship type data from 'shiptypes.data'...");
+    init_shiptypeinfo ("shiptypes.data");
+	 printf("... Done!\n");
 
     printf ("Reading in ship information from 'ships.data'...");
     fflush (stdout);
@@ -209,8 +215,9 @@ int main (int argc, char *argv[])
         sendmesg (msgidout, buffer, senderid);
         senderid = getdata (msgidin, &data, 0);
     }
-    saveallports ();
-	 saveshiptypeinfo();
+    saveallports ("ports.data");
+	 saveplanets("planets.data");
+	 saveshiptypeinfo("shiptypes.data");
 	 save_planetinfo("planettypes.data");
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
