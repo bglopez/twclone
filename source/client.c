@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.37 $
- * Last Modified: $Date: 2003-11-14 17:08:16 $
+ * $Revision: 1.38 $
+ * Last Modified: $Date: 2003-11-14 22:49:02 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.37 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-14 17:08:16 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.38 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-14 22:49:02 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1186,11 +1186,10 @@ void do_shipyard_menu(int sockid, struct player *curplayer)
 				break;
 			case 's':
 			case 'S':
-				//Sell a ship!
 				break;
 			case 'b':
 			case 'B':
-				//Buy a new ship!
+				buyship(sockid, curplayer);
 				break;
 			case 'p':
 			case 'P':
@@ -1206,6 +1205,185 @@ void do_shipyard_menu(int sockid, struct player *curplayer)
 	}
 }
 
+void buyship(int sockid, struct player *curplayer)
+{
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char *input = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char temp[BUFF_SIZE];
+	char yesno;
+	char ch;
+	int choice=0;
+	int done=0;
+	int moredone=0;
+	int price=0;
+	int total=0;
+	int count=1;
+	
+	getmyinfo(sockid, curplayer);
+	printf("\n%sYou find a salesperson and ask about buying a new ship.",KGRN);
+	printf("\n");
+	//printf("\n%sWelcome to the 'yards, you want to trade in that old ship?",KMAG);
+	printf("\n%sYour ship is in decent shape.", KGRN);
+	printf("\n%sHere's what we'll offer for it:",KGRN);
+	printf("\n");
+	strcpy(buffer, "STARDOCK PRICESHIP:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	total = popint(buffer, ":");
+
+	while(!done)
+	{
+		popstring(buffer, temp, ",", BUFF_SIZE);
+		price = popint(buffer, ":");
+		printf("\n%s%s\t\t%s:   %s%d",KGRN,temp,KLTYLW,KLTCYN,price);
+		fflush(stdout);
+		if (*(buffer+0)=='\0')
+			done = 1;
+	}
+	printf("\n\t\t\t%s=======",KNRM);
+	printf("\n%sTrade in Value\t\t%s:%s%d",KGRN,KLTYLW,KRED,total);
+	printf("\n");
+	printf("\n%sStill interested ?%s ",KMAG,KLTCYN);
+	scanf("%c", &yesno);
+	junkline();
+	if (yesno!='y' && yesno!='Y')
+	{
+		free(buffer);
+		return;
+	}
+	printf("\n");
+	done = 0;
+	while (!done)
+	{
+		printf("\n%sWhich ship are you interested in (?=List) ? ",KMAG);
+		for (count=0;(ch=getchar())!='\n';count++)
+		{
+			//if (count+1 < BUFF_SIZE)
+			//{
+				*(input+count+1)='\0';
+			//}
+			//if (count >= BUFF_SIZE);
+			//{
+			//	fprintf(stderr, "BUFFER OVERFLOW!");
+		//		free(input);
+		//		free(buffer);
+		//		return;
+		//	}
+			*(input+count)=ch;
+		}
+		choice = strtoul(input, NULL, 10);
+		if (isdigit(*(input+0)) !=0 )
+		{
+				  
+			done = 1;
+		}
+		else if (isspace(*(input+0)) == 0)
+		{
+			switch (*(input+0))
+			{
+				case 'q':
+				case 'Q':
+					free(buffer);
+					free(input);
+					return;
+					break;
+				case '?':
+					done = 0;
+					strcpy(buffer, "STARDOCK LISTSHIPS:");
+					sendinfo(sockid, buffer);
+					recvinfo(sockid, buffer);
+					while (!moredone)
+					{
+						popstring(buffer, temp, ",", BUFF_SIZE);
+						price = popint(buffer, ":");
+						printf("\n%s<%s%d%s> %s\t\t%s%d", KMAG,KGRN,count,KMAG, temp,
+							KGRN, price);
+						count++;
+						if (*(buffer+0)=='\0')
+							moredone=1;
+					}
+					printf("\n");
+					printf("\n%s<%sQ%s>%s To Leave", KMAG,KGRN,KMAG,KGRN);
+					break;
+				}
+		}
+	}
+	strcpy(buffer, "STARDOCK LISTSHIPS:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	count = 1;
+	moredone = 0;
+	while (!moredone)
+	{
+		popstring(buffer, temp, ",", BUFF_SIZE);
+		price = popint(buffer, ":");
+		if (*(buffer+0) == '\0')
+			moredone=1;
+		if (count == choice)
+			moredone = 1;
+		count++;
+	}
+
+	printf("\n%sShip Category #%d  Ship Class : %s",KGRN, choice, temp);
+	printf("\n");
+	printf("\n%sThe cost for one of these is %s%d",KGRN,KLTYLW, price);
+	printf("\n");
+	printf("\n%sWant to buy it? ",KMAG);
+	scanf("%c", &yesno);
+	junkline();
+	if (yesno!='y' && yesno!='Y')
+	{
+		free(buffer);
+		free(input);
+		return;
+	}
+	//Should this be (C)orporage or (P)ersonal Ship?
+	strcpy(buffer, "STARDOCK SELLSHIP:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	done = 0;
+	while (!done)
+	{
+		moredone=0;
+		//while (!moredone)
+		//{
+			printf("\n%sWhat to do you want to name this ship? (30 chars)\n",KGRN);
+			for (count=0;(ch=getchar()) != '\n';count++)
+			{
+				moredone=1;
+		//		if (count+1 < BUFF_SIZE)
+					temp[count+1]='\0';
+		//		if (count >= BUFF_SIZE)
+		//		{
+		//			fprintf(stderr, "\nBUFFER OVERFLOW!");
+		//			ch = '\n';
+		//			moredone=0;
+		//		}
+				if (isspace(ch)==0)
+					temp[count] = ch;
+			}
+		//}
+		strcpy(buffer, "STARDOCK BUYSHIP:");
+		addint(buffer, choice, ':', BUFF_SIZE);
+		addint(buffer, 1, ':', BUFF_SIZE);
+		addstring(buffer, temp, ':', BUFF_SIZE);
+		sendinfo(sockid, buffer);
+		recvinfo(sockid, buffer);
+		if (strncmp(buffer, "BAD", 3)==0)
+		{
+			printf("\nWhoa Something went wrong! Please try again!");
+		}
+		else
+			done = 1;
+	}
+
+	getmyinfo(sockid, curplayer);
+	//Do you want to set a password for this ship?
+	printf("\n%sYou have %s%d%s credits.", KGRN, KLTYLW, curplayer->credits, KGRN);
+	free(buffer);
+	free(input);
+	return;
+}
 void do_bank_menu(int sockid, struct player *curplayer)
 {
 	enum prompts ptype;

@@ -1317,25 +1317,14 @@ void sellship(char *buffer, struct player *curplayer)
 	char shipname[300]="\0";
 	int shipnum=0;
 
-	int holds_to_sell=0;
-	int price_holds=0;
 	struct ship *curship;
 	const float multiplier = 0.75;
 	int total = 0;
 	
 	curship = ships[curplayer->ship - 1];
 	curplayer->sector = curship->location;
-	holds_to_sell = curship->holds - shiptypes[curship->type - 1].initialholds;
-	//Taken from do_ship_upgrade
-	price_holds = base_hold_price*holds_to_sell + 
-		hold_increment*holds_to_sell*shiptypes[curship->type -1].initialholds;
-
-	total = total + multiplier*(float)shiptypes[curship->type -1].basecost;
-	total = total + multiplier*(float)(price_per_fighter*curship->fighters);
-	total = total + multiplier*(float)(price_per_shield*curship->shields);
-	total = total + multiplier*(float)price_holds;
-	//Add hardware in here!
-	
+	priceship(buffer, curplayer);
+	total = popint(buffer, ":");
 	curplayer->credits= curplayer->credits + total;
 	buffer[0]='\0';
 	addint(buffer, total, ':', BUFF_SIZE);
@@ -1369,20 +1358,29 @@ void priceship(char *buffer, struct player *curplayer)
 		hold_increment*holds_to_sell*shiptypes[curship->type -1].initialholds;
 
 	total = total + multiplier*(float)shiptypes[curship->type -1].basecost;
-	strcpy(temp, "Basecost,");
+	strcpy(temp, "Ship Basecost,");
 	addint(temp, multiplier*(float)shiptypes[curship->type - 1].basecost
 		  , ':', BUFF_SIZE);
-	addstring(temp, "Fighters", ',', BUFF_SIZE);
-	addint(temp, multiplier*(float)curship->fighters
-		  , ':', BUFF_SIZE);
-	total = total + multiplier*(float)(price_per_fighter*curship->fighters);
-	addint(temp, multiplier*(float)curship->shields
-		  , ':', BUFF_SIZE);
-   addstring(temp, "Shields", ',', BUFF_SIZE);
-	total = total + multiplier*(float)(price_per_shield*curship->shields);
-	addint(temp, multiplier*(float)price_holds, ':', BUFF_SIZE);
-	addstring(temp, "Holds", ',', BUFF_SIZE);
+	if (curship->holds != 0)
+	{
+	addstring(temp, "Ship Holds Value", ',', BUFF_SIZE);
+   addint(temp, multiplier*(float)price_holds, ':', BUFF_SIZE);
 	total = total + multiplier*(float)price_holds;
+	}
+	if (curship->fighters != 0)
+	{
+		addstring(temp, "Fighters", ',', BUFF_SIZE);
+		addint(temp, multiplier*(float)curship->fighters
+		  , ':', BUFF_SIZE);
+		total = total + multiplier*(float)(price_per_fighter*curship->fighters);
+	}
+	if (curship->shields != 0)
+	{
+		addstring(temp, "Shields", ',', BUFF_SIZE);
+		addint(temp, multiplier*(float)curship->shields
+		  , ':', BUFF_SIZE);
+		total = total + multiplier*(float)(price_per_shield*curship->shields);
+	}
 	//Add hardware in here!
 	
 	strcpy(buffer, ":");
