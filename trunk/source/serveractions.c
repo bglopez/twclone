@@ -33,7 +33,6 @@ void processcommand(char *buffer, struct msgcommand *data)
   struct realtimemessage *curmessage;
   float fsectorcount = (float)sectorcount;  //For rand() stuff in newplayer
   int linknum = 0;
-  int seconds = 0;
 
   switch(data->command)
     {
@@ -666,6 +665,51 @@ void saveship(int snumb, char *filename)
 
 }
 
+void saveallports()
+{
+	char *intptr=(char *)malloc(10);
+	char *buffer=(char *)malloc(BUFF_SIZE);
+	char *stufftosave=(char *)malloc(BUFF_SIZE);
+	FILE *portfile;
+	int loop=0, len;
+	int portnumb=1;
+
+	portfile = fopen("./ports.data", "w");
+	while(ports[portnumb - 1]!=NULL)
+	{
+		strcpy(stufftosave, "\0");
+		sprintf(intptr,"%d", portnumb - 1);
+		sprintf(stufftosave, "%d:", portnumb);
+	  	addstring(stufftosave, ports[portnumb - 1]->name, ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->location, ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->maxproduct[0], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->maxproduct[1], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->maxproduct[2], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->product[0], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->product[1], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->product[2], ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->credits, ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->type, ':', BUFF_SIZE);
+		addint(stufftosave, ports[portnumb - 1]->invisible, ':', BUFF_SIZE);
+
+		len = strlen(stufftosave);
+		for (loop=1;loop<=99-len;loop++)   //This puts a buffer of space in the save
+			strcat(stufftosave, " ");		//file so things don't get overwritten
+		strcat(stufftosave, "\n");			//when saving.
+		//fprintf(stderr, "\nsaveallports: Saving port '%s'", stufftosave);
+		//fflush(stderr);
+
+		fprintf(portfile, "%s",stufftosave);
+		portnumb++;
+	}
+	fclose(portfile);
+	free(intptr);
+	free(buffer);
+	free(stufftosave);
+
+}
+
+
 void buildplayerinfo(int playernum, char *buffer)
 {
   buffer[0] = '\0';
@@ -1129,7 +1173,6 @@ void sendtosector(int sector, int playernum, int direction)
    struct list *element;
 	char buffer[50];
 	char temp[5];
-	struct realtimemessage *curmessage=NULL;
 	int p=0;	
   
    sprintf(temp, ":%d:", direction);

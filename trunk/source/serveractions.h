@@ -18,5 +18,6 @@ void addmessage(struct player *curplayer, char *message);
 void sendtosector(int sector, int playernum, int direction);
 void saveplayer(int pnumb, char *filename);
 void saveship(int snumb, char *filename);
+void saveallports();
 
 #endif

@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
       sendmsg(msgidout, buffer, senderid);
       senderid = getdata(msgidin, &data, 0);
     }
+  saveallports();
 
   //when we're done, clean up the msg queues
   if (fork() == 0)
