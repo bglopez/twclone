@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #include "common.h"
 #include "universe.h"
 #include "msgqueue.h"

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.17 $
- * Last Modified: $Date: 2002-07-03 03:04:58 $
+ * $Revision: 1.18 $
+ * Last Modified: $Date: 2002-07-10 15:29:39 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.17 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-07-03 03:04:58 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.18 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-07-10 15:29:39 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -60,7 +60,7 @@ main (int argc, char *argv[])
   char *mickey = NULL;
   int sector = 1;
   int loop = 1, counter;	//Loop counters
-  int port;			//Port number of the server
+  int port=1234;			//Port number of the server
   int sockid;			//Socket ID
   char *buffer;
   enum prompts ptype;
@@ -884,7 +884,7 @@ printsector (struct sector *cursector)
 {
   int len, counter;
   struct player *first = NULL, *place = NULL, *after = NULL;
-  struct planet *pfirst=NULL,  *curplanet=NULL, *pnext=NULL;
+  struct planet *curplanet=NULL, *pnext=NULL;
 
   printf ("\n%sSector  %s: %s%d %sin ", KLTGRN, KLTYLW, KLTCYN,
 	  cursector->number, KGRN);
@@ -1235,7 +1235,7 @@ movesector (char *holder, int sockid, int current, struct sector *cursector)
   char *temp = (char *) malloc (BUFF_SIZE);
   int pos, len;
   int length;
-  int counter, foo;
+  int counter, foo=0;
   char tempsec[5] = "\0";
   int warps[25] =
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1425,7 +1425,6 @@ prompttype (enum prompts type, int sector, int sockid)
   int sec = 0;
   int test = 0;
   char *input = NULL;
-  char tempstr[10] = "\0";
   char *duplicate = NULL;
   char *buffer = (char *) malloc (BUFF_SIZE);
 
