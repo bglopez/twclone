@@ -66,9 +66,16 @@ struct player
   int firstprice;  //first price offered by a port
   unsigned short intransit;  //Is the player moving?
   long beginmove;					//At what time the player began moving
+  struct realtimemessage *messages; //Holds realtime messages
   int movingto;				 //What sector the player is moving to
   unsigned short loggedin;  //This is not in the file
   unsigned short ported;    //Neither is this
+};
+
+struct realtimemessage
+{
+	struct realtimemessage *nextmessage;
+	char *message;
 };
 
 //It is in this order in universe.data
