@@ -450,13 +450,16 @@ void init_nodes(int numsectors)
 		nodes[counter]->portptr = NULL;
 		for (portcount = 0; portcount < configdata->max_ports; portcount++)
 		{
-			if (ports[portcount]->type == 10)
+			if (ports[portcount]!=NULL)
 			{
-				if ((ports[portcount]->location >= nodes[counter]->min) &&
-					(ports[portcount]->location <= nodes[counter]->max))
+				if (ports[portcount]->type == 10)
 				{
-					nodes[counter]->portptr = ports[portcount];
-					portcount = configdata->max_ports+1;
+					if ((ports[portcount]->location >= nodes[counter]->min) &&
+					(ports[portcount]->location <= nodes[counter]->max))
+					{
+						nodes[counter]->portptr = ports[portcount];
+						portcount = configdata->max_ports+1;
+					}
 				}
 			}
 		}
