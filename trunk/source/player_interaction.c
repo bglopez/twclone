@@ -201,7 +201,41 @@ handle_player (void *threadinfo)
 	  data.command = ct_land;
 	  commandgood = 1;
 	}
-
+		else if (strncmp(inbuffer, "PLANET", strlen("PLANET")) == 0 && loggedin)
+		{
+			strcpy(data.name, name);
+			popstring(inbuffer, temp, " ", BUFF_SIZE);
+			popstring(inbuffer, temp, ":", BUFF_SIZE);
+			if (strncmp(temp, "DISPLAY", strlen("DISPLAY")) == 0)
+				data.plcommand = pl_display;
+			else if (strncmp(temp, "OWNERSHIP", strlen("OWNERSHIP")) == 0)
+				data.plcommand = pl_ownership;
+			else if (strncmp(temp, "DESTROY", strlen("DESTROY")) == 0)
+					  data.plcommand = pl_destroy;
+			else if (strncmp(temp, "TAKE", strlen("TAKE")) == 0)
+					  data.plcommand = pl_take;
+			else if (strncmp(temp, "LEAVE", strlen("LEAVE")) == 0)
+					  data.plcommand = pl_leave;
+			else if (strncmp(temp, "CITADEL", strlen("CITADEL")) == 0)
+					  data.plcommand = pl_citadel;
+			else if (strncmp(temp, "REST", strlen("REST")) == 0)
+					  data.plcommand = pl_rest;
+			else if (strncmp(temp, "MRL", strlen("MRL")) == 0)
+					  data.plcommand = pl_militarylvl;
+			else if (strncmp(temp, "QCANNON", strlen("QCANNON")) == 0)
+					  data.plcommand = pl_qcannon;
+			else if (strncmp(temp, "EVICT", strlen("EVICT")) == 0)
+					  data.plcommand = pl_evict;
+			else if (strncmp(temp, "SWAP", strlen("SWAP")) == 0)
+					  data.plcommand = pl_swap;
+			else if (strncmp(temp, "CQUIT", strlen("CQUIT")) == 0)
+					  data.plcommand = pl_cquit;
+			else if (strncmp(temp, "QUIT", strlen("QUIT")) == 0)
+					  data.plcommand = pl_quit;
+			strcpy(data.buffer, inbuffer);
+			data.command = ct_planet;
+			commandgood = 1;
+		}
       else if (strncmp (inbuffer, "SCAN", strlen ("SCAN")) == 0 && loggedin)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);

@@ -29,6 +29,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 #include "common.h"
 
+enum planetcmds
+{
+	pl_display,
+	pl_ownership,
+	pl_destroy,
+	pl_take,
+	pl_leave,
+	pl_citadel,
+	pl_rest,
+	pl_militarylvl,
+	pl_qcannon,
+	pl_evict,
+	pl_swap,
+	pl_cquit,
+	pl_quit
+};
+
 enum commandtype
 {
   ct_quit,
@@ -46,6 +63,7 @@ enum commandtype
   ct_fedcomm,
   ct_online,
   ct_stardock,
+  ct_planet,
   ct_land,
   ct_scan,
   ct_beacon,
@@ -111,6 +129,7 @@ struct msgcommand
   long mtype;
   enum commandtype command;
   enum porttype pcommand;
+  enum planetcmds plcommand;
   char name[MAX_NAME_LENGTH + 1];
   char passwd[MAX_NAME_LENGTH + 1];
   char buffer[30];
