@@ -1515,15 +1515,15 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
         {
         case 0:
             curship->ore = curship->ore + holds;
-            type = 2;
+            type = 4;
             break;
         case 1:
             curship->organics = curship->organics + holds;
-            type = 1;
+            type = 2;
             break;
         case 2:
             curship->equipment = curship->equipment + holds;
-            type = 0;
+            type = 1;
             break;
         default:
             break;
@@ -1541,7 +1541,7 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                     if (curport->type == 8)
                         curport->type = (int) pow (2, type);
                     else
-                        curport->type = +(int) pow (2, type);	//Switch to selling
+                        curport->type = curport->type ^ type;	//Switch to selling
                 }
             }
 
