@@ -60,9 +60,6 @@ int init_clientnetwork(char *hostname, int port);
 int sendinfo(int sockid, char *buffer);
 int recvinfo(int sockid, char *buffer);
 int acceptnewconnection(int sockid);
-int saveall();
-int saveplanet(char *filename);
-int savesector(char *filename);
 
 enum porttype
 {

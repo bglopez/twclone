@@ -144,9 +144,3 @@ int acceptnewconnection(int sockid)
   return sockaid;
 }
 
-int saveall()
-{
-
-return(1);
-}
-
