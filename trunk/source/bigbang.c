@@ -24,6 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //is initally run.
 #define NUMSECTORS			500
 
+//This is the number of ports 
+#define NUMPORTS				190
+
 //Percentage of sectors that will have the maximum number of warps in them 
 #define MAXJUMPPERCENT		3
 
@@ -54,6 +57,8 @@ const int fedspace[10][6]={ {2,3,4,5,6,7},
 							{2,9,0,0,0,0} };
 struct sector **sectorlist;
 struct config *configdata;
+struct port *portlist[NUMPORTS];
+
 int randsectornum[NUMSECTORS-10];
 
 int compsec(const void *cmp1, const void *cmp2);
@@ -63,11 +68,13 @@ void secjump(int from, int to);
 int freewarp(int sector);
 int warpsfull(int sector);
 int numwarps(int sector);
+void makeports();
 
 int main(void) 
 {	int x, y, z, tempint, randint, tosector, fromsector, startsec, secptrcpy, jumpsize;
 	int maxjumpsize = (int) (NUMSECTORS * ((double) MAXJUMPPERCENT / 100));
 	int usedsecptr = NUMSECTORS - 11;
+	int len;
 	char *fileline, *tempstr;
 	FILE *file;
 	struct sector *secptr;
@@ -84,6 +91,14 @@ int main(void)
 	sectorlist = malloc(NUMSECTORS * sizeof(struct sector *));
 	for(x = 0; x < NUMSECTORS; x++)
 		sectorlist[x] = malloc(sizeof(struct sector));
+	printf("done.\n");
+	
+	printf("Creating port array...");
+	for(x = 0; x<NUMPORTS; x++)
+	{
+		portlist[x]=NULL;
+		sectorlist[x]->portptr=NULL;
+	}
 	printf("done.\n");
 
 	//Fills in the randsectornum array with numbers 10 to (numsectors - 1)
@@ -213,6 +228,10 @@ int main(void)
 	}
 	printf("done.\n");
 
+	printf("Creating ports!");
+	makeports();
+	printf("done.\n");
+
 	//Sorts each sector's warps into numeric order
 	for(x=0;x<NUMSECTORS;x++)
 	{	qsort(sectorlist[x]->sectorptr, numwarps(x), sizeof(struct sector *), compsec);
@@ -220,7 +239,7 @@ int main(void)
 						
 	//Writing data to universe.data file
 	printf("Saving universe to file...");	
-	file = fopen("universe.data", "w");
+	file = fopen("./universe.data", "w");
 	fileline = malloc(1024*sizeof(char));
 	tempstr = malloc(10*sizeof(char));
 	for(x=0;x<NUMSECTORS;x++)
@@ -240,9 +259,35 @@ int main(void)
 		if(sectorlist[x]->nebulae != NULL)
 			fileline = strcat(fileline, sectorlist[x]->nebulae);
 		fileline = strcat(fileline, ":\n");
+		//Later put in whitespace buffer for saving
+		//Not needed until user created beacons put in
 		fprintf(file,fileline);
 	}
 	fclose(file);
+	free(fileline);
+	free(tempstr);
+
+	//Writing data to ports.data file
+	printf("Saving ports to file...");	
+	file = fopen("./ports.data", "w");
+	fileline = malloc(1024*sizeof(char));
+	tempstr = malloc(10*sizeof(char));
+	for(x=0;x<NUMPORTS;x++)
+	{	
+		sprintf(fileline, "%d:%s:%d:%d:%d:%d:%d:%d:%d:%ld:%d:%d", (x+1),
+			portlist[x]->name, portlist[x]->location, portlist[x]->maxproduct[0],
+			portlist[x]->maxproduct[1], portlist[x]->maxproduct[2],
+			portlist[x]->product[0], portlist[x]->product[1], portlist[x]->product[2],
+			portlist[x]->credits, portlist[x]->type, portlist[x]->invisible);
+		fileline = strcat(fileline, ":");
+		len = strlen(fileline);
+		for(y=0; y<=99-len; y++)
+			strcat(fileline, " ");
+		strcat(fileline, "\n");
+		fprintf(file,fileline);
+	}
+	fclose(file);
+
 	printf("done.\nUniverse sucessfully created!\n\n");
 	
 	return 0;
@@ -307,4 +352,75 @@ int numwarps(int sector)
 	if(x == -1)
 		return configdata->maxwarps;
 	return x;
+}
+
+void makeports()
+{
+   struct port *curport;
+	int type=0;
+	int loop=0;
+	int sector=0;
+	char name[50];
+	
+	for (loop=0; loop<NUMPORTS; loop++)
+	{
+		curport=(struct port *)malloc(sizeof(struct port));
+		curport->number = loop+1;
+		curport->name = (char *)malloc(sizeof(struct port));
+		strcpy(name, "\0");
+		//currently copying Unnamed Port into the names until a port names
+		//database can be initialized
+		sprintf(name, "Unnamed Port %d", loop+1);
+		strcpy(curport->name, name);
+		curport->maxproduct[0] = randomnum(2800, 3000);
+		curport->maxproduct[1] = randomnum(2800, 3000);
+		curport->maxproduct[2] = randomnum(2800, 3000);
+
+		type = randomnum(1, 8);
+		curport->type = type;
+		curport->product[0]=0;
+		curport->product[1]=0;
+		curport->product[2]=0;
+		curport->credits = 50000;
+		curport->invisible = 0;  //Only *special* ports are invisible;
+		
+		
+		switch(type)
+		{
+			case 1:
+				curport->product[2] = curport->maxproduct[2];
+				break;
+			case 2:
+				curport->product[1] = curport->maxproduct[1];
+				break;
+			case 3:
+				curport->product[1] = curport->maxproduct[1];
+				curport->product[2] = curport->maxproduct[2];
+				break;
+			case 4:
+				curport->product[0] = curport->maxproduct[0];
+				break;
+			case 5:
+				curport->product[0] = curport->maxproduct[0];
+				curport->product[2] = curport->maxproduct[2];
+				break;
+			case 6:
+				curport->product[0] = curport->maxproduct[0];
+				curport->product[1] = curport->maxproduct[1];
+				break;
+			case 7:
+				curport->product[0] = curport->maxproduct[0];
+				curport->product[1] = curport->maxproduct[1];
+				curport->product[2] = curport->maxproduct[2];
+				break;
+		}
+		portlist[loop] = curport;
+		curport = NULL;
+
+		//Now for assigning the port to a sector
+		sector=randomnum(0,NUMSECTORS-1);
+		while (sectorlist[sector]->portptr != NULL)
+			sector=randomnum(0,NUMSECTORS-1);
+		portlist[loop]->location = sector;
+	}
 }

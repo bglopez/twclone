@@ -316,7 +316,7 @@ void init_portinfo(char *filename)
 
     if (ports[counter -1] != NULL)
     {
-       fprintf(stderr, "init_portinfo: Duplicate ship numbers, exiting...\n");
+       fprintf(stderr, "init_portinfo: Duplicate port numbers, exiting...\n");
        exit(-1);
     }
     ports[counter - 1] = curport;

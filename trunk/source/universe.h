@@ -30,7 +30,7 @@ struct port
   int location;
   int maxproduct[3]; //0 for ore, 1 organics, 2 for equipment
   int product[3];    //Same as above
-  int credits;
+  unsigned long credits;
   int type;
   unsigned short invisible;
 };
