@@ -116,6 +116,10 @@ int main (int argc, char *argv[])
 	 init_planetinfo("./planettypes.data");
 	 printf(" Done!\n");
 
+	 printf("initializing ship type data from 'shiptypes.data'...");
+    init_shiptypeinfo("./shiptypes.data");
+	 printf("... Done!\n");
+	 
     printf ("initializing the universe from '%s'...", "universe.data");
     fflush (stdout);
     sectorcount = init_universe ("./universe.data", &sectors);
@@ -125,10 +129,6 @@ int main (int argc, char *argv[])
     fflush (stdout);
     init_planets ("./planets.data");
     printf ("... Done!\n");
-
-	 printf("initializing ship type data from 'shiptypes.data'...");
-    init_shiptypeinfo("./shiptypes.data");
-	 printf("... Done!\n");
 
     printf ("Reading in ship information from 'ships.data'...");
     fflush (stdout);
