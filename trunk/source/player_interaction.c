@@ -631,6 +631,13 @@ void *handle_player (void *threadinfo)
 	  data.command = ct_info;
 	  commandgood = 1;
 	}
+		else if (strncmp(inbuffer, "GAMEINFO", strlen("GAMEINFO")) == 0
+				&& loggedin)
+		{
+			strcpy(data.name, name);
+			data.command = ct_gameinfo;
+			commandgood = 1;
+		}
       else if ((sector = strtol (inbuffer, NULL, 10)) != 0 && loggedin)
 	{
 	  printf ("Thread %d: Player moving to %d\n", (int) pthread_self (),

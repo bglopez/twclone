@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.51 $
- * Last Modified: $Date: 2004-01-05 22:37:32 $
+ * $Revision: 1.52 $
+ * Last Modified: $Date: 2004-01-20 05:35:44 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.51 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-05 22:37:32 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.52 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-20 05:35:44 $\0";
+int MAXWARPS = 5000;
+int MAX_PLANETS = 500;
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -148,6 +150,10 @@ int main (int argc, char *argv[])
 
 		  dologin (sockid);
     	  buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+		  strcpy(buffer, "GAMEINFO:");
+		  sendinfo(sockid, buffer);
+		  recvinfo(sockid, buffer);
+		  MAXWARPS = popint(buffer, ":");
 		  printwelcome ();
     	  whosplaying (sockid);
     	  printf ("\n");
@@ -281,6 +287,10 @@ int main (int argc, char *argv[])
                         sector = movesector (goofey, sockid, sector, cursector);
                     }
                     break;
+					 case 'v':
+					 case 'V':
+						  dogameinfo(sockid);
+						  break;
                 case '?':
                     printhelp ();
                     break;
@@ -531,6 +541,80 @@ void printhelp ()
      KGRN, KLTRED, KGRN);
 
 }
+
+void dogameinfo(int sockid)
+{
+   char *buffer = (char *) malloc (BUFF_SIZE);
+	int totalsectors;
+	int turns;
+	int scredits;
+	int sfigs;
+	int sholds;
+	int maxplayers;
+	int numplayers;
+	int percentgood;
+	int maxships;
+	int maxports;
+	int numports;
+	int portworth;
+	int maxplanets;
+	int maxsafeplanets;
+	int numplanets;
+	int percentcit;
+	int numnodes;
+	int stardocksector;
+	int daysrunning;
+
+	strcpy(buffer, "GAMEINFO:");
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+
+	totalsectors = popint(buffer, ":");
+	turns = popint(buffer, ":");
+	scredits = popint(buffer, ":");
+	sfigs = popint(buffer, ":");
+	sholds = popint(buffer, ":");
+	maxplayers = popint(buffer, ":");
+	numplayers = popint(buffer, ":");
+	percentgood = popint(buffer, ":");
+	maxports = popint(buffer, ":");
+	numports = popint(buffer, ":");
+	portworth = popint(buffer, ":");
+	maxplanets = popint(buffer, ":");
+	maxsafeplanets = popint(buffer, ":");
+	numplanets = popint(buffer, ":");
+	percentcit = popint(buffer, ":");
+	numnodes = popint(buffer, ":");
+	stardocksector = popint(buffer, ":");
+	daysrunning = popint(buffer, ":");
+
+	printf("\n");
+	printf("\n%sInitial turns per day %s%d%s, fighters %s%d%s, credits %s%d%s, holds %s%d%s.", KGRN, KLTCYN, turns, KGRN, KLTCYN, sfigs, KGRN, KLTCYN, scredits
+			, KGRN, KLTCYN, sholds, KGRN);
+	printf("\n%sMaximum players %s%d%s, sectors %s%d%s, ports %s%d%s, planets %s%d%s.", KGRN, KLTCYN, maxplayers, KGRN, KLTCYN, totalsectors, KGRN, KLTCYN, maxports, KGRN, KLTCYN, maxplanets, KGRN);
+	printf("\n%sThe Maximum number of Planets per sector : %s%d%s", KGRN, KLTCYN
+			, maxsafeplanets, KGRN);
+	printf("\n");
+	printf("\n\t%sThe Stardock is located in sector %s%d%s.", KGRN, KLTCYN, 
+						 stardocksector, KGRN);
+	if (numnodes!=1)
+	{
+		printf("\n\t%sThe number of Nodes is %s%d%s.", KGRN, KLTCYN, numnodes
+							 ,KGRN);
+	}
+	printf("\n\t%sThis game has been running for %s%d%s days.", KGRN, KLTCYN,
+						 daysrunning, KGRN);
+	printf("\n");
+	printf("\n%sCurrent Stats", KMAG);
+	printf("\n");
+	printf("\n%s%d%s ports are open for business and have a net worth of %s%d%s."
+			,KLTYLW, numports, KGRN, KLTYLW, portworth, KGRN);
+	printf("\n%s%d%s planets exist in the universe %s%d%s%% have Citadels."
+			,KLTYLW, numplanets, KGRN, KLTYLW, percentcit, KGRN);
+	printf("\n%s%d%s Traders (%s%d%% Good%s) are active in the game.", 
+			KLTYLW, numplayers, KGRN, KMAG, percentgood, KGRN);
+}
+
 
 void getmyinfo (int sockid, struct player *curplayer)
 {
@@ -1149,7 +1233,7 @@ void print_node_help()
 	printf("\n%s| %s<%sP%s> %sThe Federal Space Police HQ%s     |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 	printf("\n%s| %s<%sS%s> %sThe Federation Shipyards%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 	printf("\n%s| %s<%sT%s> %sThe Lost Trader's Tavern%s        |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
-	printf("\n%s| %s<%sN%s> %sThe Node Relay System%s       |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sN%s> %sThe Node Relay System%s           |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
 
 	printf("\n%s|                                     |",KGRN);
 	printf("\n%s| %s<%s!%s> %sStardock Help%s                   |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
@@ -2805,6 +2889,7 @@ int movesector (char *holder, int sockid, int current, struct sector *cursector)
     char *duplicate = NULL;
     int foobar;
     struct pollfd checkin[1];
+	 int actualend=0;
 
     strcpy (buff, "\0");
     strcpy (temp, "\0");
@@ -2904,10 +2989,20 @@ int movesector (char *holder, int sockid, int current, struct sector *cursector)
             }
         }
 
+		  for (counter=1; counter <= 25; counter++)
+		  {
+				if (warps[counter]!=0)
+					actualend = warps[counter];
+				else
+					break;
+		  }
         printf ("\n%sThat Warp lane is not adjacent.%s", KGRN, KNRM);
+		  if (actualend != sector) 
+		  {
+					printf("\n%sWarning! That sector is not in this Node.\nCalculating path to the nearest Node Station.", KMAG);
+		  }
         printf ("\n\n%sComputed.%s", KBLU, KNRM);
-        printf
-        ("\n\n%sThe Shortest path is %s( %d hops, %d turns)%s from sector %s%d%s to sector %s%d%s is%s:%s",
+        printf("\n\n%sThe Shortest path is %s( %d hops, %d turns)%s from sector %s%d%s to sector %s%d%s is%s:%s",
          KGRN, KMAG, foo, (foo * 3), KGRN, KYLW, current, KGRN, KYLW, sector,
          KGRN, KYLW, KNRM);
         printf ("\n%s%d", KLTRED, warps[0]);

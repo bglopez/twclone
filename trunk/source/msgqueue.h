@@ -60,6 +60,7 @@ enum commandtype
   ct_port,
   ct_info,
   ct_portinfo,
+  ct_gameinfo,
   ct_update,
   ct_fedcomm,
   ct_online,
