@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.28 $
- * Last Modified: $Date: 2003-10-12 01:16:28 $
+ * $Revision: 1.29 $
+ * Last Modified: $Date: 2003-10-23 17:47:17 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.28 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-10-12 01:16:28 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.29 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-10-23 17:47:17 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -339,7 +339,10 @@ whosplaying (int sockid)
         popstring (buffer, name, ":", BUFF_SIZE);
         exper = popint (buffer, ":");
         align = popint (buffer, ":");
-        rank = (int)(log (exper) / log (2));	//Since exp ranks go by mod 2...
+		  if (exper != 0)
+        	rank = (int)(log (exper) / log (2));	//Since exp ranks go by mod 2..
+		  else
+			rank = 0;
         if (align < 0)
             printf ("\n%s%s %s", KRED, evil_ranks[rank], name);
         else
@@ -348,10 +351,10 @@ whosplaying (int sockid)
 
     free (buffer);
     free (temp);
+	 free(name);
 }
 
-void
-debugmode (int sockid)
+void debugmode (int sockid)
 {
     char buffer[BUFF_SIZE];
 
@@ -387,8 +390,7 @@ debugmode (int sockid)
     recvinfo (sockid, buffer);	//Gets rid of the BAD from exit
 }
 
-int
-getintstuff ()
+int getintstuff ()
 {
     char ch;
     int i;
@@ -400,8 +402,7 @@ getintstuff ()
         return -1;
 }
 
-void
-junkline ()
+void junkline ()
 {
     int loop = 1;
     char ch;
@@ -415,8 +416,7 @@ junkline ()
     }
 }
 
-void
-printhelp ()
+void printhelp ()
 {
     printf
     ("\n%s|================================%stwclone%s================================|",
@@ -489,8 +489,7 @@ printhelp ()
 
 }
 
-void
-getmyinfo (int sockid, struct player *curplayer)
+void getmyinfo (int sockid, struct player *curplayer)
 {
     char *buffer = (char *) malloc (BUFF_SIZE);
     int position = 1;
@@ -523,13 +522,18 @@ getmyinfo (int sockid, struct player *curplayer)
     curplayer->pship->location = popint (buffer + position, ":");
     curplayer->pship->turnsperwarp = popint (buffer + position, ":");
 
-    curplayer->rank = log (curplayer->exper) / log (2);	//Since exp ranks go by mod 2...
+	 if (curplayer->exper != 0)
+	 {
+    	curplayer->rank = log (curplayer->exper) / log (2);	//Since exp ranks go by mod 2...
+	 }
+	 else
+		curplayer->rank = 0;
     curplayer->blownup = 0;
     curplayer->pship->ported = 0;
     curplayer->pship->kills = 0;
     curplayer->pship->emptyholds = curplayer->pship->holds -
-                                   curplayer->pship->equipment - curplayer->pship->organics -
-                                   curplayer->pship->ore - curplayer->pship->colonists;
+    curplayer->pship->equipment - curplayer->pship->organics -
+    curplayer->pship->ore - curplayer->pship->colonists;
     if (curplayer->align < 0)
     {
         strcpy (title, KRED);
@@ -552,11 +556,11 @@ getmyinfo (int sockid, struct player *curplayer)
     strncpy (curplayer->title, title, strlen (title) + 1);
     strncpy (curplayer->pship->name, sname, strlen (sname) + 1);
     strncpy (curplayer->pship->type, type, strlen (type) + 1);
+	 free(buffer);
     return;
 }
 
-void
-printmyinfo (struct player *curplayer)
+void printmyinfo (struct player *curplayer)
 {
 
     printf ("\n%s%s<Info>%s", KBBLU, KFWHT, KNRM);
@@ -614,8 +618,7 @@ printmyinfo (struct player *curplayer)
 
 }
 
-void
-psinfo (int sockid, int pnumb, struct player *p)
+void psinfo (int sockid, int pnumb, struct player *p)
 {
     char *buffer = (char *) malloc (BUFF_SIZE);
     char *temp = (char *) malloc (70);
@@ -642,6 +645,7 @@ psinfo (int sockid, int pnumb, struct player *p)
         free (buffer);
         free (temp);
         free (p);
+		  free(intptr);
         p = NULL;
         return;
     }
@@ -699,7 +703,9 @@ psinfo (int sockid, int pnumb, struct player *p)
 
         free (buffer);
         free (temp);
+		  free(intptr);
         p->pship = curship;
+		  free(curship);
     }
     else
     {
@@ -707,6 +713,7 @@ psinfo (int sockid, int pnumb, struct player *p)
         free (buffer);
         free (temp);
         free (p);
+		  free(intptr);
         free (curship);
         p = NULL;
         return;
@@ -714,8 +721,7 @@ psinfo (int sockid, int pnumb, struct player *p)
     return;
 }
 
-int
-getsectorinfo (int sockid, struct sector *cursector)
+int getsectorinfo (int sockid, struct sector *cursector)
 {
     int length, position, len, pos;
     int counter;
@@ -782,6 +788,7 @@ getsectorinfo (int sockid, struct sector *cursector)
             strcat (nebulae, "uncharted space");
         }
     }
+	 //This checks for the Port name!
     if ((length = strcspn (buff + position, ":")) == 0)	//If no port
     {
         cursector->ports = NULL;	//Then no port!
@@ -789,6 +796,7 @@ getsectorinfo (int sockid, struct sector *cursector)
     }
     else
         popstring (buffer + position, portname, ":", MAX_NAME_LENGTH);
+	 //This checks for the port type!
     if ((length = strcspn (buff + position, ":")) == 0)	//If no port!
     {
         cursector->ports = NULL;
@@ -797,14 +805,25 @@ getsectorinfo (int sockid, struct sector *cursector)
     }
     else
         porttype = popint (buffer + position, ":");
-    if (cursector->beacontext == NULL)
-        cursector->beacontext = (char *) malloc (strlen (beacon) + 1);
-    if (cursector->nebulae == NULL)
-        cursector->nebulae = (char *) malloc (strlen (nebulae) + 1);
-    strncpy (cursector->beacontext, beacon, strlen (beacon) + 1);
-    strncpy (cursector->nebulae, nebulae, strlen (nebulae) + 1);
-    if (strlen (portname) != 0)
-    {
+	 if (beacon != NULL || nebulae != NULL)
+	 {
+	 	if (strlen(beacon)!=0)
+	 	{
+    		if (cursector->beacontext == NULL)
+        		cursector->beacontext = (char *) malloc (strlen (beacon) + 1);
+	 		strncpy (cursector->beacontext, beacon, strlen (beacon) + 1);
+	 	}
+		if (strlen(nebulae)!=0)
+	 	{
+    		if (cursector->nebulae == NULL)
+        		cursector->nebulae = (char *) malloc (strlen (nebulae) + 1);
+	  		strncpy (cursector->nebulae, nebulae, strlen (nebulae) + 1);
+	 	}
+	 }
+	 if (portname != NULL)
+	 {
+    	if (strlen (portname) != 0)
+    	{
         if ((curport = (struct port *) malloc (sizeof (struct port))) != NULL)
         {
             curport->name = (char *) malloc (strlen (portname) + 1);
@@ -824,7 +843,8 @@ getsectorinfo (int sockid, struct sector *cursector)
             printf ("\nUnable to allocate memory");
             return (cursector->number);
         }
-    }
+		}
+	 }
     if ((length = strcspn (buff + position, ":")) == 0)	//If no players
     {
         cursector->players = NULL;	//No players!
@@ -920,8 +940,7 @@ getsectorinfo (int sockid, struct sector *cursector)
     return cursector->number;
 }
 
-int
-printsector (struct sector *cursector)
+int printsector (struct sector *cursector)
 {
     int len, counter;
     struct player *first = NULL, *place = NULL, *after = NULL;
@@ -937,7 +956,7 @@ printsector (struct sector *cursector)
     {
         printf ("\n%sBeacon  %s:%s ", KMAG, KLTYLW, KRED);
         printf ("%s %s", cursector->beacontext, KNRM);
-        free (cursector->beacontext);
+        free(cursector->beacontext);
         cursector->beacontext = NULL;
     }
     if (cursector->ports != NULL)
@@ -948,8 +967,8 @@ printsector (struct sector *cursector)
                 porttypes[cursector->ports->type], KMAG);
         if (cursector->ports->type == 9)
             printf (" %s(Stardock)%s", KYLW, KNRM);
-        free (cursector->ports->name);
-        free (cursector->ports);
+        free(cursector->ports->name);
+        free(cursector->ports);
     }
     if (cursector->planets != NULL)
     {
@@ -1022,8 +1041,7 @@ printsector (struct sector *cursector)
     return cursector->number;
 }
 
-void
-clearplayer (struct player *curplayer)
+void clearplayer (struct player *curplayer)
 {
     free (curplayer->pship->name);
     free (curplayer->pship->type);
