@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.32 $
- * Last Modified: $Date: 2003-11-04 23:37:28 $
+ * $Revision: 1.33 $
+ * Last Modified: $Date: 2003-11-12 23:33:35 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.32 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-11-04 23:37:28 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.33 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-11-12 23:33:35 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1202,6 +1202,7 @@ void doporting (int sockid, struct player *curplayer)
     int xpgained = 0;
     char pnames[3][20] = {"\x1B[1;36mFuel Ore","\x1B[1;36mOrganics","\x1B[1;36mEquipment"};
     int playerproduct[3];
+	 int cur_holds= 0 ;    //Number of holds player has of product
     int testholds = 0;		//Number of holds player can afford according
     //To the test price
 
@@ -1291,7 +1292,14 @@ void doporting (int sockid, struct player *curplayer)
             printf ("\n%sHow many holds of %s%s do you want to sell [%s%d%s]? ",
                     KMAG, pnames[counter], KMAG, KLTYLW, testholds, KMAG);
             scanf ("%d", &holds);
-            if (holds > 0)
+				if (counter==0)
+					cur_holds = curplayer->pship->ore;
+				else if (counter == 1)
+					cur_holds = curplayer->pship->organics;
+				else if (counter == 2)
+					cur_holds = curplayer->pship->equipment;
+					
+            if (holds > 0 && cur_holds == holds)
             {
                 printf ("\n%sAgreed, %s%d%s units.", KLTCYN, KLTYLW, holds,
                         KLTCYN);

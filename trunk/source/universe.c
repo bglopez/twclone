@@ -319,6 +319,7 @@ init_shipinfo (char *filename)
         curship->organics = popint (buffer, ":");
         curship->ore = popint (buffer, ":");
         curship->owner = popint (buffer, ":");
+		  curship->flags = popint(buffer, ":");
         if (ships[x - 1] != NULL)
         {
             fprintf (stderr,

@@ -904,6 +904,7 @@ void saveplayer (int pnumb, char *filename)
 	 //addint(stufftosave, players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 sprintf(intptr, "%ld", players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
+	 addint(stufftosave, players[pnumb - 1]->flags, ':', BUFF_SIZE);
 	 //Now to use intptr to find where to place the person.
 	 sprintf(intptr, "%d:", pnumb - 1);
     len = strlen (stufftosave);
@@ -985,6 +986,7 @@ saveship (int snumb, char *filename)
     addint (stufftosave, ships[snumb - 1]->organics, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->ore, ':', BUFF_SIZE);
     addint (stufftosave, ships[snumb - 1]->owner, ':', BUFF_SIZE);
+	 addint(stufftosave, ships[snumb - 1]->flags, ':', BUFF_SIZE);
     len = strlen (stufftosave);
     for (loop = 1; loop <= 199 - len; loop++)	//This puts a buffer of space in the save
         strcat (stufftosave, " ");	//file so things don't get overwritten
