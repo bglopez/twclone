@@ -1393,7 +1393,6 @@ void priceship(char *buffer, struct player *curplayer)
 void listships(char *buffer)
 {
 	int index=0;
-	strcpy(buffer, ":");
 	for(index=0;index<=SHIP_TYPE_COUNT-1;index++)
 	{
 		addstring(buffer, shiptypes[index].name, ',', BUFF_SIZE);

@@ -234,7 +234,7 @@ init_shiptypeinfo ()
   shiptypes[11].planet = 1;
   shiptypes[11].photons = 0;
 
-  strcpy (shiptypes[12].name, "\x1B[7;34;1;43mTholian Sentinel\x1B[0m\0");
+  strcpy (shiptypes[12].name, "\x1B[7;34;1;43mTholian Sentinel\x1B[0m");
   shiptypes[12].basecost = 47500;
   shiptypes[12].maxattack = 800;
   shiptypes[12].initialholds = 10;
@@ -272,7 +272,7 @@ init_shiptypeinfo ()
   shiptypes[13].planet = 1;
   shiptypes[13].photons = 0;
 
-  strcpy (shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser\x1B[0;0m");
+  strcpy (shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser\x1B[0m");
   shiptypes[14].basecost = 539000;
   shiptypes[14].maxattack = 15000;
   shiptypes[14].initialholds = 10;
