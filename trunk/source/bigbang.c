@@ -523,6 +523,7 @@ main (int argc, char **argv)
     printf("Saving config data to file...");
     datenow = time(NULL);
     configdata->bangdate = (unsigned long)datenow;
+	 configdata->numnodes = numNodes;
     saveconfig("config.data");
 
 
@@ -701,7 +702,7 @@ int innode(int sector)
         nodemax = (int)counter*(float)numSectors/(float)numNodes;
         if (sector >= nodemin && sector <= nodemax)
         {
-            //fprintf(stderr, "\ninnode: Sector %d is in node %d", sector, counter);
+				fprintf(stderr, "innode: Sector %d is in node %d\n", sector, counter);
             return(counter);
         }
     }
@@ -808,7 +809,22 @@ makeports ()
             curport->maxproduct[1] = randomnum (2800, 3000);
             curport->maxproduct[2] = randomnum (2800, 3000);
         }
-        else
+        else if ((loop <= numNodes+3) && numNodes > 1)
+		  {
+				if (loop == 4)
+					sprintf(name, "Terra Node");
+				else
+				{
+					sprintf(name, "%s", tmpname);
+					strcat(name, " Node");
+				}
+				type = 10;
+				strcpy(curport->name, name);
+           	curport->maxproduct[0] = randomnum (2800, 3000);
+           	curport->maxproduct[1] = randomnum (2800, 3000);
+           	curport->maxproduct[2] = randomnum (2800, 3000);
+		  }
+		  else 
         {
             sprintf (name, "%s", tmpname);
             strcpy (curport->name, name);
@@ -862,10 +878,27 @@ makeports ()
         /*  Now for assigning the port to a sector */
         if (loop != 0)
         {
-            sector = randomnum (0, numSectors - 1);
-            while (sectorlist[sector]->portptr != NULL)
-                sector = randomnum (0, NUMSECTORS - 1);
-            portlist[loop]->location = sector + 1;
+				if (((loop <= 3) && (loop > (numNodes+3))) || (numNodes == 1) )
+				{
+            	sector = randomnum (0, numSectors - 1);
+            	while (sectorlist[sector]->portptr != NULL)
+                	sector = randomnum (0, NUMSECTORS - 1);
+            	portlist[loop]->location = sector + 1;
+				}
+				else if ((loop > 3) && (loop <= numNodes+3) && (numNodes != 1))
+				{
+					sector = randomnum(0, numSectors - 1);
+					while ((sectorlist[sector]->portptr != NULL) && (innode(sector+1)==(loop-3)))
+						sector = randomnum(0, numSectors - 1);
+					portlist[loop]->location = sector + 1;
+				}
+				else
+				{
+            	sector = randomnum (0, numSectors - 1);
+            	while (sectorlist[sector]->portptr != NULL)
+                	sector = randomnum (0, NUMSECTORS - 1);
+            	portlist[loop]->location = sector + 1;
+				}
         }
         else
             portlist[loop]->location = 1;
