@@ -137,7 +137,7 @@ int printsector (struct sector *cursector);
 int movesector (char *holder, int sockid, int current,
 		struct sector *cursector);
 int dologin (int sockid);
-char *prompttype (enum prompts type, int sector, int sockid);
+char *prompttype (enum prompts type, int sector_or_porttype, int sockid);
 int getyes (char *answer);
 void psinfo (int sockid, int pnumb, struct player *p);
 void clearplayer (struct player *curplayer);
@@ -145,6 +145,7 @@ void getmyinfo (int sockid, struct player *curplayer);
 void printmyinfo (struct player *curplayer);
 void printhelp ();
 void printwelcome ();
+void do_ship_upgrade(int sockid, struct player *curplayer);
 void doporting (int sockid, struct player *curplayer);
 void debugmode (int sockid);
 void getmessages (char *buffer);
