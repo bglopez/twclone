@@ -2,7 +2,7 @@
 #include "unistd.h"
 
 void reject_player(struct connection *cx){
-		write(cx->connfd, g_reject_message, strlen(g_reject_message));
+//		write(cx->connfd, g_reject_message, strlen(g_reject_message));
 		close(cx->connfd);
 }
 
