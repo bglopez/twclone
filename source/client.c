@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.11 $
- * Last Modified: $Date: 2002-06-12 04:17:55 $
+ * $Revision: 1.12 $
+ * Last Modified: $Date: 2002-06-12 06:12:13 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.11 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-06-12 04:17:55 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.12 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-06-12 06:12:13 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -385,48 +385,24 @@ junkline ()
 void
 printhelp ()
 {
-  printf
-    ("\n%s|===============================%stwclone%s===============================|",
-     KGRN, KLTBLU, KGRN);
-  printf
-    ("\n%s|                           %sGlobal Commands%s                           |",
-     KGRN, KMAG, KGRN);
-  printf
-    ("\n%s|                           %s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s                           |",
-     KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW,
-     KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN);
-  printf
-    ("\n%s| %s<%s`%s>%s Fed. Comm-Link                                                  %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTRED, KGRN);
-  printf
-    ("\n%s| %s<%s#%s>%s Who's Playing                                                   %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTRED, KGRN);
-  printf
-    ("\n%s| ------------------------------------------------------------------- |",
-     KGRN);
-  printf
-    ("\n%s|        %sNavigation             Computer              Tactical        %s|",
-     KGRN, KMAG, KGRN);
-  printf
-    ("\n%s|        %s=%s-%s=%s-%s==%s-%s=%s-%s=             %s=%s-%s=%s--%s=%s-%s=              %s=%s-%s=%s--%s=%s-%s=        %s|",
-     KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW,
-     KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KLTYLW, KGRN, KLTYLW,
-     KGRN, KLTYLW, KGRN, KLTYLW, KGRN);
-  printf
-    ("\n%s| %s<%sD%s>%s Re-Display Sector %s<%sI%s>%s Ship Information                          %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
-  printf
-    ("\n%s| %s<%sP%s>%s Port and Trade                                                  %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
-  printf
-    ("\n%s| %s<%sM%s>%s Move to a Sector                                                %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
-  printf
-    ("\n%s| %s<%sQ%s>%s Quit and Exit                                                   %s|",
-     KGRN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
-  printf
-    ("\n%s|=============================%s0.10 alpha%s==============================|",
-     KGRN, KLTRED, KGRN);
+  printf("\n%s|================================%stwclone%s================================|", KGRN, KLTBLU, KGRN);
+  printf("\n%s|                            %sGlobal Commands%s                            |", KGRN, KMAG, KGRN);
+  printf("\n%s|                            %s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s-%s=%s                            |", KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN);
+  printf("\n%s| %s<%s`%s>%s Fed. Comm-Link    %s<%s'%s>%s Sub-Space Radio  %s<%s=%s>%s Hailing Frequencies    %s|", KGRN, KMAG, KGRN, KMAG, KLTRED, KMAG, KGRN, KMAG, KLTRED, KMAG, KGRN, KMAG, KLTRED, KGRN);
+  printf("\n%s| %s<%s#%s>%s Who's Playing     %s<%s*%s>%s List All Globals %s<%s/%s>%s Quick-stats            %s|", KGRN, KMAG, KGRN, KMAG, KLTRED, KMAG, KGRN, KMAG, KLTRED, KMAG, KGRN, KMAG, KLTRED, KGRN);
+  printf("\n%s| --------------------------------------------------------------------- |", KGRN);
+  printf("\n%s|        %sNavigation            Computer              Tactical           %s|", KGRN, KMAG, KGRN);
+  printf("\n%s|        %s=%s-%s=%s-%s==%s-%s=%s-%s=            %s=%s-%s=%s--%s=%s-%s=              %s=%s-%s=%s--%s=%s-%s=           %s|", KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN, KLTYLW, KGRN);  
+  printf("\n%s| %s<%sD%s>%s Re-Display Sector %s<%sC%s>%s Onboard Computer %s<%sA%s>%s Attack Enemy Ship      %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN); 
+  printf("\n%s| %s<%sP%s>%s Port and Trade    %s<%sX%s>%s Transporter Pad  %s<%sE%s>%s Sub-space EtherProbe   %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sM%s>%s Move to a Sector  %s<%sI%s>%s Ship Information %s<%sF%s>%s Take or Leave Fighters %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sL%s>%s Land on a Planet  %s<%sT%s>%s Corporate Menu   %s<%sG%s>%s Show Deployed Fighters %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sS%s>%s Long Range Scan   %s<%sU%s>%s Use Genesis Torp %s<%sH%s>%s Handle Space Mines     %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sR%s>%s Release Beacon    %s<%sJ%s>%s Jettison Cargo   %s<%sK%s>%s Show Deployed Mines    %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sW%s>%s Tow SpaceCraft    %s<%sB%s>%s Interdictor Ctrl %s<%sO%s>%s Starport Construction  %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sN%s>%s Move to NavPoint  %s<%s %s>%s                  %s<%sY%s>%s Set NavPoints          %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s| %s<%sQ%s>%s Quit and Exit     %s<%s %s>%s                  %s<%sV%s>%s View Game Status       %s|", KGRN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KMAG, KGRN, KMAG, KLTCYN, KGRN);
+  printf("\n%s|==============================%s0.10 alpha%s===============================|", KGRN, KLTRED, KGRN);
 
 }
 
