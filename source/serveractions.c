@@ -1259,7 +1259,7 @@ buildnewplanet (struct player *curplayer, char *planetname, int sector )
     {
       if (planets[i] == NULL)
 	{
-	  p_num = i;
+	  p_num = i+1;
 	  break;
 	}
     }
