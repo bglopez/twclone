@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.46 $
- * Last Modified: $Date: 2004-01-01 01:35:03 $
+ * $Revision: 1.47 $
+ * Last Modified: $Date: 2004-01-01 03:48:22 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.46 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-01 01:35:03 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.47 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-01 03:48:22 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1231,6 +1231,7 @@ int do_citadel_menu(int sockid, struct player *curplayer)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	char yesno;
 	int done=0;
 
 	while (!done)
@@ -1252,10 +1253,16 @@ int do_citadel_menu(int sockid, struct player *curplayer)
 			case 'r':
 			case 'R':
 				//strcpy(buffer, "PLANET REST:");
-				strcpy(buffer, "QUIT");
-				sendinfo(sockid,buffer);
-				recvinfo(sockid,buffer);
-				return(1);
+				printf("%s\nDo you wish to end your turn and remain here? ", KMAG);
+				scanf("%c", &yesno);
+				if (yesno == 'y' || yesno == 'n')
+				{
+					strcpy(buffer, "QUIT");
+					sendinfo(sockid,buffer);
+					recvinfo(sockid,buffer);
+					return(1);
+				}
+				junkline();
 				break;
 			case '?':
 				print_citadel_help();
@@ -1280,10 +1287,11 @@ int do_planet_menu(int sockid, struct player *curplayer)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	struct planet *curplanet = (struct planet *)malloc(sizeof(struct planet));
 	int done=0;
 	int quitting=0;
 
-	do_planet_display(sockid, curplayer);
+	do_planet_display(sockid, curplayer, curplanet);
 	while (!done)
 	{
 		printf("\n");
@@ -1299,12 +1307,29 @@ int do_planet_menu(int sockid, struct player *curplayer)
 				break;
 		case 'd':
 		case 'D':
-				do_planet_display(sockid, curplayer);
+				do_planet_display(sockid, curplayer, curplanet);
 				break;
 		case 'c':
 		case 'C':
 				done = do_citadel_menu(sockid, curplayer);
 				quitting = done;
+				break;
+		case 'a':
+		case 'A':
+				//takeallprod(sockid, curplayer);
+				break;
+		case 'm':
+		case 'M':
+				change_stuff(sockid, curplayer,0);
+				break;
+		case 's':
+		case 'S':
+				change_stuff(sockid, curplayer,2);
+				break;
+		case 't':
+		case 'T':
+				change_stuff(sockid, curplayer,1);
+				break;
 		case '?':
 				print_planet_help();
 				break;
@@ -1323,7 +1348,100 @@ int do_planet_menu(int sockid, struct player *curplayer)
 	free(buffer);
 	return(quitting);
 }
-void do_planet_display(int sockid, struct player *curplayer)
+
+void change_stuff(int sockid, struct player *curplayer, int type)
+{
+	char *buffer= (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int amt=0;
+	char yesno;
+	int choice;
+	char types[3][25] = {"Fighters", "Product", "Colonists"};
+	char prod[3][25] = {"", "", "Production"};
+	char pro[3][25] = {"Ore", "Organics", "Equipment"};
+	char product;
+	char takeorleave;
+	struct planet *curplanet = (struct planet *)malloc(sizeof(struct planet));
+	int torl=0; //0 for taking, 1 for leaving
+
+	printf("\n%s\nDisplay Planet? ", KMAG);
+	scanf("%s", &yesno);
+	if (yesno == 'y' || yesno=='Y')
+		do_planet_display(sockid, curplayer, curplanet);
+	printf("\n");
+	junkline();
+	printf("\n%sDo you wish to (%sL%s)eave or (%sT%s)ake %s? ",
+				KMAG, KLTYLW, KMAG, KLTYLW, KMAG, types[type]);
+	scanf("%c", &takeorleave);
+	if (takeorleave == 'T' || takeorleave == 't')
+		torl = 0;
+	else
+		torl = 1;
+	if (type==0)
+	{
+		if (torl==0)
+		{
+			printf("\n%sHow many fighters do you wish to take ? ",KMAG);
+		}
+		else
+		{
+			printf("\n%sHow many fighters do you wish to leave ? ", KMAG);
+		}
+		junkline();
+	}
+	if (type==1)
+	{
+		printf("\n%sWhich product are you changing? ", KMAG);
+	}
+	if (type==2)
+	{
+		printf("\n%sWhich production group are you changing? ", KMAG);
+	}
+	if (type!=0)
+	{
+		printf("\n%s(%s1%s)Ore, (%s2%s)Org or (%s3%s)Equipment %s? ",
+				KMAG, KLTYLW, KMAG, KLTYLW, KMAG, KLTYLW, KMAG, prod[type]);
+		scanf("%d", &product);
+		if (type == 1)
+		{
+			if (torl == 0)
+			{
+				printf("\nHow many holds of %s do you want to take? ", 
+						pro[product-1]);
+			}
+			else
+			{
+			printf("\nHow many holds of %s do you want to leave? ", 
+						pro[product-1]);
+			}
+		}
+		else if (type == 2)
+		{
+			if (torl == 0)
+				printf("\nHow many groups of Colonists do you want to take? ");
+			else
+				printf("\nHow many groups of Colonists do you want to leave? ");
+		}
+	}
+	scanf("%d", &amt);
+
+	if (torl == 0)
+		strcpy(buffer, "PLANET TAKE:");
+	else
+		strcpy(buffer, "PLANET LEAVE:");
+	if (type!=0)
+		addint(buffer, (type-1)*3 + (product-1), ':', BUFF_SIZE);
+	else
+		addint(buffer, 6, ':', BUFF_SIZE);
+	addint(buffer, amt, ':', BUFF_SIZE);
+	sendinfo(sockid, buffer);
+	recvinfo(sockid, buffer);
+	
+	//The fighters join your battle force.
+	free(buffer);
+	free(curplanet);
+}
+void do_planet_display(int sockid, struct player *curplayer,
+					 struct planet *curplanet)
 {
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	int sector;
