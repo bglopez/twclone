@@ -1461,9 +1461,16 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                     accepted = 0;
                     xpgained = 0;
                 }
-                if ((offered >= playerprice) && offered!=0)
+					 if (playerprice >= 3*firstprice)
+					 {
+							accepted = -1;
+							xpgained = 0;
+					 }
+					 if ((offered >= playerprice) && offered!=0 
+								&& playerprice < 3*firstprice)
                 {
                     accepted = 1;
+						  xpgained = 0;
                 }
                 holds = 0 - holds;	//If buying from player want to decriment holds
             }
@@ -1528,6 +1535,10 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                 {
                     accepted = 1;
                 }
+					 if (playerprice == 0)
+					 {
+						accepted = -1;
+					 }
                 playerprice = 0 - playerprice;	//Deduction from players credits
             }
         }
@@ -1590,6 +1601,11 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
     else if (playerprice != -1)
         curplayer->lastprice = offered;
     buffer[0] = '\0';
+	 if (accepted == -1)
+	 {
+		curplayer->firstprice = 0;
+		curplayer->lastprice = 0;
+	 }
     addint (buffer, offered, ':', BUFF_SIZE);
     addint (buffer, accepted, ':', BUFF_SIZE);
     addint (buffer, xpgained, ':', BUFF_SIZE);
