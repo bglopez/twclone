@@ -206,6 +206,8 @@ void do_planet_display(int sockid, struct player *curplayer, struct planet *curp
 void do_examine_ship_specs(int sockid, struct player *curplayer);
 void print_planet_help();
 void print_shipspecs_help();
+void print_available_ships(int sockid, struct player *curplayer);
+void do_transport(int sockid, struct player *curplayer);
 void do_shipyard_menu(int sockid, struct player *curplayer);
 void buyship(int sockid, struct player *curplayer);
 void buymovieticket(int sockid, struct player *curplayer);

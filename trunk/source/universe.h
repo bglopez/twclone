@@ -78,6 +78,7 @@ struct port
 // 7 SSS
 // 8 BBB
 // 9 Class 9 Stardock and BBB
+// 10 Class 10 Node Station(Stardock+more and BBB)
 // 0 Class 0 Upgrade and BBB
 // B = Buy
 // S = Sell

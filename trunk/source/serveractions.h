@@ -15,6 +15,7 @@ void buildnewplanet (struct player *curplayer, char *buffer, int sector);
 void buildshipinfo (int shipnum, char *buffer);
 void buildallshipinfo(char *buffer);
 void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data);
+void listplayerships(char *buffer, struct player *curplayer);
 void buildgameinfo(char *buffer);
 void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curship); 
 void trading (struct player *curplayer, struct port *curport, char *buffer,
