@@ -467,7 +467,11 @@ int buildsectorlist(int from, int to, int depth, int *beenthere)
 void buildplayerinfo(int playernum, char *buffer)
 {
   buffer[0] = '\0';
-
+  if (players[playernum - 1] == NULL)
+  {
+     strcpy(buffer, "BAD");
+     return;
+  }
   addstring(buffer, players[playernum - 1]->name, ':', BUFF_SIZE);
   addint(buffer, players[playernum - 1]->experience, ':', BUFF_SIZE);
   addint(buffer, players[playernum - 1]->alignment, ':', BUFF_SIZE);
@@ -479,7 +483,11 @@ void buildplayerinfo(int playernum, char *buffer)
 void buildshipinfo(int shipnum, char *buffer)
 {
   buffer[0] = '\0';
-  
+  if (ships[shipnum - 1] == NULL)
+  {
+     strcpy(buffer, "BAD");
+     return;
+  }
   addint(buffer, ships[shipnum - 1]->owner, ':', BUFF_SIZE);
   addstring(buffer, ships[shipnum - 1]->name, ':', BUFF_SIZE);
   addstring(buffer, shiptypes[ships[shipnum - 1]->type - 1].name, ':', BUFF_SIZE);

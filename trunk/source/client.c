@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.2 $
- * Last Modified: $Date: 2001-06-16 06:04:38 $
+ * $Revision: 1.3 $
+ * Last Modified: $Date: 2001-06-16 20:36:27 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.2 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2001-06-16 06:04:38 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.3 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2001-06-16 20:36:27 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -212,6 +212,16 @@ int main(int argc, char *argv[])
 	    case '?':
 	      printhelp();
 	      break;
+	    case '~':
+	      if (strncmp(goofey, "~debug", 6)==0)
+	      {
+	         printf("\nEntering debug mode.");
+		 debugmode(sockid);
+	      }
+	      getmyinfo(sockid, curplayer);
+  	      sector = getsectorinfo(sockid, cursector);
+  	      printsector(cursector);           
+	      break;
 	    default:
 	      printf("\nSorry that option is not supported yet.");
 	      break;
@@ -232,6 +242,43 @@ printf("\n\n%s", CVS_REVISION);
 printf("\nLast Modified on: %s", LAST_MODIFIED);
 printf("\n");
 }
+
+void debugmode(int sockid)
+{
+char buffer[BUFF_SIZE];
+
+printf("\nAnything you type will be sent directly to the server");
+printf("\nType 'exit' to exit out of debug mode");
+printf("\nThe BAD server response from exit is automatically discarded");
+printf("\n");
+printf("\n>");
+fgets(buffer, BUFF_SIZE, stdin);
+buffer[strcspn(buffer, "\n")] = '\0';
+
+if (sendinfo(sockid, buffer) == -1)
+   return;
+printf("\nSent '%s'\n", buffer);
+do
+  {
+    if (recvinfo(sockid, buffer) == -1)
+	exit(-1);
+     
+    printf("\nServer response '%s'", buffer);
+    printf("\n>");
+
+    fgets(buffer, BUFF_SIZE, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+
+    if (sendinfo(sockid, buffer) == -1)
+	exit(-1);
+
+    printf("\nSent '%s'\n", buffer);
+
+  }
+while(strcmp(buffer, "exit") != 0);
+recvinfo(sockid, buffer);		//Gets rid of the BAD from exit
+}
+
 int getintstuff()
 {
    char ch;
@@ -512,6 +559,7 @@ int getsectorinfo(int sockid, struct sector *cursector)
    length = 0;
    buff = buffer;
    sendinfo(sockid, "DESCRIPTION");
+   strcpy(buff, "\0");
    recvinfo(sockid, buff);
    position = 1;                      //Gets rid of first : from description
    cursector->number = popint(buffer + position, ":");
@@ -1153,7 +1201,7 @@ char *prompttype(enum prompts type, int sector)
     }
   }
   input = tempstr;
-  read(0, input, 5);          //Get 5 characters from stdin! 
+  read(0, input, 10);          //Get 10 characters from stdin! 
   return input;
 }
 	

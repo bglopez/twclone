@@ -5,7 +5,7 @@ struct sp_shipinfo shiptypes[SHIP_TYPE_COUNT];
 
 void init_shiptypeinfo()
 {
-  strcpy(shiptypes[0].name, "\x1B[0;32mMerchant Cruiser");
+  strcpy(shiptypes[0].name, "\x1B[0;32mMerchant Cruiser\x1B[0m");
   shiptypes[0].basecost = 41300;
   shiptypes[0].maxattack = 750;
   shiptypes[0].initialholds = 20;
@@ -24,7 +24,7 @@ void init_shiptypeinfo()
   shiptypes[0].planet = 1;
   shiptypes[0].photons = 0;
 
-  strcpy(shiptypes[1].name, "\x1B[0;35mScout Marauder");
+  strcpy(shiptypes[1].name, "\x1B[0;35mScout Marauder\x1B[0m");
   shiptypes[1].basecost = 15950;
   shiptypes[1].maxattack = 250;
   shiptypes[1].initialholds = 10;
@@ -43,7 +43,7 @@ void init_shiptypeinfo()
   shiptypes[1].planet = 1;
   shiptypes[1].photons = 0;
 
-  strcpy(shiptypes[2].name, "\x1B[0;33mMissile Frigate");
+  strcpy(shiptypes[2].name, "\x1B[0;33mMissile Frigate\x1B[0m");
   shiptypes[2].basecost = 100000;
   shiptypes[2].maxattack = 2000;
   shiptypes[2].initialholds = 12;
@@ -62,7 +62,7 @@ void init_shiptypeinfo()
   shiptypes[2].planet = 0;
   shiptypes[2].photons = 1;
 
-  strcpy(shiptypes[3].name, "\x1B[1;33mBattleship");
+  strcpy(shiptypes[3].name, "\x1B[1;33mBattleship\x1B[0m");
   shiptypes[3].basecost = 88500;
   shiptypes[3].maxattack = 3000;
   shiptypes[3].initialholds = 16;
@@ -81,7 +81,7 @@ void init_shiptypeinfo()
   shiptypes[3].planet = 1;
   shiptypes[3].photons = 0;
 
-  strcpy(shiptypes[4].name, "\x1B[0;31mCorporate Flagship");
+  strcpy(shiptypes[4].name, "\x1B[0;31mCorporate Flagship\x1B[0m");
   shiptypes[4].basecost = 163500;
   shiptypes[4].maxattack = 6000;
   shiptypes[4].initialholds = 20;
@@ -100,7 +100,7 @@ void init_shiptypeinfo()
   shiptypes[4].planet = 1;
   shiptypes[4].photons = 0;
 
-  strcpy(shiptypes[5].name, "\x1B[0;36mColonial Transport");
+  strcpy(shiptypes[5].name, "\x1B[0;36mColonial Transport\x1B[0m");
   shiptypes[5].basecost = 63600;
   shiptypes[5].maxattack = 100;
   shiptypes[5].initialholds = 50;
@@ -119,7 +119,7 @@ void init_shiptypeinfo()
   shiptypes[5].planet = 1;
   shiptypes[5].photons = 0;
 
-  strcpy(shiptypes[6].name, "\x1B[1;34mCargo Transport");
+  strcpy(shiptypes[6].name, "\x1B[1;34mCargo Transport\x1B[0m");
   shiptypes[6].basecost = 51950;
   shiptypes[6].maxattack = 125;
   shiptypes[6].initialholds = 50;
@@ -138,7 +138,7 @@ void init_shiptypeinfo()
   shiptypes[6].planet = 1;
   shiptypes[6].photons = 0;
 
-  strcpy(shiptypes[7].name, "\x1B[1;32mMerchant Freighter");
+  strcpy(shiptypes[7].name, "\x1B[1;32mMerchant Freighter\x1B[0m");
   shiptypes[7].basecost = 33400;
   shiptypes[7].maxattack = 100;
   shiptypes[7].initialholds = 30;
@@ -157,7 +157,7 @@ void init_shiptypeinfo()
   shiptypes[7].planet = 1;
   shiptypes[7].photons = 0;
 
-  strcpy(shiptypes[8].name, "\x1B[7;34;47mImperial Starship");
+  strcpy(shiptypes[8].name, "\x1B[7;34;47mImperial Starship\x1B[0m");
   shiptypes[8].basecost = 329000;
   shiptypes[8].maxattack = 10000;
   shiptypes[8].initialholds = 40;
@@ -176,7 +176,7 @@ void init_shiptypeinfo()
   shiptypes[8].planet = 1;
   shiptypes[8].photons = 1;
 
-  strcpy(shiptypes[9].name, "\x1B[1;35mHavoc Gunstar");
+  strcpy(shiptypes[9].name, "\x1B[1;35mHavoc Gunstar\x1B[0m");
   shiptypes[9].basecost = 79000;
   shiptypes[9].maxattack = 1000;
   shiptypes[9].initialholds = 12;
@@ -195,7 +195,7 @@ void init_shiptypeinfo()
   shiptypes[9].planet = 0;
   shiptypes[9].photons = 0;
 
-  strcpy(shiptypes[10].name, "\x1B[7;39;44mConstellation");
+  strcpy(shiptypes[10].name, "\x1B[7;39;44mConstellation\x1B[0m");
   shiptypes[10].basecost = 72500;
   shiptypes[10].maxattack = 2000;
   shiptypes[10].initialholds = 20;
@@ -214,7 +214,7 @@ void init_shiptypeinfo()
   shiptypes[10].planet = 1;
   shiptypes[10].photons = 0;
 
-  strcpy(shiptypes[11].name, "\x1B[1;31mT'khasi Orion");
+  strcpy(shiptypes[11].name, "\x1B[1;31mT'khasi Orion\x1B[0m");
   shiptypes[11].basecost = 42500;
   shiptypes[11].maxattack = 250;
   shiptypes[11].initialholds = 30;
@@ -233,7 +233,7 @@ void init_shiptypeinfo()
   shiptypes[11].planet = 1;
   shiptypes[11].photons = 0;
 
-  strcpy(shiptypes[12].name, "\x1B[7;34;1;43mTholian Sentinel\0");
+  strcpy(shiptypes[12].name, "\x1B[7;34;1;43mTholian Sentinel\x1B[0m\0");
   shiptypes[12].basecost = 47500;
   shiptypes[12].maxattack = 800;
   shiptypes[12].initialholds = 10;
@@ -252,7 +252,7 @@ void init_shiptypeinfo()
   shiptypes[12].planet = 0;
   shiptypes[12].photons = 0;
 
-  strcpy(shiptypes[13].name, "\x1B[7;39;41mTaurean Mule");
+  strcpy(shiptypes[13].name, "\x1B[7;39;41mTaurean Mule\x1B[0m");
   shiptypes[13].basecost = 63600;
   shiptypes[13].maxattack = 150;
   shiptypes[13].initialholds = 50;
@@ -271,7 +271,7 @@ void init_shiptypeinfo()
   shiptypes[13].planet = 1;
   shiptypes[13].photons = 0;
 
-  strcpy(shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser");
+  strcpy(shiptypes[14].name, "\x1B[7;31;49mInterdictor Cruiser\x1B[0m");
   shiptypes[14].basecost = 539000;
   shiptypes[14].maxattack = 15000;
   shiptypes[14].initialholds = 10;

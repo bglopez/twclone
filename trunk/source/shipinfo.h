@@ -2,7 +2,7 @@
 #define SHIP_INFO_H
 
 #define SHIP_TYPE_COUNT 15
-#define MAX_SHIP_NAME_LENGTH 25
+#define MAX_SHIP_NAME_LENGTH 30
 
 struct sp_shipinfo
 {
