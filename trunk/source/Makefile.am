@@ -1,5 +1,5 @@
 # -*- makefile -*-
-# $Id: Makefile.am,v 1.2 2002-06-15 06:19:54 npsimons Exp $
+# $Id: Makefile.am,v 1.3 2002-06-19 02:16:28 npsimons Exp $
 # Copyright (C) 2002, Nathan Paul Simons <npsimons@hardcorehackers.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,8 @@ bigbang_SOURCES = \
 	bigbang.c \
 	config.c \
 	config.h \
+	getopt.c \
+	getopt.h \
 	namegen.c \
 	namegen.h \
 	parse.c \
