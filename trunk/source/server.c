@@ -58,9 +58,9 @@ struct port *ports[MAX_PORTS];
 struct config *configdata;
 time_t *timeptr;
 time_t starttime;
+int WARP_WAIT = 1;
 
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   int c;
   int sockid, port, msgidin, msgidout, senderid;
