@@ -43,7 +43,11 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  strcpy(buffer, "BAD");
 	  return;
 	}
-
+		if (intransit(data))
+		{
+				  strcpy(buffer, "BAD: Intransit!");
+				  return;
+		}
       if (curplayer->sector == 0)
 	builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
       else
@@ -55,6 +59,7 @@ void processcommand(char *buffer, struct msgcommand *data)
     case ct_move:
       fprintf(stderr, "processcommand: Got a Move command\n");
 
+
       //I'm assuming that this will short circuit
       gettimeofday( &begin, 0);
       if (((curplayer = 
@@ -65,37 +70,41 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  strcpy(buffer, "BAD");
 	  return;
 	}
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Already moving!");
+			return;
+		}
       if ((curplayer->turns <= 0) || (curplayer->turns < shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
-        {
-	if(move_player(curplayer, data, buffer) < 0) 
-	{
-	  strcpy(buffer, "BAD");
-	  return;
-	}
-	}
+      {
+		//if(move_player(curplayer, data, buffer) < 0) 
+		//{
+	  		strcpy(buffer, "BAD");
+	  		return;
+		}
+		//}
       while (linknum < MAX_WARPS_PER_SECTOR)
-	{
-	  if (sectors[(curplayer->sector == 0) ? ships[curplayer->ship - 1]->location - 1 : 
+		{
+	  		if (sectors[(curplayer->sector == 0) ? ships[curplayer->ship - 1]->location - 1 : 
 		     (curplayer->sector - 1)]->sectorptr[linknum] == NULL)
-	      break;
-	  else if (sectors[(curplayer->sector == 0) ? ships[curplayer->ship - 1]->location - 1 : 
+	      	break;
+	  		else if (sectors[(curplayer->sector == 0) ? ships[curplayer->ship - 1]->location - 1 : 
 		     (curplayer->sector - 1)]->sectorptr[linknum++]->number == data->to)
-	    {
-	      fprintf(stderr, "processcommand: Move was successfull\n");
-	      if (curplayer->sector == 0)
-		{
-		  curplayer = delete(curplayer->name, player, 
+	    	{
+	      	fprintf(stderr, "processcommand: Move was successfull\n");
+	      	if (curplayer->sector == 0)
+				{
+		  		curplayer = delete(curplayer->name, player, 
 			    sectors[ships[curplayer->ship - 1]->location - 1]->playerlist, 1);
-		  ships[curplayer->ship - 1]->location = data->to;
-		}
-	      else
-		{
-		  curplayer = delete(curplayer->name, player, 
-			    sectors[curplayer->sector - 1]->playerlist, 1);
-		  curplayer->sector = data->to;
-		}
+		  		ships[curplayer->ship - 1]->location = data->to;
+				}
+	      	else
+				{
+		  		curplayer = delete(curplayer->name, player, sectors[curplayer->sector - 1]->playerlist, 1);
+		  		curplayer->sector = data->to;
+				}
 	      //Put realtime so and so warps in/out of the sector here.
-	      gettimeofday( &end, 0);
+	      /*gettimeofday( &end, 0);
 	      seconds = end.tv_sec - begin.tv_sec;
 	      while(seconds != 
 		 (shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
@@ -103,16 +112,19 @@ void processcommand(char *buffer, struct msgcommand *data)
 	      gettimeofday(&end, 0);
 	      seconds = end.tv_sec - begin.tv_sec;
 	      }
-	      //Need to put towing into this later
-	      curplayer->turns = curplayer->turns - shiptypes[ships[curplayer->ship - 1]->type - 1].turns;
-	      insertitem(curplayer, player, sectors[data->to - 1]->playerlist, 1);
-	      builddescription(data->to, buffer, curplayer->number);
+	      //Need to put towing into this later*/
+	      //curplayer->turns = curplayer->turns - shiptypes[ships[curplayer->ship - 1]->type - 1].turns;
+	      //insertitem(curplayer, player, sectors[data->to - 1]->playerlist, 1);
+	      //builddescription(data->to, buffer, curplayer->number);
+			curplayer->intransit=1;
+			curplayer->movingto=data->to;
+			curplayer->beginmove = begin.tv_sec;
+			strcpy(buffer, "OK: Now moving");
+			return;
 
-	      return;
 	    }
 	}
-      findautoroute((curplayer->sector == 0) ? ships[curplayer->ship - 1]->location : 
-		     (curplayer->sector), data->to, buffer);
+      findautoroute((curplayer->sector == 0) ? ships[curplayer->ship - 1]->location : (curplayer->sector), data->to, buffer);
       break;
     case ct_login:
       fprintf(stderr, "processcommand: Got a login command\n");
@@ -155,12 +167,39 @@ void processcommand(char *buffer, struct msgcommand *data)
       else
 	builddescription(curplayer->sector, buffer, curplayer->number);
       break;
+	 case ct_update:
+		if (intransit(data) == 0)
+		{	
+      	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
+			{
+	  			strcpy(buffer, "BAD");
+	  			return;
+			}
+      	if (curplayer->sector == 0)
+				builddescription(ships[curplayer->ship - 1]->location, buffer, curplayer->number);
+      	else
+				builddescription(curplayer->sector, buffer, curplayer->number);
+		}
+		else
+			strcpy(buffer, "OK: Still in Transit");
+		//Put realtime messages here!
+		break;
     case ct_playerinfo:
       //fprintf(stderr, "processcommand: Got a playerinfo command\n");
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Moving you can't do that");
+			return;
+		}
       buildplayerinfo(data->to, buffer);
       break;
     case ct_shipinfo:
       //fprintf(stderr, "processcommand: Got a shipinfo command\n");
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Moving you can't do that");
+			return;
+		}
       buildshipinfo(data->to, buffer);
       break;
     case ct_logout:
@@ -171,6 +210,11 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  strcpy(buffer, "BAD");
 	  return;
 	}
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Can't quit while moving!");
+			return;
+		}
       strcpy(buffer, "OK");
       curplayer->loggedin = 0;
       break;
@@ -180,6 +224,11 @@ void processcommand(char *buffer, struct msgcommand *data)
 	strcpy(buffer, "BAD");
 	return;
       }
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Moving can't do that!");
+			return;
+		}
       if (curplayer->sector == 0)
       {
  	 if (sectors[ships[curplayer->ship - 1]->location - 1]->portptr != NULL)
@@ -225,6 +274,11 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  strcpy(buffer, "BAD");
 	  return;
 	}
+		if (intransit(data))
+		{
+			strcpy(buffer, "BAD: Can't port while moving!");
+			return;
+		}
       if (curplayer->sector == 0)
       {
          if (sectors[ships[curplayer->ship - 1]->location - 1]->portptr != NULL)
@@ -284,7 +338,7 @@ void processcommand(char *buffer, struct msgcommand *data)
 	  strcpy(buffer, "BAD");
 	  return;
 	}
-      buildtotalinfo(curplayer->number, buffer);
+      buildtotalinfo(curplayer->number, buffer, data);
       break;
     default:
       //fprintf(stderr, "processcommand: Got a bogus command\n");
@@ -354,6 +408,32 @@ void builddescription(int sector, char *buffer, int playernum)
     }
 
   return;
+}
+
+int intransit(struct msgcommand *data)
+{
+	struct player *curplayer;
+	if ((curplayer = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL)
+	  return(-1);
+	fprintf(stderr,"\nintransit: Checking transit");
+		  
+   gettimeofday(&end, 0);
+		if (curplayer->intransit == 1)
+		{
+			if ((end.tv_sec - curplayer->beginmove) >= (shiptypes[ships[curplayer->ship - 1]->type - 1].turns))
+			{
+				curplayer->intransit = 0;
+				curplayer->beginmove = 0;
+				curplayer->turns = curplayer->turns - shiptypes[ships[curplayer->ship - 1]->type - 1].turns;
+				insertitem(curplayer, player, sectors[data->to - 1]->playerlist, 1);
+			return(0);
+			}
+			else
+				return(1);
+		}
+		else if (curplayer->beginmove == 0)
+				  return(0);
+		return(0);
 }
 
 /*
@@ -482,9 +562,9 @@ void buildshipinfo(int shipnum, char *buffer)
 
 }
 
-void buildtotalinfo(int pnumb, char *buffer)
+void buildtotalinfo(int pnumb, char *buffer, struct msgcommand *data)
 {
-  
+		  
   buffer[0] = '\0';
   
   addint(buffer, players[pnumb - 1]->number, ':', BUFF_SIZE);
@@ -505,7 +585,10 @@ void buildtotalinfo(int pnumb, char *buffer)
   addint(buffer, ships[players[pnumb - 1]->ship - 1]->organics, ':', BUFF_SIZE);
   addint(buffer, ships[players[pnumb - 1]->ship - 1]->ore, ':', BUFF_SIZE);
   addint(buffer, ships[players[pnumb - 1]->ship - 1]->owner, ':', BUFF_SIZE);
-  addint(buffer, ships[players[pnumb - 1]->ship - 1]->location, ':', BUFF_SIZE);
+  if (intransit(data))
+		addint(buffer, 0, ':', BUFF_SIZE);
+  else
+  		addint(buffer, ships[players[pnumb - 1]->ship - 1]->location, ':', BUFF_SIZE);
   addint(buffer, shiptypes[ships[players[pnumb - 1]->ship - 1]->type - 1].turns, ':', BUFF_SIZE);
 
 
@@ -838,47 +921,44 @@ void buildnewplayer(struct player *curplayer, char *shipname)
   ships[i] = curship;
 }
 
-int move_player(struct player *p, struct msgcommand *data, char *buffer){
+int move_player(struct player *p, struct msgcommand *data, char *buffer)
+{
 	int linknum=0;
-      fprintf(stderr, "processcommand: Got a Move command\n");
+      
+	fprintf(stderr, "processcommand: Got a Move command\n");
 
       //I'm assuming that this will short circuit
       if (((p = (struct player *)find(data->name, player, symbols, HASH_LENGTH)) == NULL) || ((p->sector != 0) ? p->sector : (ships[p->ship - 1]->location) == data->to) || data->to > sectorcount)  
-	return -1; 
+			return -1; 
       if ((p->turns <= 0) || (p->turns < shiptypes[ships[p->ship - 1]->type - 1].turns)) 
-	return -1;
+			return -1;
 
       while (linknum < MAX_WARPS_PER_SECTOR)
-	{
-	  if (sectors[(p->sector == 0) ? ships[p->ship - 1]->location - 1 : 
-		     (p->sector - 1)]->sectorptr[linknum] == NULL)
-	      break;
-	  else if (sectors[(p->sector == 0) ? ships[p->ship - 1]->location - 1 : 
-		     (p->sector - 1)]->sectorptr[linknum++]->number == data->to)
-	    {
-	      fprintf(stderr, "processcommand: Move was successfull\n");
-	      if (p->sector == 0)
 		{
-		  p = delete(p->name, player, 
-			    sectors[ships[p->ship - 1]->location - 1]->playerlist, 1);
-		  ships[p->ship - 1]->location = data->to;
-		}
-	      else
-		{
-		  p = delete(p->name, player, 
-			    sectors[p->sector - 1]->playerlist, 1);
-		  p->sector = data->to;
-		}
-	      //Put realtime so and so warps in/out of the sector here.
-	      //Need to put towing into this later
-	      p->turns = p->turns - shiptypes[ships[p->ship - 1]->type - 1].turns;
-	      insertitem(p, player, sectors[data->to - 1]->playerlist, 1);
-	      builddescription(data->to, buffer, p->number);
+	  		if (sectors[(p->sector == 0) ? ships[p->ship - 1]->location - 1 : (p->sector - 1)]->sectorptr[linknum] == NULL)
+	      	break;
+	  		else if (sectors[(p->sector == 0) ? ships[p->ship - 1]->location - 1 : (p->sector - 1)]->sectorptr[linknum++]->number == data->to)
+	  		{
+	      	fprintf(stderr, "processcommand: Move was successfull\n");
+	      	if (p->sector == 0)
+				{
+		  			p = delete(p->name, player, sectors[ships[p->ship - 1]->location - 1]->playerlist, 1);
+		  			ships[p->ship - 1]->location = data->to;
+				}
+	      	else
+				{
+		  			p = delete(p->name, player, sectors[p->sector - 1]->playerlist, 1);
+		  			p->sector = data->to;
+				}
+	      	//Put realtime so and so warps in/out of the sector here.
+	      	//Need to put towing into this later
+	      	p->turns = p->turns - shiptypes[ships[p->ship - 1]->type - 1].turns;
+	      	insertitem(p, player, sectors[data->to - 1]->playerlist, 1);
+	      	builddescription(data->to, buffer, p->number);
 
-	      return data->to;
-	    }
-	}
-      findautoroute((p->sector == 0) ? ships[p->ship - 1]->location : 
-		     (p->sector), data->to, buffer);
+	      	return data->to;
+	    		}
+			}
+      	findautoroute((p->sector == 0) ? ships[p->ship - 1]->location : (p->sector), data->to, buffer);
 	return data->to;
 }

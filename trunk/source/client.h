@@ -130,7 +130,7 @@ int getsectorinfo(int sockid, struct sector *cursector);
 int printsector(struct sector *cursector);
 int movesector(char *holder, int sockid, int current, struct sector *cursector);
 int dologin(int sockid);
-char *prompttype(enum prompts type, int sector);
+char *prompttype(enum prompts type, int sector, int sockid);
 int getyes(char *answer);
 void psinfo(int sockid, int pnumb, struct player *p);
 void clearplayer(struct player *curplayer);

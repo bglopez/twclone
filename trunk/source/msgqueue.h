@@ -41,7 +41,8 @@ enum commandtype
   ct_shipinfo,
   ct_port,
   ct_info,
-  ct_portinfo
+  ct_portinfo,
+  ct_update
 };
   
 struct msgbuffer

@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.4 $
- * Last Modified: $Date: 2002-04-10 18:05:51 $
+ * $Revision: 1.5 $
+ * Last Modified: $Date: 2002-04-24 22:00:35 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.4 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2002-04-10 18:05:51 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.5 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2002-04-24 22:00:35 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
   for (;loop;)
     {
       ptype = command;   //Main command type of prompt
-      goofey=prompttype(ptype, sector);
+      goofey=prompttype(ptype, sector, sockid);
       if (isdigit( *(goofey+0) )!=0)
 	{
 	   sector = movesector(goofey, sockid, sector, cursector);
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 	    case 'Q':
 	      printf("\x1B[5;31m<Quit>?%s ", KNRM);
 	      ptype = quit;
-	      if (getyes(prompttype(ptype,0)))
+	      if (getyes(prompttype(ptype,0,sockid)))
 	      {
 		loop=0;
 		sendinfo(sockid, "QUIT");
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 	    case 'p':
 	    case 'P':
 	      ptype = pt_port;
-	      mickey=prompttype(ptype, 0);
+	      mickey=prompttype(ptype, 0,sockid);
 	      doporting(sockid, curplayer); 
 	      break;   //Porting ain't done yet.
 	    case 'm':
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 	      }
        
 	      ptype = move; 
-	      goofey=prompttype(ptype, sector);
+	      goofey=prompttype(ptype, sector,sockid);
 	      if (isdigit( *(goofey+0) )!=0)
 	      {
 	         sector = movesector(goofey, sockid, sector, cursector);
@@ -1027,13 +1027,22 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
    printf("\n%sWarping to Sector %s%d\n", KMAG, KYLW, sector);
    sprintf(intptr, "%d", sector);
    sendinfo(sockid, intptr);
-   while((poll(checkin, 1, 1)!=1))
-   {
-      //la la la do nothing.. for now...
-      //Check out the real time thread here via polling.
-      fflush(stdout);
-   }
-   recvinfo(sockid, buff);
+	recvinfo(sockid, buff);  //Put a check error into here
+	if (strncmp(buff, ":", 1)!=0)
+	{
+		sendinfo(sockid, "UPDATE");
+		recvinfo(sockid, buff);
+   	while(strncmp(buff, "OK", 2)==0)
+   	{
+      	//la la la do nothing.. for now...
+      	//Check out the real time thread here via polling.
+			usleep(500000);  //Wait half a second
+			sendinfo(sockid, "UPDATE");
+			recvinfo(sockid, buff);
+      	fflush(stdout);
+   	}
+	}
+   	//recvinfo(sockid, buff);
    len = 0;
    length = 0;
    pos = 1;                         //First part of move is a delimiter
@@ -1091,7 +1100,7 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
      } 
        printf("\n\n");
        ptype = autopilot;
-       if (getyes(prompttype(ptype, 0))) 
+       if (getyes(prompttype(ptype, 0, sockid))) 
        { 
 	 printf("\n%s%s<Auto Pilot Engaging>%s", KBBLU, KFWHT, KNRM);      
     	 for (counter = 1; counter <= foo; counter++)
@@ -1100,15 +1109,21 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
 			     KLTYLW, warps[counter]);
 	    sprintf(intptr, "%d", warps[counter]);
             sendinfo(sockid, intptr);
-	    while((poll(checkin, 1, 1)!=1))
+				recvinfo(sockid, buff);
+				sendinfo(sockid, "UPDATE");
+				recvinfo(sockid, buff);
+	    while(strncmp(buff, "OK", 2)==0)
 	    {
 		//la la la do nothing.. for now...	    
 		//Check out the realtime thread here via polling
-		fflush(stdout);
+			usleep(500000);
+			sendinfo(sockid, "UPDATE");
+			recvinfo(sockid, buff);
+			fflush(stdout);
 	    }
-            recvinfo(sockid, buff);
+            //recvinfo(sockid, buff);
             getsectorinfo(sockid, cursector);
-	    printsector(cursector);
+	    		printsector(cursector);
 	 }
 	 printf("\n\n%sArriving Sector :%s%s%d%s Autopilot disengaging.", KCYN, 
 			 KBBLU, KFWHT, warps[counter-1], KCYN);
@@ -1133,7 +1148,7 @@ int movesector(char *holder, int sockid, int current, struct sector *cursector)
 }  
 
 
-char *prompttype(enum prompts type, int sector)
+char *prompttype(enum prompts type, int sector, int sockid)
 {
   int hour=0;
   int min=0;
@@ -1191,6 +1206,7 @@ char *prompttype(enum prompts type, int sector)
 	      
     }
   fflush(stdout);
+  
     while((poll(check, 1, 1)!=1))  //Dont forget to put infinite in
     {
       // Check the real time thread here!

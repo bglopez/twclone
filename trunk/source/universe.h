@@ -64,6 +64,9 @@ struct player
   int credits;
   int lastprice;   //Last price offered by a port.
   int firstprice;  //first price offered by a port
+  unsigned short intransit;  //Is the player moving?
+  long beginmove;					//At what time the player began moving
+  int movingto;				 //What sector the player is moving to
   unsigned short loggedin;  //This is not in the file
   unsigned short ported;    //Neither is this
 };
