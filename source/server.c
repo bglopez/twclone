@@ -205,10 +205,11 @@ int main (int argc, char *argv[])
     while (data.command != ct_quit || senderid != threadid)	//Main game loop
     {
         processcommand (buffer, &data);
-        sendmsg (msgidout, buffer, senderid);
+        sendmesg (msgidout, buffer, senderid);
         senderid = getdata (msgidin, &data, 0);
     }
     saveallports ();
+	 saveshipinfo();
 
 	 printf("\nPlease run 'rm msgqueue.lock'\n");
     //when we're done, clean up the msg queues
