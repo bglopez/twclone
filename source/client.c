@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.45 $
- * Last Modified: $Date: 2004-01-01 00:14:22 $
+ * $Revision: 1.46 $
+ * Last Modified: $Date: 2004-01-01 01:35:03 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.45 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2004-01-01 00:14:22 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.46 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2004-01-01 01:35:03 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -61,10 +61,11 @@ int main (int argc, char *argv[])
     int loop = 1, counter;	//Loop counters
     int port = 1234;		//Port number of the server
     int sockid;			//Socket ID
-    char *buffer;
+    char *buffer = NULL;
     struct sector *cursector = NULL;	//Stores stuff about the current sector
     struct player *curplayer = NULL;	//For the player logging in
     struct ship *curship = NULL;	//For the current players ship
+	 int temp=0;
 
     gettimeofday (&t, 0);
 
@@ -145,11 +146,19 @@ int main (int argc, char *argv[])
         curplayer->pship = curship;
 
 		  dologin (sockid);
-    	  buffer = (char *)malloc(sizeof(char)*1024);
+    	  buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
 		  printwelcome ();
     	  whosplaying (sockid);
     	  printf ("\n");
         getmyinfo (sockid, curplayer);
+		  strcpy(buffer, "ONPLANET:");
+		  sendinfo(sockid, buffer);
+		  recvinfo(sockid, buffer);
+		  temp = popint(buffer, ":");
+		  if (temp == 1)
+		  {
+				do_planet_menu(sockid, curplayer);
+		  }
         sector = getsectorinfo (sockid, cursector);
         printsector (cursector);
         for (; loop;)
@@ -199,11 +208,11 @@ int main (int argc, char *argv[])
 								sprintf(buffer, "LAND %d:", cursector->planets->number);
 								sendinfo(sockid, buffer);
 								recvinfo(sockid, buffer);
-								do_planet_menu(sockid, curplayer);
+								temp = do_planet_menu(sockid, curplayer);
 						  }
 						  else
 						  {
-								do_planet_select(sockid, curplayer, cursector);
+								temp = do_planet_select(sockid, curplayer, cursector);
 						  }
 						  break;
                 case 'p':
@@ -284,6 +293,10 @@ int main (int argc, char *argv[])
                     printf ("\nSorry that option is not supported yet.");
                     break;
                 }
+					 if (temp==1)
+					 {	
+						loop=0;
+					 }
             }
         }
         return (0);
@@ -1179,12 +1192,13 @@ void do_stardock_menu(int sockid, struct player *curplayer)
 	return;
 }
 
-void do_planet_select(int sockid, struct player *curplayer,
+int do_planet_select(int sockid, struct player *curplayer,
 					 struct sector *cursector)
 {
 	struct planet *curplanet;
 	char *buffer = malloc(sizeof(char)*BUFF_SIZE);
 	int choice;
+	int quitting=0;
 	
 	printf("\nPreparing to land on a planet!");
 	printf("\nWhich one? ");
@@ -1202,21 +1216,72 @@ void do_planet_select(int sockid, struct player *curplayer,
 		sprintf(buffer, "LAND %d:", choice);
 		sendinfo(sockid, buffer);
 		recvinfo(sockid, buffer);
-		do_planet_menu(sockid, curplayer);
+		quitting = do_planet_menu(sockid, curplayer);
 	}
 	else
 	{
 		printf("\nWhoa! Trying to land on non-existant planets!");
-		return;
+		return(quitting);
 	}
 	free(buffer);
+	return(quitting);
 }
 
-void do_planet_menu(int sockid, struct player *curplayer)
+int do_citadel_menu(int sockid, struct player *curplayer)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	int done=0;
+
+	while (!done)
+	{
+		printf("\n");
+		choice = prompttype(pl_cmenu, 0, sockid);
+		switch(*(choice+0))
+		{
+			case 'q':
+			case 'Q':
+				strcpy(buffer, "PLANET CQUIT:");
+				sendinfo(sockid, buffer);
+				recvinfo(sockid, buffer);
+				done = 1;
+				break;
+			case 'd':
+			case 'D':
+				break;
+			case 'r':
+			case 'R':
+				//strcpy(buffer, "PLANET REST:");
+				strcpy(buffer, "QUIT");
+				sendinfo(sockid,buffer);
+				recvinfo(sockid,buffer);
+				return(1);
+				break;
+			case '?':
+				print_citadel_help();
+				break;
+			case '`':
+				fedcommlink(sockid);
+				break;
+			case '#':
+				whosplaying(sockid);
+				break;
+			default:
+				printf("\nInvalid menu choice!");
+				break;
+		}
+	}
+	free(choice);
+	free(buffer);
+	return(0);
+}
+
+int do_planet_menu(int sockid, struct player *curplayer)
+{
+	char *choice = (char *)malloc(sizeof(char)*10);
+	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
+	int done=0;
+	int quitting=0;
 
 	do_planet_display(sockid, curplayer);
 	while (!done)
@@ -1236,6 +1301,10 @@ void do_planet_menu(int sockid, struct player *curplayer)
 		case 'D':
 				do_planet_display(sockid, curplayer);
 				break;
+		case 'c':
+		case 'C':
+				done = do_citadel_menu(sockid, curplayer);
+				quitting = done;
 		case '?':
 				print_planet_help();
 				break;
@@ -1252,6 +1321,7 @@ void do_planet_menu(int sockid, struct player *curplayer)
 	}
 	free(choice);
 	free(buffer);
+	return(quitting);
 }
 void do_planet_display(int sockid, struct player *curplayer)
 {
@@ -1346,6 +1416,27 @@ free(ptype);
 free(ptname);
 free(creator);
 free(owner);
+}
+
+void print_citadel_help()
+{
+	printf("\n%s+===================================+",KGRN);
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%sA%s> %sTake all Products%s                |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sC%s> %sEnter Citadel%s              |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sD%s> %sDisplay Planet%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sM%s> %sChange Military Levels%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sO%s> %sClaim Ownership of this Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sP%s> %sChange Population Levels%s            |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sS%s> %sLoad/Unload Colonists%s             |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sT%s> %sTake or Leave Products%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+	printf("\n%s| %s<%sZ%s> %sTry to Destroy Planet%s      |",KGRN,KMAG,KGRN,KMAG,KLTCYN,KGRN);
+
+	printf("\n%s|                                   |",KGRN);
+	printf("\n%s| %s<%s!%s> %sPlanet Help%s                |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s| %s<%sQ%s> %sLeave this Planet%s           |",KGRN,KMAG,KGRN,KMAG,KYLW,KGRN);
+	printf("\n%s+===================================+",KGRN);
+
 }
 
 void print_planet_help()

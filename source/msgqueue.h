@@ -65,6 +65,7 @@ enum commandtype
   ct_online,
   ct_stardock,
   ct_planet,
+  ct_onplanet,
   ct_land,
   ct_scan,
   ct_beacon,

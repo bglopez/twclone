@@ -110,6 +110,7 @@ void *handle_player (void *threadinfo)
       if (recvinfo (sockid, inbuffer) == -1)
 		{
 			fprintf(stderr, "Thread %d: Exiting!\n", (int)pthread_self());
+			fflush(stderr);
 			pthread_exit (NULL);
 		}
 
@@ -206,6 +207,12 @@ void *handle_player (void *threadinfo)
 	  data.command = ct_land;
 	  commandgood = 1;
 	}
+		else if (strncmp(inbuffer, "ONPLANET", strlen("PLANET")) == 0 && loggedin)
+		{
+			strcpy(data.name, name);
+			data.command = ct_onplanet;
+			commandgood = 1;
+		}
 		else if (strncmp(inbuffer, "PLANET", strlen("PLANET")) == 0 && loggedin)
 		{
 			strcpy(data.name, name);

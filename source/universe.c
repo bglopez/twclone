@@ -257,6 +257,8 @@ void init_playerinfo (char *filename)
 		  {
         players[playernum - 1] = curplayer;
 
+		  if (ships[curplayer->ship-1]->onplanet == 0)
+		  {
         if (insertitem (curplayer, player,
                         sectors[(curplayer->sector == 0) ?
                                 ships[curplayer->ship - 1]->location - 1 :
@@ -271,6 +273,7 @@ void init_playerinfo (char *filename)
                                  1]->location : (curplayer->sector));
             exit (-1);
         }
+		  }
 
 
         //Here is where I need to tack this onto the playerlist
