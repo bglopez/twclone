@@ -13,12 +13,11 @@
 int init_planets (char *filename, struct sector **secarray)
 {
     FILE *planetfile;
-    int i, p_num, p_sec, p_type;
-    char *p_name, dummy[3], *p_owner, buffer[BUFF_SIZE];
+    int i, p_num, p_sec, p_type, p_owner;
+    char *p_name, dummy[3], buffer[BUFF_SIZE];
     int count = 0;
 
     p_name = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
-    p_owner = (char *) malloc (sizeof (char) * (MAX_NAME_LENGTH + 1));
 
     for (i = 0; i < MAX_TOTAL_PLANETS; i++)
         planets[i] = NULL;
@@ -55,7 +54,6 @@ int init_planets (char *filename, struct sector **secarray)
         insert_planet (planets[p_num - 1], secarray[p_sec - 1], 0);
     }
     free (p_name);
-    free (p_owner);
     return (0);
 }
 
