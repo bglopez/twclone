@@ -1353,7 +1353,33 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                     strcpy (buffer, "BAD: Port cannot buy more");	//To keep from going out of bounds
                     return;
                 }
-            }
+					 //If we're not getting a test price
+					 if (playerprice != -1)
+					 {
+					 	if (product == 0)
+					 	{
+							if (curship->ore != holds)
+							{
+								strcpy(buffer, "BAD: You don't have that much ore!");
+								return;
+							}
+					 	}
+					 	else if (product == 1)
+					 	{
+							if (curship->organics != holds)
+							{
+								strcpy(buffer, "BAD: You don't have that much organics!");
+							}
+					 	}
+					 	else if (product == 2)
+					 	{
+							if (curship->equipment != holds)
+							{
+								strcpy(buffer, "BAD: You don't have that much equipment!");
+							}
+					 	}
+					 }
+				}
             else if (portconversion[curport->type][product] == 'S')
             {
                 mean =
@@ -1375,7 +1401,7 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
             }
             else
                 strcpy (buffer, "BAD: Port does not sell or buy");
-            deviation = .1 * mean;
+            deviation = .05 * mean;
             offered = box_muller (mean, deviation);
             if (playerprice == -1)	//In case we're getting a test price
             {
@@ -1404,38 +1430,38 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                     accepted = 1;
                     xpgained = 0;
                 }
-                else if ((playerprice >= firstprice / 0.967 - 1) &&
-                         (playerprice <= firstprice / 0.967 + 1))
+                else if ((playerprice >= (firstprice / 0.967 - 1)) &&
+                         (playerprice <= (firstprice / 0.967 + 1)))
                 {
                     accepted = 1;
                     xpgained = 5;
                 }
-                else if ((playerprice >= firstprice / 0.967 + 2) &&
-                         (playerprice <= firstprice / 0.967 + 5))
+                else if ((playerprice >= (firstprice / 0.967 + 2)) &&
+                         (playerprice <= (firstprice / 0.967 + 5)))
                 {
                     accepted = 1;
                     xpgained = 2;
                 }
-                else if (playerprice >= 1.1 * firstprice / 0.967)
+                else if (playerprice >= (1.1 * firstprice / 0.967))
                 {
                     accepted = 0;
                     xpgained = 0;
                     offered = curplayer->lastprice;
                 }
-                else if ((playerprice > 1.05 * firstprice / 0.967) &&
-                         (playerprice < 1.1 * firstprice / 0.967))
+                else if ((playerprice > (1.05 * firstprice / 0.967)) &&
+                         (playerprice < (1.1 * firstprice / 0.967)))
                 {
                     accepted = 0;
                     xpgained = 0;
                     offered = curplayer->lastprice + 1;
                 }
-                else if (playerprice <= 1.05 * firstprice / 0.967)
+                else if (playerprice <= (1.05 * firstprice / 0.967))
                 {
                     offered = (firstprice / 0.967 + lastprice) / 2;
                     accepted = 0;
                     xpgained = 0;
                 }
-                if (offered >= playerprice)
+                if ((offered >= playerprice) && offered!=0)
                 {
                     accepted = 1;
                 }
@@ -1461,43 +1487,44 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                     strcpy (buffer, "BAD: User does not have enough holds");
                     return;
                 }
-                if ((playerprice >= firstprice * 0.967 + 2) ||
+                if ((playerprice >= (firstprice * 0.967 + 2)) ||
                         (playerprice >= curplayer->firstprice))
                 {
                     accepted = 1;
                     xpgained = 0;
                 }
-                else if ((playerprice <= firstprice * 0.967 + 1) &&
-                         (playerprice >= firstprice * 0.967 - 1))
+                else if ((playerprice <= (firstprice * 0.967 + 1)) &&
+                         (playerprice >= (firstprice * 0.967 - 1)))
                 {
                     accepted = 1;
                     xpgained = 5;
                 }
-                else if ((playerprice <= firstprice * 0.967 - 2) &&
-                         (playerprice >= firstprice * 0.967 - 5))
+                else if ((playerprice <= (firstprice * 0.967 - 2)) &&
+                         (playerprice >= (firstprice * 0.967 - 5)))
                 {
                     accepted = 1;
                     xpgained = 2;
                 }
-                else if (playerprice <= .9 * firstprice * 0.967)
+                else if (playerprice <= (.9 * firstprice * 0.967))
                 {
                     accepted = 0;
                     xpgained = 0;
+						  offered = curplayer->lastprice;
                 }
-                else if ((playerprice > .9 * firstprice * 0.967) &&
-                         (playerprice <= .95 * firstprice * 0.967))
+                else if ((playerprice > (.9 * firstprice * 0.967)) &&
+                         (playerprice <= (.95 * firstprice * 0.967)))
                 {
                     accepted = 0;
                     xpgained = 0;
                     offered = curplayer->lastprice - 1;
                 }
-                else if (playerprice > .95 * firstprice * 0.967)
+                else if (playerprice > (.95 * firstprice * 0.967))
                 {
                     accepted = 0;
                     xpgained = 0;
                     offered = (lastprice + firstprice * 0.967) / 2;
                 }
-                if (offered <= playerprice)
+                if ((offered <= playerprice) && offered != 0)
                 {
                     accepted = 1;
                 }
@@ -1539,7 +1566,7 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
                 if ((curport->type != 0) || (curport->type != 9))
                 {
                     if (curport->type == 8)
-                        curport->type = (int) pow (2, type);
+                        curport->type = 0 ^ type;
                     else
                         curport->type = curport->type ^ type;	//Switch to selling
                 }
@@ -1552,10 +1579,10 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
             {
                 if ((curport->type != 0) || (curport->type != 9))
                 {
-                    if ((curport->type - (int) pow (2, type)) == 0)
-                        curport->type = 8;	//Switch to buying
+                    if (curport->type == 8)
+                        curport->type = 0 ^ type;	//Switch to buying
                     else
-                        curport->type = -(int) pow (2, type);
+                        curport->type = curport->type ^ type;
                 }
             }
         }
