@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  * This program interfaces with the server and producs nice looking output
  * for the user.
  *   
- * $Revision: 1.43 $
- * Last Modified: $Date: 2003-12-31 21:35:17 $
+ * $Revision: 1.44 $
+ * Last Modified: $Date: 2003-12-31 21:39:59 $
  */
 
 /* Normal Libary Includes */
@@ -39,8 +39,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <math.h>
 
 struct timeval t, end;
-static char CVS_REVISION[50] = "$Revision: 1.43 $\0";
-static char LAST_MODIFIED[50] = "$Date: 2003-12-31 21:35:17 $\0";
+static char CVS_REVISION[50] = "$Revision: 1.44 $\0";
+static char LAST_MODIFIED[50] = "$Date: 2003-12-31 21:39:59 $\0";
 
 //these are for invisible passwords
 static struct termios orig, new;
@@ -1582,7 +1582,7 @@ void buyship(int sockid, struct player *curplayer)
 		moredone=0;
 		//while (!moredone)
 		//{
-			printf("\n%sWhat to do you want to name this ship? (30 chars)\n",KGRN);
+			printf("\n%sWhat do you want to name this ship? (30 chars)\n",KGRN);
 			for (count=0;(ch=getchar()) != '\n';count++)
 			{
 				moredone=1;
@@ -2573,7 +2573,7 @@ void getmessages (char *buffer)
 		  printf("\n%s%s%s lands on the Stardock.", KLTCYN, name, KGRN);
 		  break;
 	 case -4:
-		  printf("\n%s%s%s blasts off the Stardock.", KLTCYN, name, KGRN);
+		  printf("\n%s%s%s blasts off from the Stardock.", KLTCYN, name, KGRN);
 		  break;
 	 case 5:
 		  printf("\n%s%s%s lands on %s%s%s.", KLTCYN, name, KGRN, KLTCYN, 
