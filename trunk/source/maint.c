@@ -89,16 +89,19 @@ background_maint (void *threadinfo)
 				if (planets[loop]!=NULL)
 				{
 					planets[loop]->fuel = planets[loop]->fuel +
-				(planets[loop]->fuel/planets[loop]->pClass->fuelProduction)/24;
+				(planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction)/24;
 					
 					planets[loop]->organics = planets[loop]->organics +
-			(planets[loop]->organics/planets[loop]->pClass->organicsProduction)/24;
+			(planets[loop]->organicsColonist/planets[loop]->pClass->organicsProduction)/24;
 					
 					planets[loop]->equipment = planets[loop]->equipment +
-		(planets[loop]->equipment/planets[loop]->pClass->equipmentProduction)/24;
+		(planets[loop]->equipmentColonist/planets[loop]->pClass->equipmentProduction)/24;
 					
 					planets[loop]->fighters = planets[loop]->fighters +
-			(planets[loop]->fighters/planets[loop]->pClass->fighterProduction)/24;
+			((planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction +
+			 planets[loop]->organicsColonist/planets[loop]->pClass->organicsProduction +
+			 planets[loop]->equipmentColonist/planets[loop]->pClass->equipmentProduction)
+			 /planets[loop]->pClass->fighterProduction)/24;
 					
 					planets[loop]->fuelColonist = planets[loop]->fuelColonist +
 					planets[loop]->fuelColonist*planets[loop]->pClass->breeding/24;
@@ -152,16 +155,19 @@ background_maint (void *threadinfo)
 				if (planets[loop]!=NULL)
 				{
 					planets[loop]->fuel = planets[loop]->fuel +
-				(planets[loop]->fuel/planets[loop]->pClass->fuelProduction) % 24;
+				(planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction) % 24;
 					
 					planets[loop]->organics = planets[loop]->organics +
-			(planets[loop]->organics/planets[loop]->pClass->organicsProduction) % 24;
+			(planets[loop]->organicsColonist/planets[loop]->pClass->organicsProduction) % 24;
 					
 					planets[loop]->equipment = planets[loop]->equipment +
-		(planets[loop]->equipment/planets[loop]->pClass->equipmentProduction) % 24;
+		(planets[loop]->equipmentColonist/planets[loop]->pClass->equipmentProduction) % 24;
 					
 					planets[loop]->fighters = planets[loop]->fighters +
-			(planets[loop]->fighters/planets[loop]->pClass->fighterProduction) % 24;
+			((planets[loop]->fuelColonist/planets[loop]->pClass->fuelProduction +
+			 planets[loop]->organicsColonist/planets[loop]->pClass->organicsProduction +
+			 planets[loop]->equipmentColonist/planets[loop]->pClass->equipmentProduction)
+			 /planets[loop]->pClass->fighterProduction) % 24;
 				
 			temp = (int)planets[loop]->fuelColonist*planets[loop]->pClass->breeding;
 					planets[loop]->fuelColonist = planets[loop]->fuelColonist +
