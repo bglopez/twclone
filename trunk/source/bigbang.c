@@ -102,6 +102,7 @@ int freewarp (int sector);
 int warpsfull (int sector);
 int numwarps (int sector);
 void makeports ();
+void sectorsort(struct sector *base[configdata->maxwarps], int elements);
 extern char *randomname (char *name);
 extern char *consellationName (char *name);
 extern void init_usedNames ();
@@ -389,8 +390,7 @@ main (int argc, char **argv)
   /*  Sorts each sector's warps into numeric order */
   for (x = 0; x < numSectors; x++)
     {
-      qsort (sectorlist[x]->sectorptr, sizeof (numwarps (x)), sizeof (struct sector *),
-	     compsec);
+		sectorsort(sectorlist[x]->sectorptr, numwarps(x));
     }
 
   /*  Writing data to universe.data file */
@@ -469,7 +469,7 @@ compsec (const void *cmp1, const void *cmp2)
 {
   const struct sector *a = *(struct sector **) cmp1;
   const struct sector *b = *(struct sector **) cmp2;
-
+  
   if (a->number > b->number)
     return 1;
   if (a->number < b->number)
@@ -555,8 +555,56 @@ numwarps (int sector)
   return x;
 }
 
-void
-makeports ()
+void sectorsort(struct sector *base[configdata->maxwarps], int elements)
+{
+   struct sector *holdersector;
+	int x=0;
+	int done=0, alldone=1;  /* This allows for exiting the sort */
+	/*This could be done better, but for now it works */
+	if (elements == 1)
+		return;
+	if (elements == 2)
+	{
+		if (base[0]->number > base[1]->number)
+		{
+			holdersector = base[0];
+			base[0] = base[1];
+			base[1] = holdersector;
+		}
+		return;
+
+	}
+	while(1)
+	{
+		alldone = 1;
+		for(x=0;x<(elements/2-1+elements%2);x++)
+		{
+			if (base[2*x]->number > base[2*x+1]->number)
+			{
+				holdersector = base[2*x];
+				base[2*x] = base[2*x+1];
+				base[2*x+1] = holdersector;
+			}
+		}
+		for(x=1;x<=(elements/2 - 1 + elements%2);x++)
+		{
+			if (base[2*x-1]->number > base[2*x]->number)
+			{
+				alldone = 0;
+				done = 0;
+				holdersector = base[2*x-1];
+				base[2*x-1] = base[2*x];
+				base[2*x] = holdersector;
+			}
+			else if (alldone)
+				done = 1;
+		}	
+		if (done)
+			break;
+	}
+}
+
+void makeports ()
 {
   struct port *curport;
   int type = 0;
