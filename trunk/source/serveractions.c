@@ -304,9 +304,9 @@ processcommand (char *buffer, struct msgcommand *data)
         {
             sendtosector (curplayer->sector, curplayer->number, -2);
         }
-        saveplayer (curplayer->number, "./players.data");
-        saveship (curplayer->ship, "./ships.data");
-        strcpy (buffer, "OK\n");
+        saveplayer(curplayer->number, "./players.data");
+        saveship(curplayer->ship, "./ships.data");
+        strcpy(buffer, "OK\n");
         curplayer->loggedin = 0;
         break;
     case ct_portinfo:
@@ -856,8 +856,7 @@ findautoroute (int from, int to, char *buffer)
   end of the autopilot stuff (but probably not the end of junk ;)
 */
 
-void
-saveplayer (int pnumb, char *filename)
+void saveplayer (int pnumb, char *filename)
 {
     char *intptr = (char *) malloc (50);
     char *buffer = (char *) malloc (BUFF_SIZE);
@@ -869,7 +868,7 @@ saveplayer (int pnumb, char *filename)
     strcpy (intptr, "\0");
     strcpy (stufftosave, "\0");
 
-    sprintf (intptr, "%d:", pnumb - 1);
+    //sprintf (intptr, "%d:", pnumb - 1);
     sprintf (stufftosave, "%d:", pnumb);
     addstring (stufftosave, players[pnumb - 1]->name, ':', BUFF_SIZE);
     addstring (stufftosave, players[pnumb - 1]->passwd, ':', BUFF_SIZE);
@@ -884,7 +883,10 @@ saveplayer (int pnumb, char *filename)
 	 //addint(stufftosave, players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 sprintf(intptr, "%ld", players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
+	 //Now to use intptr to find where to place the person.
+	 sprintf(intptr, "%d:", pnumb - 1);
     len = strlen (stufftosave);
+	 //fprintf(stderr, "saveplayer: Player save string is (%s)", stufftosave);
 
     for (loop = 1; loop <= 199 - len; loop++)
         strcat (stufftosave, " ");
