@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
     opterr = 0;
 
     while ((c = getopt (argc, argv, "p:")) != -1)
-{
+	 {
         switch (c)
         {
         case 'p':
@@ -183,15 +183,15 @@ int main (int argc, char *argv[])
     threadinfo->sockid = sockid;
     threadinfo->msgidin = msgidin;
     threadinfo->msgidout = msgidout;
-    if (pthread_create (&threadid, NULL, makeplayerthreads, (void *) threadinfo)
+    /*if (pthread_create (&threadid, NULL, makeplayerthreads, (void *) threadinfo)
             != 0)
     {
         perror ("Unable to Create Listening Thread");
         exit (-1);
-    }
+    }*/
     printf ("Accepting connections!\n");
 
-    printf ("Initializing background maintenance...");
+/*    printf ("Initializing background maintenance...");
     fflush (stdout);
     threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
     threadinfo->msgidin = msgidin;
@@ -202,7 +202,7 @@ int main (int argc, char *argv[])
         perror ("Unable to Create Backgroud Thread");
         exit (-1);
     }
-    printf ("Done!\n");
+    printf ("Done!\n");*/
 
     threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
     threadinfo->msgidin = msgidin;
