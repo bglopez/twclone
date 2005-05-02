@@ -30,6 +30,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "player_interaction.h"
 
 
+void *handle_players(int sockid, int msgidin, int msgidout)
+{
+  fd_set reads;
+  fd_set writes;
+  int ret;
+
+  FD_ZERO(&reads);
+  FD_SET(sockid, &reads);
+
+  ret = select(1, &reads, NULL, NULL, 0);
+  if (ret < 0 )
+  {
+		perror("select()");
+		exit(1);
+  }
+  if (ret == -1 && errno = EINTR)
+	 continue;
+  if (FD_ISSET(sockid, &reads))
+  {
+     struct sockaddr_in clnt_sockaddr;
+	  unsinged int len;
+	  memset(&clnt_sockaddr, 0, len = sizeof (clnt_sockaddr));
+
+     if ((ret = accept (sockid, (struct sockaddr *) &clnt_sockaddr,
+			 &len)) == -1)
+     {
+      perror ("accept: ");
+      exit (-1);
+     }
+	  add_fd(head, ret, inet_ntoa(clnt_sockaddr.sin_addr));
+  }
+}
+
 
 /*
   makeplayerthreads
@@ -38,8 +71,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   it spews forth another thread to handle them
  */
 
-void *
-makeplayerthreads (void *threadinfo)
+void * makeplayerthreads (void *threadinfo)
 {
   int sockid = ((struct connectinfo *) threadinfo)->sockid,
     msgidin = ((struct connectinfo *) threadinfo)->msgidin, sockaid,
