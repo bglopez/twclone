@@ -29,28 +29,141 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "common.h"
 #include "player_interaction.h"
 
+/* handle_sockets
+ * 
+ * This function polls the main connection socket and accepts any incoming new connections.
+ * It also handles all of the sockets for the players and reads and writes to them if needed
+ * grabbing and tossing stuff on the msg queue if neccesairy.
+ *
+ */
 
-void *handle_players(int sockid, int msgidin, int msgidout)
+struct sockinfo *headsock = NULL;
+
+void add_sock(int sockid, char *address)
+{
+   struct sockinfo *newsock, *current;
+	
+	newsock = (struct sockinfo *)malloc(sizeof(struct sockinfo));
+	newsock->sockid = sockid;
+	newsock->address = (char *)malloc(sizeof(address)+1);
+	newsock->name = (char *)malloc(sizeof(char)*80);
+	newsock->next = NULL;
+	strcpy(newsock->address, address);
+	strcpy(newsock->name, "\0");
+	
+	if (headsock==NULL)
+		headsock = current;
+	else
+	{
+		current = headsock;
+		do
+		{
+			if (newsock==current)
+			{
+				fprintf(stderr, "Duplicate socket %d!", sockid);
+				free(newsock->name);
+				free(newsock->address);
+				free(newsock);
+				return;
+			}
+			if (current->next == NULL)
+			{
+				current->next = newsock;
+				current = NULL;
+			}
+			else
+				current = current->next;
+		}
+		while (current!=NULL);
+	}
+}
+
+int del_sock(struct sockinfo *deleteme)
+{
+   struct sockinfo *current, *last=NULL;
+
+	current = headsock;
+	do
+	{
+		if (current = deleteme)
+		{
+			if (last!=NULL)
+			{
+				last->next = current->next;
+			}
+			else
+			{
+				headsock = NULL;
+			}
+			free(deleteme->name);
+			free(deleteme->address);
+			free(deleteme);
+			return 1;
+		}
+		last = current;
+		current = current->next;
+	}while(current!=NULL);
+	return 0;
+}
+
+/* handle_sockets
+ * 
+ * This function polls the main connection socket and accepts any incoming new connections.
+ * It also handles all of the sockets for the players and reads and writes to them if needed
+ * grabbing and tossing stuff on the msg queue if neccesairy.
+ *
+ */
+
+void handle_sockets(int sockid, int msgidin, int msgidout)
 {
   fd_set reads;
   fd_set writes;
   int ret;
+  struct sockaddr_in clnt_sockaddr;
+  unsinged int len;
+  int loop;
 
+
+  //Look for incoming and outgoing data and new connections.
   FD_ZERO(&reads);
-  FD_SET(sockid, &reads);
+  FD_ZERO(&writes);
 
-  ret = select(1, &reads, NULL, NULL, 0);
+  FD_SET(sockid, &reads);
+  for (current=headsock; current!=NULL; current=current->next)
+  {
+		FD_SET(current->sockid, &reads);
+		//Only add to writes if we actually have something to write
+		FD_SET(current->sockid, &writes);
+  }
+
+  //Check to make sure that they're writable
+  ret = select(10, NULL, &writes, NULL, 0);
   if (ret < 0 )
   {
 		perror("select()");
 		exit(1);
   }
-  if (ret == -1 && errno = EINTR)
-	 continue;
+  
+  //Write to the players sockets.
+  for (current=headsock; current!=NULL; current=current->next)
+  {
+	  if (FD_ISSET(current->sockid, &writes))
+	  {
+		  getmsg(msgidout, outbuffer, current->sockid);
+		  sendinfo (current->sockid, outbuffer); //Check for disconnected players?
+	  }
+  }
+  
+  //Check to see if any sockets need to be read from, or any new players appear. Wait.
+  ret = select(10, &reads, NULL, NULL, NULL);
+  if (ret < 0)
+  {
+		perror("select()");
+		exit(1);
+  }
+  //Read from them, and parse it and throw it on the msg queue.
   if (FD_ISSET(sockid, &reads))
   {
-     struct sockaddr_in clnt_sockaddr;
-	  unsinged int len;
 	  memset(&clnt_sockaddr, 0, len = sizeof (clnt_sockaddr));
 
      if ((ret = accept (sockid, (struct sockaddr *) &clnt_sockaddr,
@@ -59,13 +172,24 @@ void *handle_players(int sockid, int msgidin, int msgidout)
       perror ("accept: ");
       exit (-1);
      }
-	  add_fd(head, ret, inet_ntoa(clnt_sockaddr.sin_addr));
+	  //Add the descriptor to the list
+	  add_sock(ret, inet_ntoa(clnt_sockaddr.sin_addr));
   }
+
+  for (current=headsock; current!=NULL; current=current->next)
+  {
+		if (FD_ISSET(current->sockid, &reads))
+		{
+			handle_player(current, msgidin, msgidout);
+		}
+  }
+  //check for heartbeat
+  //  parse through message queues and do actions
+  //  
 }
 
-
 /*
-  makeplayerthreads
+  makeplayerthreads (deprecated)
 
   This thread sits and waits for network connections, when it gets them,
   it spews forth another thread to handle them
@@ -119,39 +243,36 @@ int catchpipes(char *inbuff)
   for the players.
 */
 
-void *handle_player (void *threadinfo)
+void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 {
-  int sector, sockid = ((struct connectinfo *) threadinfo)->sockid,
-    msgidout = ((struct connectinfo *) threadinfo)->msgidout,
-    msgidin = ((struct connectinfo *) threadinfo)->msgidin,
-    commandgood, loggedin;
+  int sector, commandgood, loggedin;
   char inbuffer[BUFF_SIZE], outbuffer[BUFF_SIZE],
     name[MAX_NAME_LENGTH + 1], passwd[MAX_NAME_LENGTH + 1], temp[BUFF_SIZE];
 
   struct msgcommand data;
 
-  free (threadinfo);
-
-  data.sockid = sockid;
-  data.threadid = pthread_self();
-  printf ("Thread %d: Created\n", (int) pthread_self ());
+  data.sockid = playersock->sockid;
+  data.threadid = -1;
+  strncpy(data.ipaddr, playersock->address, 15);
+  
+  strcpy(name, playersock->name);
   loggedin = 0;
 
    //Ignore SIG_PIPE
-   signal(13, SIG_IGN);
+   //signal(13, SIG_IGN);
 
 
-  do
-    {
+//  do
+//    {
       commandgood = 0;
 
       outbuffer[0] = '\0';
 
-      if (recvinfo (sockid, inbuffer) == -1)
+      if (recvinfo (playersock->sockid, inbuffer) == -1)
 		{
-			fprintf(stderr, "Thread %d: Exiting!\n", (int)pthread_self());
+			fprintf(stderr, "Socket %d: Exiting!\n", playersock->sockid);
 			fflush(stderr);
-			pthread_exit (NULL);
+			return;
 		}
 	
 
@@ -159,7 +280,7 @@ void *handle_player (void *threadinfo)
       if (strncmp (inbuffer, "DESCRIPTION", strlen ("DESCRIPTION")) == 0
 	  && loggedin)
 	{
-	  printf ("Thread %d: Player Querried\n", (int) pthread_self ());
+	  printf ("Socket %d: Player Querried\n", playersock->sockid);
 	  strcpy (data.name, name);
 	  data.command = ct_describe;
 	  commandgood = 1;
@@ -176,11 +297,12 @@ void *handle_player (void *threadinfo)
 	  popstring (inbuffer, passwd, ":", BUFF_SIZE);
 	  popstring (inbuffer, data.buffer, ":", BUFF_SIZE);
 
-	  fprintf (stderr,
-		   "Thread %d: Player '%s' trying to login with passwd '%s'\n",
-		   (int) pthread_self (), name, passwd);
+	  fprintf (stderr, "Socket %d: Player '%s' trying to login with passwd '%s'\n",
+		   playersock->sockid, name, passwd);
 	  strcpy (data.name, name);
 	  strcpy (data.passwd, passwd);
+
+	  strcpy(playersock->name, name);
 
 	  commandgood = 2;
 	}
@@ -646,8 +768,8 @@ void *handle_player (void *threadinfo)
 	}
       else if (strncmp (inbuffer, "PORT", strlen ("PORT")) == 0 && loggedin)
 	{
-	  printf ("Thread %d: Player attempting to port\n",
-		  (int) pthread_self ());
+	  printf ("Socket %d: Player attempting to port\n",
+		  playersock->sockid);
 	  strcpy (data.name, name);
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
 	  popstring (inbuffer, temp, ":", BUFF_SIZE);
@@ -688,7 +810,7 @@ void *handle_player (void *threadinfo)
 		}
       else if ((sector = strtol (inbuffer, NULL, 10)) != 0 && loggedin)
 	{
-	  printf ("Thread %d: Player moving to %d\n", (int) pthread_self (),
+	  printf ("Socket %d: Player moving to %d\n", playersock->sockid,
 		  sector);
 	  strcpy (data.name, name);
 	  data.command = ct_move;
@@ -697,36 +819,46 @@ void *handle_player (void *threadinfo)
 	}
 
       if (commandgood)
-	{
-	  senddata (msgidin, &data, pthread_self ());
-	  getmsg (msgidout, outbuffer, pthread_self ());
-	}
+		{
+	  		senddata (msgidin, &data, playersock->sockid);
+			if (data.command == ct_logout)
+			{
+				close(playersock->sockid);
+  				fprintf (stderr, "Socket %d: Just closed the socket, exiting\n",
+	   			playersock->sockid);
+				//Clear msg queue of messages to this socket
+				del_sock(playersock);
+			}
+		}
       else
-	strcpy (outbuffer, "BAD\n");
-
+		{
+			strcpy (outbuffer, "BAD\n");
+			sendmsg(msgidout, outbuffer, playersock->sockid); 
+		}
+		//This used to catch bad events after login was sent
       if (!loggedin && strncmp (outbuffer, "BAD\n", 3) != 0
-	  && commandgood == 2)
-	loggedin = 1;
+	  				&& commandgood == 2)
+			loggedin = 1;
 
-      if (sendinfo (sockid, outbuffer) == -1)
+//Need to fix the following commented out code to work in non-threaded version
+/*      if (sendinfo (playersock->sockid, outbuffer) == -1)
       {
 
-	fprintf(stderr, "Thread %d: Unexpected exit...\n", (int)pthread_self());
-	strcpy(data.name, name);
-	data.command = ct_logout;
-	senddata(msgidin, &data, pthread_self());
-	getmsg (msgidout, outbuffer, pthread_self());
-	pthread_exit (NULL);
-      }
-
-    }
-  while (strcmp (inbuffer, "QUIT") != 0);
+			fprintf(stderr, "Thread %d: Unexpected exit...\n", (int)pthread_self());
+			strcpy(data.name, name);
+			data.command = ct_logout;
+			senddata(msgidin, &data, pthread_self());
+			getmsg (msgidout, outbuffer, pthread_self());
+			pthread_exit (NULL);
+      }*/
+//    }
+//  while (strcmp (inbuffer, "QUIT") != 0);
 
   //close our socket
-  close (sockid);
+//  close (sockid);
 
-  fprintf (stderr, "Thread %d: Just closed the socket, exiting\n",
-	   (int) pthread_self ());
+//  fprintf (stderr, "Thread %d: Just closed the socket, exiting\n",
+//	   (int) pthread_self ());
 
-  return NULL;
+  return;
 }
