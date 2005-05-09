@@ -30,7 +30,18 @@ struct connectinfo
   int msgidout;
 };
 
-void *handle_player (void *threadinfo);
+struct sockinfo
+{
+	int sockid;
+	char *address;
+	char *name;
+	struct sockinfo *next;
+}
+		  
+void add_sock(int sockid, char *address);
+int del_sock(struct sockinfo *deleteme);
+void handle_sockets(int sockid, int msgidin, int msgidout);
+void handle_player (struct sockinfo *playersock, int msgidin, int msgidout);
 int catchpipes(char *inbuff);
 void *makeplayerthreads (void *threadinfo);
 
