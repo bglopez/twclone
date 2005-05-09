@@ -111,7 +111,7 @@ void sendmesg (int msgid, char *buffer, long mtype)
 
   if (msgsnd (msgid, msg, sizeof (struct msgbuffer), 0) < 0)
     {
-      perror ("sendmsg: unable to send message to queue: ");
+      perror ("sendmesg: unable to send message to queue: ");
       exit (-1);
     }
 

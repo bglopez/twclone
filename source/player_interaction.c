@@ -120,8 +120,10 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
   fd_set writes;
   int ret;
   struct sockaddr_in clnt_sockaddr;
-  unsinged int len;
+  unsigned int len;
   int loop;
+  struct sockinfo *current;
+  char outbuffer[BUFF_SIZE];
 
 
   //Look for incoming and outgoing data and new connections.
@@ -173,7 +175,7 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
       exit (-1);
      }
 	  //Add the descriptor to the list
-	  add_sock(ret, inet_ntoa(clnt_sockaddr.sin_addr));
+	  add_sock(ret, (char *)inet_ntoa(clnt_sockaddr.sin_addr));
   }
 
   for (current=headsock; current!=NULL; current=current->next)
@@ -186,49 +188,6 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
   //check for heartbeat
   //  parse through message queues and do actions
   //  
-}
-
-/*
-  makeplayerthreads (deprecated)
-
-  This thread sits and waits for network connections, when it gets them,
-  it spews forth another thread to handle them
- */
-
-void * makeplayerthreads (void *threadinfo)
-{
-  int sockid = ((struct connectinfo *) threadinfo)->sockid,
-    msgidin = ((struct connectinfo *) threadinfo)->msgidin, sockaid,
-    msgidout = ((struct connectinfo *) threadinfo)->msgidout;
-
-  pthread_t threadid;
-
-  free (threadinfo);
-  do
-    {
-      threadinfo =
-	(struct connectinfo *) malloc (sizeof (struct connectinfo));
-      sockaid = acceptnewconnection (sockid);
-
-      //putting the info in the special struct for the thread
-      ((struct connectinfo *) threadinfo)->sockid = sockaid;
-      ((struct connectinfo *) threadinfo)->msgidin = msgidin;
-      ((struct connectinfo *) threadinfo)->msgidout = msgidout;
-
-      //make the threads, passing them the stuff to connect to the client
-      if (pthread_create (&threadid, NULL, handle_player, (void *) threadinfo)
-	  != 0)
-	{
-	  perror ("Unable to Create Thread");
-	  exit (-1);
-	}
-
-    }
-  while (1);			//we want this to last forever
-
-  close (sockid);
-
-  return NULL;
 }
 
 int catchpipes(char *inbuff)
@@ -833,7 +792,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
       else
 		{
 			strcpy (outbuffer, "BAD\n");
-			sendmsg(msgidout, outbuffer, playersock->sockid); 
+			sendmesg(msgidout, outbuffer, (long)playersock->sockid); 
 		}
 		//This used to catch bad events after login was sent
       if (!loggedin && strncmp (outbuffer, "BAD\n", 3) != 0

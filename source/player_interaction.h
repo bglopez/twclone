@@ -36,7 +36,7 @@ struct sockinfo
 	char *address;
 	char *name;
 	struct sockinfo *next;
-}
+};
 		  
 void add_sock(int sockid, char *address);
 int del_sock(struct sockinfo *deleteme);

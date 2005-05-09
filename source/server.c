@@ -72,6 +72,7 @@ int main (int argc, char *argv[])
                     (struct connectinfo *) malloc (sizeof (struct connectinfo));
     struct sockaddr_in serv_sockaddr;
     struct msgcommand data;
+	 int elapsedtime, heartbeat;
     char buffer[BUFF_SIZE];
 
 
@@ -171,6 +172,7 @@ int main (int argc, char *argv[])
     msgidout = init_msgqueue ();
     printf (" Done\n");
     printf("Cleaning up any old message queues...");
+	 //Need to find another way of doing this
     clean_msgqueues(msgidin, msgidout, "msgqueue.lock");
     printf(" Done\n");
 
@@ -184,44 +186,28 @@ int main (int argc, char *argv[])
     threadinfo->msgidin = msgidin;
     threadinfo->msgidout = msgidout;
 
-	 handle_sockets(sockid, msgidin, msgidout);
-    /*if (pthread_create (&threadid, NULL, makeplayerthreads, (void *) threadinfo)
-            != 0)
-    {
-        perror ("Unable to Create Listening Thread");
-        exit (-1);
-    }*/
     printf ("Accepting connections!\n");
 
 /*    printf ("Initializing background maintenance...");
     fflush (stdout);
-    threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
-    threadinfo->msgidin = msgidin;
-    threadinfo->msgidout = msgidout;
-    if (pthread_create (&threadid, NULL, background_maint, (void *) threadinfo)
-            != 0)
-    {
-        perror ("Unable to Create Backgroud Thread");
-        exit (-1);
-    }
     printf ("Done!\n");*/
 
-    if (pthread_create (&threadid, NULL, getsysopcommands, (void *) threadinfo)
-            != 0)
-    {
-        perror ("Unable to Create Sysop Thread");
-        exit (-1);
-    }
-    printf ("Accepting Sysop commands\n");
+	 do
+	 {
+	 	handle_sockets(sockid, msgidin, msgidout);
 
-    //process the commands from the threads
-    senderid = getdata (msgidin, &data, 0);
-    while (data.command != ct_quit || senderid != threadid)	//Main game loop
-    {
-        processcommand (buffer, &data);
-        sendmesg (msgidout, buffer, senderid);
-        senderid = getdata (msgidin, &data, 0);
+		//check for heartbeat
+		//  process commands
+		if (elapsedtime%heartbeat==0)
+		{
+    		senderid = getdata (msgidin, &data, 0);
+      	processcommand (buffer, &data);
+     		sendmesg (msgidout, buffer, senderid);
+		}
+		//maintenance.
 	 }
+	 while(senderid != -1);
+
 	 printf("\nSaving all ports ...");
 	 fflush(stdout);
     saveallports ("ports.data");

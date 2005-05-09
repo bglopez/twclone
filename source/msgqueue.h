@@ -138,7 +138,7 @@ struct msgcommand
   enum planetcmds plcommand;
   char name[MAX_NAME_LENGTH + 1];
   char passwd[MAX_NAME_LENGTH + 1];
-  char ipaddr[15]
+  char ipaddr[15];
   char buffer[30];
   int playernum;
   int to;
