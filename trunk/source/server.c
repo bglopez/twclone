@@ -183,6 +183,8 @@ int main (int argc, char *argv[])
     threadinfo->sockid = sockid;
     threadinfo->msgidin = msgidin;
     threadinfo->msgidout = msgidout;
+
+	 handle_sockets(sockid, msgidin, msgidout);
     /*if (pthread_create (&threadid, NULL, makeplayerthreads, (void *) threadinfo)
             != 0)
     {
@@ -204,9 +206,6 @@ int main (int argc, char *argv[])
     }
     printf ("Done!\n");*/
 
-    threadinfo = (struct connectinfo *) malloc (sizeof (struct connectinfo));
-    threadinfo->msgidin = msgidin;
-    threadinfo->msgidout = msgidout;
     if (pthread_create (&threadid, NULL, getsysopcommands, (void *) threadinfo)
             != 0)
     {
