@@ -90,6 +90,7 @@ struct player
   int number;
   char *name;
   char *passwd;
+  char ipaddr[15];
   int sector;			/* If the player is in a ship this is 0 */
   int ship;			/* And this specifies what ship number he's in */
   int experience;

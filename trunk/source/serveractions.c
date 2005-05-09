@@ -169,6 +169,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         curplayer->loggedin = 1;
 		  curplayer->flags = curplayer->flags | P_LOGGEDIN;
+		  strcpy(curplayer->ipaddr, data->ipaddr);
 		  if ((ships[curplayer->ship - 1]->flags & S_CITADEL) == S_CITADEL)
 		  {
 				ships[curplayer->ship - 1]->flags = 
@@ -213,6 +214,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         strncpy (curplayer->name, data->name, strlen (data->name) + 1);
         curplayer->sector = (int) (fsectorcount * rand () / RAND_MAX + 1.0);
         buildnewplayer (curplayer, data->buffer);
+		  strcpy(curplayer->ipaddr, data->ipaddr);
         insertitem (curplayer, player, sectors[(curplayer->sector == 0) ?
                                                (ships[curplayer->ship - 1]->
                                                 location -
