@@ -52,7 +52,7 @@ void add_sock(int sockid, char *address)
 	strcpy(newsock->name, "\0");
 	
 	if (headsock==NULL)
-		headsock = current;
+		headsock = newsock;
 	else
 	{
 		current = headsock;
@@ -124,40 +124,50 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
   int loop;
   struct sockinfo *current;
   char outbuffer[BUFF_SIZE];
+  int rcounter,wcounter;
+  struct timeval tv;
 
 
   //Look for incoming and outgoing data and new connections.
   FD_ZERO(&reads);
   FD_ZERO(&writes);
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
 
   FD_SET(sockid, &reads);
+  wcounter=0;
+  rcounter=sockid;
   for (current=headsock; current!=NULL; current=current->next)
   {
 		FD_SET(current->sockid, &reads);
 		//Only add to writes if we actually have something to write
 		FD_SET(current->sockid, &writes);
+		wcounter = max(current->sockid, wcounter);
+		rcounter = max(current->sockid, wcounter);
   }
 
   //Check to make sure that they're writable
-  ret = select(10, NULL, &writes, NULL, 0);
-  if (ret < 0 )
+  if (wcounter!=0)
   {
+  	ret = select(wcounter+1, NULL, &writes, NULL, &tv);
+  	if (ret < 0 )
+  	{
 		perror("select()");
 		exit(1);
-  }
+  	}
   
-  //Write to the players sockets.
-  for (current=headsock; current!=NULL; current=current->next)
-  {
+  	//Write to the players sockets.
+  	for (current=headsock; current!=NULL; current=current->next)
+  	{
 	  if (FD_ISSET(current->sockid, &writes))
 	  {
 		  getmsg(msgidout, outbuffer, current->sockid);
 		  sendinfo (current->sockid, outbuffer); //Check for disconnected players?
 	  }
+  	}
   }
-  
   //Check to see if any sockets need to be read from, or any new players appear. Wait.
-  ret = select(10, &reads, NULL, NULL, NULL);
+  ret = select(rcounter+1, &reads, NULL, NULL, NULL);
   if (ret < 0)
   {
 		perror("select()");
@@ -176,6 +186,7 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
      }
 	  //Add the descriptor to the list
 	  add_sock(ret, (char *)inet_ntoa(clnt_sockaddr.sin_addr));
+	  fprintf(stderr, "Accepted socket %d from %s\n", ret, inet_ntoa(clnt_sockaddr.sin_addr));
   }
 
   for (current=headsock; current!=NULL; current=current->next)

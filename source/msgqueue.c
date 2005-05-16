@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <pthread.h>
 #include <time.h>
+#include <errno.h>
 #include "msgqueue.h"
 
 int
@@ -47,10 +48,14 @@ getmsg (int msgid, char *buffer, long mtype)
 
   if ((len =
        msgrcv (msgid, msg, sizeof (struct msgbuffer), mtype,
-	       MSG_NOERROR)) < 0)
+	       MSG_NOERROR | IPC_NOWAIT)) < 0)
     {
       perror ("getmsg: Couldn't recieve message from the queue: ");
-      exit (-1);
+		if (errno == ENOMSG)
+			return(-2);
+		else
+				  ;
+			//exit(-1);
     }
 
   strncpy (buffer, ((struct msgbuffer *) msg)->buffer, BUFF_SIZE);
@@ -60,8 +65,8 @@ getmsg (int msgid, char *buffer, long mtype)
   if (len < BUFF_SIZE)
     buffer[len] = '\0';
 
-  //  fprintf(stderr, "getmsg: message '%s' was recieved heading to %d from %d\n", 
-  //  buffer, mtype, senderid);
+    fprintf(stderr, "getmsg: message '%s' was recieved heading to %d from %d\n", 
+    buffer, mtype, senderid);
 
   free (msg);
 
@@ -104,10 +109,10 @@ void sendmesg (int msgid, char *buffer, long mtype)
 
   strncpy (((struct msgbuffer *) msg)->buffer, buffer, BUFF_SIZE);
   ((struct msgbuffer *) msg)->mtype = mtype;
-  ((struct msgbuffer *) msg)->senderid = pthread_self ();
+  ((struct msgbuffer *) msg)->senderid = mtype;
 
-  //fprintf(stderr, "sendmsg: Sending message '%s' from %d to %d\n", 
-  //buffer, pthread_self(), mtype);
+  fprintf(stderr, "sendmsg: Sending message '%s' from %d to %d\n", 
+  buffer, pthread_self(), mtype);
 
   if (msgsnd (msgid, msg, sizeof (struct msgbuffer), 0) < 0)
     {
@@ -126,13 +131,17 @@ getdata (int msgid, struct msgcommand *data, long mtype)
 
   if ((len =
        msgrcv (msgid, (void *) data, sizeof (struct msgcommand), mtype,
-	       MSG_NOERROR)) < 0)
+	       MSG_NOERROR | IPC_NOWAIT)) < 0)
     {
       perror ("getdata: Couldn't recieve message from the queue: ");
-      exit (-1);
+      if (errno == ENOMSG)
+			return(-2);
+		else
+				  ;
+			//exit (-1);
     }
 
-  senderid = data->senderid;
+  senderid = (struct msgbuf *)data->mtype;
 
   return senderid;
 }
