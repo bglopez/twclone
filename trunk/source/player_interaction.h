@@ -35,6 +35,7 @@ struct connectinfo
 struct sockinfo
 {
 	int sockid;
+	int loggedin;
 	char *address;
 	char *name;
 	struct sockinfo *next;

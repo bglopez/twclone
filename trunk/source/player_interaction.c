@@ -45,6 +45,7 @@ void add_sock(int sockid, char *address)
 	
 	newsock = (struct sockinfo *)malloc(sizeof(struct sockinfo));
 	newsock->sockid = sockid;
+	newsock->loggedin = 0;
 	newsock->address = (char *)malloc(sizeof(address)+1);
 	newsock->name = (char *)malloc(sizeof(char)*80);
 	newsock->next = NULL;
@@ -215,7 +216,7 @@ int catchpipes(char *inbuff)
 
 void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 {
-  int sector, commandgood, loggedin;
+  int sector, commandgood, loggedin=0;
   char inbuffer[BUFF_SIZE], outbuffer[BUFF_SIZE],
     name[MAX_NAME_LENGTH + 1], passwd[MAX_NAME_LENGTH + 1], temp[BUFF_SIZE];
 
@@ -226,7 +227,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
   strncpy(data.ipaddr, playersock->address, 15);
   
   strcpy(name, playersock->name);
-  loggedin = 0;
+  loggedin = playersock->loggedin;
 
    //Ignore SIG_PIPE
    //signal(13, SIG_IGN);
@@ -273,6 +274,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 	  strcpy (data.passwd, passwd);
 
 	  strcpy(playersock->name, name);
+	  playersock->loggedin = 1;
 
 	  commandgood = 2;
 	}

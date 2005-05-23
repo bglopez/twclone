@@ -205,7 +205,7 @@ void processcommand (char *buffer, struct msgcommand *data)
                                               HASH_LENGTH)) == NULL)
         {
             //fprintf(stderr, "processcommand: player %s already exists\n", data->name);
-            strcpy (buffer, "BAD\n");
+            strcpy (buffer, "BAD: Player already exists");
             return;
         }
         curplayer->passwd = (char *) malloc (strlen (data->passwd) + 1);
