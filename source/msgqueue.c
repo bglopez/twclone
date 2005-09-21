@@ -112,7 +112,7 @@ void sendmesg (int msgid, char *buffer, long mtype)
   ((struct msgbuffer *) msg)->senderid = mtype;
 
   fprintf(stderr, "sendmsg: Sending message '%s' from %d to %d\n", 
-  buffer, pthread_self(), mtype);
+  buffer, mtype, mtype);
 
   if (msgsnd (msgid, msg, sizeof (struct msgbuffer), 0) < 0)
     {
@@ -150,7 +150,7 @@ void
 senddata (int msgid, struct msgcommand *data, long mtype)
 {
   data->mtype = mtype;
-  data->senderid = pthread_self ();
+  data->senderid = mtype;
 
   if (msgsnd (msgid, data, sizeof (struct msgcommand), 0) < 0)
     {

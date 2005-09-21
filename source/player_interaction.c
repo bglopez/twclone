@@ -804,7 +804,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 		}
       else
 		{
-			strcpy (outbuffer, "BAD\n");
+			strcpy (outbuffer, "BAD: Invalid Command\n");
 			sendmesg(msgidout, outbuffer, (long)playersock->sockid); 
 		}
 		//This used to catch bad events after login was sent
