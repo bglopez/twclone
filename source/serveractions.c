@@ -372,7 +372,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
 		  saveplayer(curplayer->number, "./players.data");
         saveship(curplayer->ship, "./ships.data");
-        strcpy(buffer, "OK\n");
+        strcpy(buffer, "OK: Logging out\n");
         break;
 	 case ct_land:
         if ((curplayer =

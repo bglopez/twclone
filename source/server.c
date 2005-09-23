@@ -200,12 +200,15 @@ int main (int argc, char *argv[])
 		//  process commands
 		//if (elapsedtime%heartbeat==0)
 		//{
-    		senderid = getdata (msgidin, &data, 0);
+    		do
+			{
+			senderid = getdata (msgidin, &data, 0);
 			if (senderid > 0)
 			{
       	  processcommand (buffer, &data);
      		  sendmesg (msgidout, buffer, senderid);
 			}
+			}while(senderid > 0);
 		//}
 		//maintenance.
 	 }
