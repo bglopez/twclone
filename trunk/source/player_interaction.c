@@ -77,8 +77,9 @@ void add_sock(int sockid, char *address)
 		}
 		while (current!=NULL);
 	}
-}
 
+}
+	
 int del_sock(struct sockinfo *deleteme)
 {
    struct sockinfo *current, *last=NULL;
@@ -86,7 +87,7 @@ int del_sock(struct sockinfo *deleteme)
 	current = headsock;
 	do
 	{
-		if (current = deleteme)
+		if (current == deleteme)
 		{
 			if (last!=NULL)
 			{
@@ -119,11 +120,11 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
 {
   fd_set reads;
   fd_set writes;
-  int ret;
+  int ret, msg_ret; //return values
   struct sockaddr_in clnt_sockaddr;
   unsigned int len;
   int loop;
-  struct sockinfo *current;
+  struct sockinfo *current, *last;
   char outbuffer[BUFF_SIZE];
   int rcounter,wcounter;
   struct timeval tv;
@@ -140,11 +141,11 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
   rcounter=sockid;
   for (current=headsock; current!=NULL; current=current->next)
   {
-		FD_SET(current->sockid, &reads);
-		//Only add to writes if we actually have something to write
-		FD_SET(current->sockid, &writes);
-		wcounter = max(current->sockid, wcounter);
-		rcounter = max(current->sockid, wcounter);
+			FD_SET(current->sockid, &reads);
+			//Only add to writes if we actually have something to write
+			FD_SET(current->sockid, &writes);
+			wcounter = max(current->sockid, wcounter);
+			rcounter = max(current->sockid, wcounter);
   }
 
   //Check to make sure that they're writable
@@ -162,9 +163,26 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
   	{
 	  if (FD_ISSET(current->sockid, &writes))
 	  {
-		  getmsg(msgidout, outbuffer, current->sockid);
-		  sendinfo (current->sockid, outbuffer); //Check for disconnected players?
+		  msg_ret = getmsg(msgidout, outbuffer, current->sockid);
+		  if (strncmp(outbuffer, "OK: Logging out", strlen("OK: Logging out"))==0)
+		  {
+				close(current->sockid);
+  				fprintf (stderr, "Socket %d: Just closed the socket, exiting\n", current->sockid);
+				while (getmsg(msgidout, outbuffer, current->sockid)>0) ;
+				while (getmsg(msgidin, outbuffer, current->sockid)>0) ;
+				FD_CLR(current->sockid, &reads);
+				FD_CLR(current->sockid, &writes);
+				del_sock(current);
+				current = last;
+				strcpy(outbuffer, "\0");
+		  }
+		  else if (msg_ret > 0)
+		  {
+		  	sendinfo (current->sockid, outbuffer); //Check for disconnected players?
+		  	strcpy(outbuffer, "\0");
+		  }
 	  }
+	  last = current;
   	}
   }
   //Check to see if any sockets need to be read from, or any new players appear. Wait.
@@ -793,14 +811,6 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
       if (commandgood)
 		{
 	  		senddata (msgidin, &data, playersock->sockid);
-			if (data.command == ct_logout)
-			{
-				close(playersock->sockid);
-  				fprintf (stderr, "Socket %d: Just closed the socket, exiting\n",
-	   			playersock->sockid);
-				//Clear msg queue of messages to this socket
-				del_sock(playersock);
-			}
 		}
       else
 		{
