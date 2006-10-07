@@ -229,11 +229,11 @@ void init_playerinfo (char *filename)
         curplayer->turns = popint(buffer, ":");
 		  popstring(buffer, credits, ":", 100);
 		  curplayer->credits = strtoul(credits,NULL,10);
-        //curplayer->credits = popint(buffer, ":");
 		  popstring(buffer, balance, ":", 100);
 		  curplayer->bank_balance = strtoul(balance,NULL,10);
 		  curplayer->flags = popint(buffer, ":");
-		  //curplayer->bank_balance = popint(buffer, ":");
+		  curplayer->sysop = popint(buffer, ":");
+
         curplayer->name = (char *) malloc (strlen (name) + 1);
         curplayer->passwd = (char *) malloc (strlen (passwd) + 1);
         strncpy (curplayer->name, name, strlen (name) + 1);

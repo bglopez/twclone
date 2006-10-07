@@ -55,6 +55,7 @@ enum commandtype
   ct_login,
   ct_newplayer,
   ct_logout,
+  ct_shutdown,
   ct_playerinfo,
   ct_shipinfo,
   ct_port,

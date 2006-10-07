@@ -48,7 +48,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+
+#if !defined (__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
 #include <getopt.h>
+#endif
+
 #include "config.h"
 #include "universe.h"
 
@@ -150,8 +154,6 @@ main (int argc, char **argv)
     FILE *planetfile;
     struct sector *secptr;
     char *terraInfo = malloc(sizeof(char)*400);
-    "1:1:terra:1:-1:Unknown:3000:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:"
-    ;
     char *ferrinfo = malloc(sizeof(char)*400);
     char *plout = malloc(sizeof(char)*400);
     char *randomPlanetInfo;
@@ -575,7 +577,11 @@ main (int argc, char **argv)
     datenow = time(NULL);
     configdata->bangdate = (unsigned long)datenow;
 	 configdata->numnodes = numNodes;
-    saveconfig("config.data");
+
+	 char *configsave = malloc(sizeof(char)*40);
+	 strcpy(configsave, "./config.data\0");
+    saveconfig(configsave);
+	 free(configsave);
 
 
     /*  Sorts each sector's warps into numeric order */

@@ -30,7 +30,9 @@ extern struct config *configdata;
 extern struct node **nodes;
 
 extern int sectorcount;
-extern int WARP_WAIT; 
+extern int WARP_WAIT;
+extern int GAMEON;
+
 struct timeval begin, end;
 
 void processcommand (char *buffer, struct msgcommand *data)
@@ -373,6 +375,44 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  saveplayer(curplayer->number, "./players.data");
         saveship(curplayer->ship, "./ships.data");
         strcpy(buffer, "OK: Logging out\n");
+        break;
+    case ct_shutdown:
+        fprintf (stderr, "processcommand: Got a Shutdown command\n");
+        if ((curplayer =
+                    (struct player *) find (data->name, player, symbols,
+                                            HASH_LENGTH)) == NULL)
+        {
+            //fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
+            strcpy (buffer, "BAD\n");
+            return;
+        }
+        if (intransit (data))
+        {
+            strcpy (buffer, "BAD: Can't shutdown the server while moving!\n");
+            return;
+        }
+		  if (curplayer->sysop == 1)
+		  {
+        		if (curplayer->sector == 0)
+        		{
+            	sendtosector (ships[curplayer->ship - 1]->location,
+                          curplayer->number, -2,0);
+        		}
+        		else
+        		{
+            	sendtosector (curplayer->sector, curplayer->number, -2,0);
+        		}
+        		curplayer->loggedin = 0;
+		  		curplayer->flags = curplayer->flags & (P_MAX ^ P_LOGGEDIN);
+		  		saveplayer(curplayer->number, "./players.data");
+        		saveship(curplayer->ship, "./ships.data");
+        		strcpy(buffer, "OK: Shutting down\n");
+				GAMEON = 0;
+		  }
+		  else
+		  {	
+				strcpy(buffer, "BAD: You do not have valid permissions to do that!\n");
+		  }
         break;
 	 case ct_land:
         if ((curplayer =
@@ -1476,7 +1516,7 @@ void saveplayer (int pnumb, char *filename)
     sprintf (stufftosave, "%d:", pnumb);
 	 if (players[pnumb -1] == NULL)
 	 {
-		strcat(stufftosave, "(Null):(Null):0:0:0:0:0:0:0:0:0:");
+		strcat(stufftosave, "(Null):(Null):0:0:0:0:0:0:0:0:0:0:");
 	 }
 	 else
 	 {
@@ -1494,6 +1534,7 @@ void saveplayer (int pnumb, char *filename)
 	 sprintf(intptr, "%ld", players[pnumb - 1]->bank_balance, ':', BUFF_SIZE);
 	 addstring(stufftosave, intptr, ':', BUFF_SIZE);
 	 addint(stufftosave, players[pnumb - 1]->flags, ':', BUFF_SIZE);
+	 addint(stufftosave, players[pnumb - 1]->sysop, ':', BUFF_SIZE);
 	 }
 	 //Now to use intptr to find where to place the person.
 	 sprintf(intptr, "%d:", pnumb - 1);
@@ -2277,11 +2318,10 @@ void buildgameinfo(char *buffer)
 
 void buildtotalinfo (int pnumb, char *buffer, struct msgcommand *data)
 {
-
-    buffer[0] = '\0';
 	 char tempbuff[50];
 
 	 tempbuff[0]='\0';
+    buffer[0] = '\0';
 
     addint (buffer, players[pnumb - 1]->number, ':', BUFF_SIZE);
     addstring (buffer, players[pnumb - 1]->name, ':', BUFF_SIZE);
@@ -3096,6 +3136,15 @@ void buildnewplayer (struct player *curplayer, char *shipname)
     //curplayer->ported = 0;
 	 curplayer->flags=P_LOGGEDIN;
     curplayer->loggedin = 1;
+
+	 if (curplayer->number == 1)
+	 {
+		curplayer->sysop = 1;
+	 }
+	 else
+	 {
+		curplayer->sysop = 0;
+	 }
     if ((curship =
                 (struct ship *) insert (shipname, ship, symbols, HASH_LENGTH)) == NULL)
     {
