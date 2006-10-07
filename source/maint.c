@@ -81,7 +81,7 @@ background_maint (void *threadinfo)
 						players[loop]->turns + configdata->turnsperday / 24;
 	      		if (players[loop]->turns > configdata->turnsperday)
 						players[loop]->turns = configdata->turnsperday;
-	      		loop++;
+	      		//loop++;
 				}
 	    	}
 			for (loop=0; loop<configdata->max_planets;loop++)

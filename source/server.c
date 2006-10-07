@@ -62,6 +62,7 @@ struct node **nodes;
 time_t *timeptr;
 time_t starttime;
 int WARP_WAIT = 1;
+int GAMEON = 1;
 
 int main (int argc, char *argv[])
 {
@@ -74,7 +75,9 @@ int main (int argc, char *argv[])
     struct msgcommand data;
 	 int elapsedtime, heartbeat;
     char buffer[BUFF_SIZE];
-
+	 struct timeval *lasttime, *curtime, *swap;
+	 lasttime = (struct timeval *)malloc(sizeof(struct timeval));
+	 curtime = (struct timeval *)malloc(sizeof(struct timeval));
 
     char *usageinfo =
         "Usage: server [options]\n    Options:-p < integer >\n    the port number the server will listen on (Default 1234) \n";
@@ -192,25 +195,27 @@ int main (int argc, char *argv[])
     fflush (stdout);
     printf ("Done!\n");*/
 
+	 gettimeofday(lasttime, 0);
 	 do
 	 {
 	 	handle_sockets(sockid, msgidin, msgidout);
 
-		//check for heartbeat
-		//  process commands
-		//if (elapsedtime%heartbeat==0)
-		//{
-    		do
-			{
-			senderid = getdata (msgidin, &data, 0);
-			if (senderid > 0)
-			{
-      	  processcommand (buffer, &data);
-     		  sendmesg (msgidout, buffer, senderid);
-			}
-			}while(senderid > 0);
-		//}
+		gettimeofday(curtime, 0);
+  		do
+		{
+		senderid = getdata (msgidin, &data, 0);
+		if (senderid > 0)
+		{
+     	  processcommand (buffer, &data);
+  		  sendmesg (msgidout, buffer, senderid);
+		}
+		}while(senderid > 0);
+		swap = curtime;
+		curtime = lasttime;
+		lasttime = swap;
 		//maintenance.
+		if (GAMEON==0)
+			break;
 	 }
 	 while(senderid != -1);
 
@@ -236,27 +241,38 @@ int main (int argc, char *argv[])
 	 printf("Done!");
 	 fflush(stdout);
 
-	 printf("\nPlease run 'rm msgqueue.lock'\n");
-    //when we're done, clean up the msg queues
-    if (fork () == 0)
+	 //when we're done, clean up the msg queues
+    c=0;
+    sprintf (buffer, "%d", msgidin);
+    fprintf (stderr, "\nKilling message queue with id %s...", buffer);
+    if(msgctl(msgidin, IPC_RMID, NULL)==-1)
     {
-        sprintf (buffer, "%d", msgidin);
-        fprintf (stderr, "Killing message queue with id %s...", buffer);
         if (execlp ("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
         {
-            perror ("Unable to exec: ");
-            printf ("Please run 'ipcrm msg %d'\n", msgidin);
+           perror ("Unable to exec: ");
+           printf ("Please run 'ipcrm msg %d'\n", msgidin);
         }
     }
-    else
-    {
-        sprintf (buffer, "%d", msgidout);
-        fprintf (stderr, "Killing message queue with id %s...", buffer);
-        if (execlp ("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
-        {
-            perror ("Unable to exec: ");
-            printf ("Please run 'ipcrm msg %d'\n", msgidout);
-		  }
-	 }
+    else 
+	 {
+         c++;
+    }
+    sprintf (buffer, "%d", msgidout);
+    fprintf (stderr, "\nKilling message queue with id %s...", buffer);
+    if(msgctl(msgidout, IPC_RMID, NULL)==-1) 
+	 {
+       if (execlp ("ipcrm", "ipcrm", "msg", buffer, NULL) < 0)
+       {
+           perror ("Unable to exec: ");
+           printf ("Please run 'ipcrm msg %d'\n", msgidout);
+       }
+    }
+    else 
+	 {
+         c++;
+         fprintf(stderr, "\n");
+    }
+    if(c<2 || unlink("./msgqueue.lock")==-1)
+         printf("\nPlease run 'rm msgqueue.lock'\n");
     return 0;
 }

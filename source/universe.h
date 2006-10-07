@@ -109,6 +109,7 @@ struct player
   int movingto;			/* What sector the player is moving to */
   unsigned short loggedin;	/* This is not in the file */
   int lastplanet;   /*This is the last planet type that they created! */
+  unsigned short sysop; /*Is this player the systems operator */
 };
 
 struct realtimemessage

@@ -192,7 +192,7 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
 		perror("select()");
 		exit(1);
   }
-  //Read from them, and parse it and throw it on the msg queue.
+  //Check the main socket for any new connections
   if (FD_ISSET(sockid, &reads))
   {
 	  memset(&clnt_sockaddr, 0, len = sizeof (clnt_sockaddr));
@@ -208,6 +208,7 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
 	  fprintf(stderr, "Accepted socket %d from %s\n", ret, inet_ntoa(clnt_sockaddr.sin_addr));
   }
 
+  //Read from them, and parse it and throw it on the msg queue.
   for (current=headsock; current!=NULL; current=current->next)
   {
 		if (FD_ISSET(current->sockid, &reads))
@@ -215,9 +216,6 @@ void handle_sockets(int sockid, int msgidin, int msgidout)
 			handle_player(current, msgidin, msgidout);
 		}
   }
-  //check for heartbeat
-  //  parse through message queues and do actions
-  //  
 }
 
 int catchpipes(char *inbuff)
@@ -228,8 +226,9 @@ int catchpipes(char *inbuff)
 /*
   handle_player
 
-  This is the function that the thread runs.  It handles all of the communication
-  for the players.
+  This is the function that is run to parse what the player is sending to 
+  the server and then toss it on the message queue.
+
 */
 
 void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
@@ -247,22 +246,15 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
   strcpy(name, playersock->name);
   loggedin = playersock->loggedin;
 
-   //Ignore SIG_PIPE
-   //signal(13, SIG_IGN);
-
-
-//  do
-//    {
-      commandgood = 0;
-
-      outbuffer[0] = '\0';
-
-      if (recvinfo (playersock->sockid, inbuffer) == -1)
-		{
-			fprintf(stderr, "Socket %d: Exiting!\n", playersock->sockid);
-			fflush(stderr);
-			return;
-		}
+  commandgood = 0;
+  
+  outbuffer[0] = '\0';
+  if (recvinfo (playersock->sockid, inbuffer) == -1)
+  {
+		fprintf(stderr, "Socket %d: Exiting!\n", playersock->sockid);
+		fflush(stderr);
+		return;
+  }
 	
 
       //parse stuff from client, should be expanded, modularized
@@ -748,6 +740,12 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 	  strcpy (data.name, name);
 	  data.command = ct_logout;
 	  commandgood = 1;
+	}
+		else if (strncmp (inbuffer, "SERVERSHUTDOWN", strlen("SERVERSHUTDOWN")) == 0 && loggedin)
+	{
+		strcpy (data.name, name);
+		data.command = ct_shutdown;
+		commandgood = 1;
 	}
       else if (strncmp (inbuffer, "PORTINFO", strlen ("PORTINFO")) == 0
 	       && loggedin)
