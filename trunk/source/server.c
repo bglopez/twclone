@@ -76,8 +76,14 @@ int main (int argc, char *argv[])
 	 int elapsedtime, heartbeat;
     char buffer[BUFF_SIZE];
 	 struct timeval *lasttime, *curtime, *swap;
+	 struct b_maint *lmaint;
+	 
 	 lasttime = (struct timeval *)malloc(sizeof(struct timeval));
 	 curtime = (struct timeval *)malloc(sizeof(struct timeval));
+	 lmaint = (struct b_maint *)malloc(sizeof(struct b_maint));
+
+	 lmaint->regen = -1;
+	 lmaint->day = -1;
 
     char *usageinfo =
         "Usage: server [options]\n    Options:-p < integer >\n    the port number the server will listen on (Default 1234) \n";
@@ -175,7 +181,6 @@ int main (int argc, char *argv[])
     msgidout = init_msgqueue ();
     printf (" Done\n");
     printf("Cleaning up any old message queues...");
-	 //Need to find another way of doing this
     clean_msgqueues(msgidin, msgidout, "msgqueue.lock");
     printf(" Done\n");
 
@@ -210,6 +215,9 @@ int main (int argc, char *argv[])
   		  sendmesg (msgidout, buffer, senderid);
 		}
 		}while(senderid > 0);
+
+		background_maint(lmaint);
+		
 		swap = curtime;
 		curtime = lasttime;
 		lasttime = swap;

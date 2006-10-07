@@ -45,32 +45,26 @@ extern int sectorcount;
 
 time_t *timeptr;
 
-void *
-background_maint (void *threadinfo)
+void background_maint (struct b_maint *lastmaint)
 {
   time_t curtime;
   struct tm *timenow;
-  int lastregen = -1;
-  int lastday = -1;
   int loop = 0;
   int temp=0;
 
-  free (threadinfo);
 
-  while (1)
-    {
       curtime = time (timeptr);
       timenow = localtime (&curtime);
-      if (lastregen == -1)
-			lastregen = timenow->tm_hour;
-      if (lastday == -1)
-			lastday = timenow->tm_yday;
+      if (lastmaint->regen == -1)
+			lastmaint->regen = timenow->tm_hour;
+      if (lastmaint->day == -1)
+			lastmaint->day = timenow->tm_yday;
       if ((curtime - starttime) % configdata->autosave * 60)	//Autosave
 			;//saveall();
-      if ((timenow->tm_hour == lastregen + 1)
-	  || ((timenow->tm_hour == 0) && (lastregen == 23)))
+      if ((timenow->tm_hour == lastmaint->regen + 1)
+	  || ((timenow->tm_hour == 0) && (lastmaint->regen == 23)))
 		{
-	  		lastregen = timenow->tm_hour;
+	  		lastmaint->regen = timenow->tm_hour;
 	  		fprintf (stderr, "\nRegen turns by the hour!");
 	  		loop = 0;
 	  		for (loop=0; loop<configdata->max_players;loop++)
@@ -143,10 +137,10 @@ background_maint (void *threadinfo)
 				}
 			}
 		}
-      if ((timenow->tm_yday == lastday + 1)
-	  		|| ((timenow->tm_yday == 0) && (lastday == 365)))
+      if ((timenow->tm_yday == lastmaint->day + 1)
+	  		|| ((timenow->tm_yday == 0) && (lastmaint->day == 365)))
 		{
-	  		lastday = timenow->tm_yday;
+	  		lastmaint->day = timenow->tm_yday;
 	  		fprintf (stderr, "\nRegen leftover turns!");
 	  		for (loop=0;loop<configdata->max_players;loop++)
 	    	{
@@ -227,5 +221,4 @@ background_maint (void *threadinfo)
 		{
 	  //Alien movement here.
 		}
-	 }
 }

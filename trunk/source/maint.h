@@ -22,6 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "universe.h"
 
-void *background_maint (void *threadinfo);
+struct b_maint
+{
+	int regen;
+	int day;
+};
+
+void background_maint (struct b_maint *lastmaint);
 
 #endif
