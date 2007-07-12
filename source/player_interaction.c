@@ -455,6 +455,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 	{
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
 	  strcpy(data.buffer, inbuffer);
+	  strcpy(data.name, name);
 	  data.command = ct_genesis;
 	  commandgood = 1;
 	}
