@@ -239,11 +239,17 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 
   struct msgcommand data;
 
+  strcpy(inbuffer, "\0");
+  strcpy(outbuffer, "\0");
+  strcpy(name, "\0");
+  strcpy(passwd, "\0");
+  strcpy(temp, "\0");
+
   data.sockid = playersock->sockid;
   data.threadid = -1;
   strncpy(data.ipaddr, playersock->address, 15);
   
-  strcpy(name, playersock->name);
+  strncpy(name, playersock->name, strlen(playersock->name)+1);
   loggedin = playersock->loggedin;
 
   commandgood = 0;
@@ -283,7 +289,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 	  strcpy (data.name, name);
 	  strcpy (data.passwd, passwd);
 
-	  strcpy(playersock->name, name);
+	  strncpy(playersock->name, name, strlen(name)+1);
 	  playersock->loggedin = 1;
 
 	  commandgood = 2;
@@ -294,6 +300,7 @@ void handle_player (struct sockinfo *playersock, int msgidin, int msgidout)
 	  popstring (inbuffer, temp, " ", BUFF_SIZE);
 	  data.to = popint (inbuffer, ":");
 	  data.command = ct_playerinfo;
+	  strncpy (data.name, name, strlen(name)+1);
 	  commandgood = 1;
 	}
       else if (strncmp (inbuffer, "UPDATE", strlen ("UPDATE")) == 0
