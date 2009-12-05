@@ -46,10 +46,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "baseconfig.h"
 
 extern struct list *symbols[HASH_LENGTH];
-extern struct player **players;
+extern struct Player **players;
 extern struct planet **planets;
 extern struct ship **ships;
-extern struct port **ports;
+extern struct Port **ports;
 extern struct sector **sectors;
 extern struct config *configdata;
 extern struct node **nodes;
@@ -186,10 +186,10 @@ void init_playerinfo (char *filename)
 	 char credits[100];
 	 char balance[100];
     int playernum;
-    struct player *curplayer;
+    struct Player *curplayer;
 
-	 players = (struct player **)
-			malloc(sizeof(struct player *)*configdata->max_players);
+	 players = (struct Player **)
+			malloc(sizeof(struct Player *)*configdata->max_players);
     for (playernum = 0; playernum < configdata->max_players; playernum++)
         players[playernum] = NULL;
 
@@ -213,7 +213,7 @@ void init_playerinfo (char *filename)
         //    name, passwd, buffer);
 
         if ((curplayer =
-                    (struct player *) insert (name, player, symbols,
+                    (struct Player *) insert (name, player, symbols,
                                               HASH_LENGTH)) == NULL)
         {
             fprintf (stderr, "init_playerinfo: duplicate player name '%s'\n",
@@ -384,10 +384,10 @@ void init_portinfo (char *filename)
     int counter;			//Counter and other general usage
     char buffer[BUFF_SIZE];
     char name[MAX_NAME_LENGTH];
-    struct port *curport;
+    struct Port *curport;
 
-	 ports = (struct port **)
-			malloc(sizeof(struct port *)*configdata->max_ports);
+	 ports = (struct Port **)
+			malloc(sizeof(struct Port *)*configdata->max_ports);
     for (counter = 0; counter <= configdata->max_ports; counter++)
         ports[counter] = NULL;
 
@@ -407,13 +407,13 @@ void init_portinfo (char *filename)
         counter = popint (buffer, ":");
         popstring (buffer, name, ":", MAX_NAME_LENGTH);
         if ((curport =
-                    (struct port *) insert (name, port, symbols, HASH_LENGTH)) == NULL)
+                    (struct Port *) insert (name, port, symbols, HASH_LENGTH)) == NULL)
         {
             fprintf (stderr, "init_portinfo: duplicate portname '%s'\n", name);
             exit (-1);
         }
         curport->number = counter;
-        curport->location = popint (buffer, ":");
+        curport->sector = popint (buffer, ":");
         curport->maxproduct[0] = popint (buffer, ":");	//MaxOre
         curport->maxproduct[1] = popint (buffer, ":");	//MaxOrganics
         curport->maxproduct[2] = popint (buffer, ":");	//MaxEquipment
@@ -433,7 +433,7 @@ void init_portinfo (char *filename)
             exit (-1);
         }
         ports[counter - 1] = curport;
-        sectors[curport->location - 1]->portptr = curport;
+        sectors[curport->sector - 1]->portptr = curport;
     }
     fclose (portfile);
 
@@ -466,8 +466,8 @@ void init_nodes(int numsectors)
 			{
 				if (ports[portcount]->type == 10)
 				{
-					if ((ports[portcount]->location >= nodes[counter]->min) &&
-					(ports[portcount]->location <= nodes[counter]->max))
+					if ((ports[portcount]->sector >= nodes[counter]->min) &&
+					(ports[portcount]->sector <= nodes[counter]->max))
 					{
 						nodes[counter]->portptr = ports[portcount];
 						portcount = configdata->max_ports+1;
