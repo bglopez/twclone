@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
     int sockid;			//Socket ID
     char *buffer = NULL;
     struct sector *cursector = NULL;	//Stores stuff about the current sector
-    struct player *curplayer = NULL;	//For the player logging in
+    struct Player *curplayer = NULL;	//For the player logging in
     struct ship *curship = NULL;	//For the current players ship
 	 int temp=0;
 	 int onplanet=0;
@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
         cursector->beacontext = NULL;	//Initialization of pointers
         cursector->nebulae = NULL;
         if ((curplayer =
-                    (struct player *) malloc (sizeof (struct player))) == NULL)
+                    (struct Player *) malloc (sizeof (struct Player))) == NULL)
         {
             perror ("main: Unable to allocate enough memory for 1 player.");
             exit (-1);
@@ -627,7 +627,7 @@ void dogameinfo(int sockid)
 }
 
 
-void getmyinfo (int sockid, struct player *curplayer)
+void getmyinfo (int sockid, struct Player *curplayer)
 {
     char *buffer = (char *) malloc (BUFF_SIZE);
     int position = 1;
@@ -698,7 +698,7 @@ void getmyinfo (int sockid, struct player *curplayer)
     return;
 }
 
-void printmyinfo (struct player *curplayer)
+void printmyinfo (struct Player *curplayer)
 {
 
     printf ("\n%s%s<Info>%s", KBBLU, KFWHT, KNRM);
@@ -756,7 +756,7 @@ void printmyinfo (struct player *curplayer)
 
 }
 
-void psinfo (int sockid, int pnumb, struct player *p)
+void psinfo (int sockid, int pnumb, struct Player *p)
 {
     char *buffer = (char *) malloc (BUFF_SIZE);
     char *temp = (char *) malloc (70);
@@ -862,7 +862,7 @@ void psinfo (int sockid, int pnumb, struct player *p)
     return;
 }
 
-void sinfo (int sockid, int snumb, struct player *p)
+void sinfo (int sockid, int snumb, struct Player *p)
 {
     char *buffer = (char *) malloc (BUFF_SIZE);
     char *temp = (char *) malloc (70);
@@ -961,8 +961,8 @@ int getsectorinfo (int sockid, struct sector *cursector)
     char portname[50] = "\0";
     int porttype = 0;
     int tempplayer;
-    struct player *curplayer = NULL, *place = NULL;
-    struct port *curport = NULL;
+    struct Player *curplayer = NULL, *place = NULL;
+    struct Port *curport = NULL;
     struct planet *curplanet = NULL, *pplace = NULL;
     char beacon[50], nebulae[50];
 
@@ -1055,7 +1055,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
 	 {
     	if (strlen (portname) != 0)
     	{
-        if ((curport = (struct port *) malloc (sizeof (struct port))) != NULL)
+        if ((curport = (struct Port *) malloc (sizeof (struct Port))) != NULL)
         {
             curport->name = (char *) 
 					malloc(sizeof(char)*(strlen (portname) + 1));
@@ -1090,7 +1090,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
         strncpy (temp, tempbuf, strlen (tempbuf));
         for (counter = 0; counter <= MAX_PLAYERS; counter++)
         {
-            if ((curplayer = (struct player *) malloc (sizeof (struct player))) != NULL)
+            if ((curplayer = (struct Player *) malloc (sizeof (struct Player))) != NULL)
             {
                 tempplayer = popint (temp, ",");
                 curplayer->name = NULL;
@@ -1186,7 +1186,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
         strncpy (temp, tempbuf, strlen (tempbuf));
         for (counter = 0; counter <= MAX_PLAYERS; counter++)
         {
-            if ((curplayer = (struct player *) malloc (sizeof (struct player))) != NULL)
+            if ((curplayer = (struct Player *) malloc (sizeof (struct Player))) != NULL)
             {
                 tempplayer = popint (temp, ",");
                 curplayer->name = NULL;
@@ -1228,7 +1228,7 @@ int getsectorinfo (int sockid, struct sector *cursector)
 int printsector (struct sector *cursector)
 {
     int len, counter;
-    struct player *first = NULL, *place = NULL, *after = NULL;
+    struct Player *first = NULL, *place = NULL, *after = NULL;
     struct planet *curplanet = NULL, *pnext = NULL;
 
     printf ("\n%sSector  %s: %s%d %sin ", KLTGRN, KLTYLW, KLTCYN,
@@ -1365,7 +1365,7 @@ int printsector (struct sector *cursector)
     return cursector->number;
 }
 
-void clearplayer (struct player *curplayer)
+void clearplayer (struct Player *curplayer)
 {
 	 newfree(curplayer->pship->name);
     newfree(curplayer->pship->type);
@@ -1492,7 +1492,7 @@ void print_shipspecs_help()
 	return;
 }
 
-void print_available_ships(int sockid, struct player *curplayer)
+void print_available_ships(int sockid, struct Player *curplayer)
 {
   int ship;
   int sector;
@@ -1511,7 +1511,7 @@ void print_available_ships(int sockid, struct player *curplayer)
 	
 }
 
-void do_transport(int sockid, struct player *curplayer)
+void do_transport(int sockid, struct Player *curplayer)
 {
 
   printf("\n%s%s<Transport to Ship>%s", KBBLU, KFWHT, KNRM);
@@ -1539,7 +1539,7 @@ void print_bank_help()
 	return;
 }
 
-void do_stardock_menu(int sockid, struct player *curplayer, int node)
+void do_stardock_menu(int sockid, struct Player *curplayer, int node)
 {
 	char *buff = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	char command;
@@ -1606,7 +1606,7 @@ void do_stardock_menu(int sockid, struct player *curplayer, int node)
 	return;
 }
 
-int do_planet_select(int sockid, struct player *curplayer,
+int do_planet_select(int sockid, struct Player *curplayer,
 					 struct sector *cursector)
 {
 	struct planet *curplanet;
@@ -1641,7 +1641,7 @@ int do_planet_select(int sockid, struct player *curplayer,
 	return(quitting);
 }
 
-int do_citadel_menu(int sockid, struct player *curplayer,
+int do_citadel_menu(int sockid, struct Player *curplayer,
 					 struct planet *curplanet)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
@@ -1732,7 +1732,7 @@ int do_citadel_menu(int sockid, struct player *curplayer,
 	return(0);
 }
 
-void treasury(int sockid, struct player *curplayer, int pcredits)
+void treasury(int sockid, struct Player *curplayer, int pcredits)
 {
 	char torf;
 	int amt=0;
@@ -1758,7 +1758,7 @@ void treasury(int sockid, struct player *curplayer, int pcredits)
 	free(buffer);
 }
 
-int do_planet_menu(int sockid, struct player *curplayer)
+int do_planet_menu(int sockid, struct Player *curplayer)
 {
 	char *choice = (char *)malloc(sizeof(char)*10);
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
@@ -1964,7 +1964,7 @@ void citadelupgrade(int sockid, struct planet *curplanet)
 		printf("\n%sTry again later when you have enough of everything on this planet.",KGRN);
 	}
 }
-void change_stuff(int sockid, struct player *curplayer, int type)
+void change_stuff(int sockid, struct Player *curplayer, int type)
 {
 	char *buffer= (char *)malloc(sizeof(char)*BUFF_SIZE);
 	int amt=0;
@@ -2119,7 +2119,7 @@ void getplanetinfo(int sockid, struct planet *curplanet)
 
 }
 
-void do_planet_display(int sockid, struct player *curplayer,
+void do_planet_display(int sockid, struct Player *curplayer,
 					 struct planet *curplanet)
 {
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
@@ -2285,7 +2285,7 @@ void print_planet_help()
 
 }
 
-void do_noderelay_menu(int sockid, struct player *curplayer)
+void do_noderelay_menu(int sockid, struct Player *curplayer)
 {
 	int done=0;
 	int moredone=0;
@@ -2368,7 +2368,7 @@ void do_noderelay_menu(int sockid, struct player *curplayer)
 	free(input);
 }
 
-void do_shipyard_menu(int sockid, struct player *curplayer)
+void do_shipyard_menu(int sockid, struct Player *curplayer)
 {
 	char command;
 	int done=0;
@@ -2417,7 +2417,7 @@ void do_shipyard_menu(int sockid, struct player *curplayer)
 	12/8/04 - jdodson - cleaned up the text, made it more readable.  cleaned up the code a bit.
 	
 */
-void do_examine_ship_specs(int sockid, struct player *curplayer)
+void do_examine_ship_specs(int sockid, struct Player *curplayer)
 {
 	char command;
 	int done=0;
@@ -2961,7 +2961,7 @@ printf("\n%s       Maximum Holds:       40 Transport Range:     20 Photon Missil
 	last updated 12/7/04 - jdodson - created the function
 	
 */
-void do_cineplex_menu(int sockid, struct player *curplayer)
+void do_cineplex_menu(int sockid, struct Player *curplayer)
 {
 	char command;
 	int done=0;
@@ -3024,7 +3024,7 @@ void do_cineplex_menu(int sockid, struct player *curplayer)
 	}
 }
 
-void buyship(int sockid, struct player *curplayer)
+void buyship(int sockid, struct Player *curplayer)
 {
 	char *buffer = (char *)malloc(sizeof(char)*BUFF_SIZE);
 	char *input = (char *)malloc(sizeof(char)*BUFF_SIZE);
@@ -3245,7 +3245,7 @@ void buyship(int sockid, struct player *curplayer)
 
 	last updated - jdodson - 12/7/04
 */
-void buymovieticket(int sockid, struct player *curplayer)
+void buymovieticket(int sockid, struct Player *curplayer)
 {
 	//amount of money the movie costs
 	//lets set this to 150
@@ -3346,7 +3346,7 @@ char *spaces(int numspaces)
 	return(test);
 }
 
-void do_bank_menu(int sockid, struct player *curplayer)
+void do_bank_menu(int sockid, struct Player *curplayer)
 {
 	enum prompts ptype;
 	char command;
@@ -3427,7 +3427,7 @@ void do_bank_menu(int sockid, struct player *curplayer)
 	}
 }
 
-void do_ship_upgrade(int sockid, struct player *curplayer)
+void do_ship_upgrade(int sockid, struct Player *curplayer)
 {
 	char *buffer = (char *)malloc(BUFF_SIZE);
 	char *temp = (char *)malloc(BUFF_SIZE);
@@ -3538,7 +3538,7 @@ void do_ship_upgrade(int sockid, struct player *curplayer)
 	free(temp);
 	return;
 }
-void doporting (int sockid, struct player *curplayer)
+void doporting (int sockid, struct Player *curplayer)
 {
     int maxproduct[3];
     int product[3];
@@ -4092,7 +4092,7 @@ char *prompttype (enum prompts type, int sector_or_porttype, int sockid)
     return input;
 }
 
-void dogenesis(int sockid, struct player *curplayer)
+void dogenesis(int sockid, struct Player *curplayer)
 {
 	char *name = (char *)malloc(sizeof(char)*50);
 	char *typename = (char *)malloc(sizeof(char)*50);
@@ -4390,12 +4390,12 @@ char * get_invis_password (void)
     return pw_buffer;
 }
 
-void do_attack(int sockid, struct player *curplayer, struct sector *cursector)
+void do_attack(int sockid, struct Player *curplayer, struct sector *cursector)
 {
 	char *buffer = (char *)malloc(sizeof(char)*5280);
 	int counter;
 	int done = 0;
-	struct player *first = NULL, *next = NULL, *target=NULL;
+	struct Player *first = NULL, *next = NULL, *target=NULL;
 	struct planet *curplanet, *pnext;
 	int shields, defense_lost, attack_lost, captured, destroyed;
 	char yesno;

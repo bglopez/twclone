@@ -117,7 +117,7 @@ struct sector **bigsectorlist;
 struct sector **sectors;
 struct config *configdata;
 /*  struct port *portlist[NUMPORTS]; */
-struct port **portlist;
+class Port **portlist;
 /*  int randsectornum[NUMSECTORS-10]; */
 int *randsectornum;
 
@@ -260,7 +260,7 @@ main (int argc, char **argv)
     sectors = sectorlist;
 
     printf ("Creating port array...");
-    portlist = malloc (numPorts * sizeof (struct port *));
+    portlist = malloc (numPorts * sizeof (struct Port *));
     for (x = 0; x < numPorts; x++)
     {
         portlist[x] = NULL;
@@ -642,7 +642,7 @@ main (int argc, char **argv)
     for (x = 0; x < numPorts; x++)
     {
         sprintf (fileline, "%d:%s:%d:%d:%d:%d:%d:%d:%d:%ld:%d:%d", (x + 1),
-                 portlist[x]->name, portlist[x]->location,
+                 portlist[x]->name, portlist[x]->sector,
                  portlist[x]->maxproduct[0], portlist[x]->maxproduct[1],
                  portlist[x]->maxproduct[2], portlist[x]->product[0],
                  portlist[x]->product[1], portlist[x]->product[2],
@@ -825,7 +825,7 @@ void sectorsort (struct sector *base[maxWarps], int elements)
 void
 makeports ()
 {
-    struct port *curport;
+    struct Port *curport;
     int type = 0;
     int loop = 0;
     int sector = 0;
@@ -837,7 +837,7 @@ makeports ()
 
     for (loop = 0; loop < numPorts; loop++)
     {
-        curport = (struct port *) malloc (sizeof (struct port));
+        curport = (struct Port *) malloc (sizeof (struct Port));
         curport->number = loop + 1;
         tmpname = randomname (tmpname);
         curport->name = (char *) malloc (sizeof (char) * 80);
@@ -940,7 +940,7 @@ makeports ()
             	sector = randomnum (0, numSectors - 1);
             	while (sectorlist[sector]->portptr != NULL)
                 	sector = randomnum (0, numSectors - 1);
-            	portlist[loop]->location = sector + 1;
+            	portlist[loop]->sector = sector + 1;
 				}
 				else if ((loop > 3) && (loop <= numNodes+3))
 				{
@@ -956,7 +956,7 @@ makeports ()
 							curnode = innode(sector+1);
 							}while(sectorlist[sector]->portptr!=NULL);
 					}
-					portlist[loop]->location = sector + 1;
+					portlist[loop]->sector = sector + 1;
 				}
 				else
 				{
@@ -964,11 +964,11 @@ makeports ()
 					sector = randomnum (0, numSectors - 1);
             	while (sectorlist[sector]->portptr != NULL)
                 	sector = randomnum (0, NUMSECTORS - 1);
-            	portlist[loop]->location = sector + 1;
+            	portlist[loop]->sector = sector + 1;
 				}
         }
         else
-            portlist[loop]->location = 1;
+            portlist[loop]->sector = 1;
         sectorlist[sector]->portptr = portlist[loop];
     }
 }

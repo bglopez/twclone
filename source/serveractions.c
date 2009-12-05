@@ -20,11 +20,11 @@
 
 extern struct sector **sectors;
 extern struct list *symbols[HASH_LENGTH];
-extern struct player **players;
+extern struct Player **players;
 extern struct sp_shipinfo **shiptypes;
 extern planetClass **planetTypes;
 extern struct ship **ships;
-extern struct port **ports;
+extern struct Port **ports;
 extern struct planet **planets;
 extern struct config *configdata;
 extern struct node **nodes;
@@ -37,8 +37,8 @@ struct timeval begin, end;
 
 void processcommand (char *buffer, struct msgcommand *data)
 {
-    struct player *curplayer;
-    struct port *curport;
+    struct Player *curplayer;
+    struct Port *curport;
 	 struct planet *curplanet;
 	 struct sector *cursector;
     struct realtimemessage *curmessage;
@@ -50,7 +50,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_describe:
         //fprintf(stderr, "processcommand: Got a describe command\n");
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -77,7 +77,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         //I'm assuming that this will short circuit
         gettimeofday (&begin, 0);
         if (((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
                 || ((curplayer->sector != 0) ? curplayer->
                     sector : (ships[curplayer->ship - 1]->location) == data->to)
@@ -160,7 +160,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_login:
         fprintf (stderr, "processcommand: Got a login command\n");
         if (((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
                 || (curplayer->loggedin == 1)
                 || (strcmp (curplayer->name, data->name) != 0)
@@ -203,7 +203,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_newplayer:
         //fprintf(stderr, "processcommand: Got a newplayer command\n");
         if ((curplayer =
-                    (struct player *) insert (data->name, player, symbols,
+                    (struct Player *) insert (data->name, player, symbols,
                                               HASH_LENGTH)) == NULL)
         {
             //fprintf(stderr, "processcommand: player %s already exists\n", data->name);
@@ -238,7 +238,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_update:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -268,7 +268,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_fedcomm:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -287,7 +287,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_playerinfo:
         //fprintf(stderr, "processcommand: Got a playerinfo command\n");
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -303,7 +303,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_shipinfo:
         //fprintf(stderr, "processcommand: Got a shipinfo command\n");
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -318,7 +318,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_listshipinfo:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -333,7 +333,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
     case ct_listmyships:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -349,7 +349,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_logout:
         fprintf (stderr, "processcommand: Got a logout command\n");
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             //fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
@@ -379,7 +379,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_shutdown:
         fprintf (stderr, "processcommand: Got a Shutdown command\n");
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             //fprintf(stderr, "processcommand: player %s does not exists\n", data->name);
@@ -416,7 +416,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
 	 case ct_land:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -467,7 +467,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  break;
 	 case ct_onplanet:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -490,7 +490,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 
 	 case ct_planet:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -650,7 +650,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 		  break;
     case ct_portinfo:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -705,7 +705,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         //If QUIT, duh..
         //
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -919,7 +919,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         }
         break;
 	 case ct_stardock:
-			if ((curplayer = (struct player *) find (data->name, player, symbols,
+			if ((curplayer = (struct Player *) find (data->name, player, symbols,
               HASH_LENGTH)) == NULL)
         	{
             strcpy (buffer, "BAD\n");
@@ -964,7 +964,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 						buyship(buffer, curplayer);
 						break;
 					case p_sellship:
-						sellship(buffer, curplayer, curport->location);
+						sellship(buffer, curplayer, curport->sector);
 						break;
 					case p_priceship:
 						priceship(buffer, curplayer->ship);
@@ -985,7 +985,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         	}
         	break;
 	 case ct_node:
-			if ((curplayer = (struct player *) find (data->name, player, symbols,
+			if ((curplayer = (struct Player *) find (data->name, player, symbols,
               HASH_LENGTH)) == NULL)
         	{
             strcpy (buffer, "BAD\n");
@@ -1030,7 +1030,7 @@ void processcommand (char *buffer, struct msgcommand *data)
 						buyship(buffer, curplayer);
 						break;
 					case p_sellship:
-						sellship(buffer, curplayer, curport->location);
+						sellship(buffer, curplayer, curport->sector);
 						break;
 					case p_priceship:
 						priceship(buffer, curplayer->ship);
@@ -1059,7 +1059,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         	break;
     case ct_info:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -1069,7 +1069,7 @@ void processcommand (char *buffer, struct msgcommand *data)
         break;
 	 case ct_gameinfo:
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD\n");
@@ -1081,7 +1081,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_genesis:
 
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD: Couldn't find player\n");
@@ -1100,7 +1100,7 @@ void processcommand (char *buffer, struct msgcommand *data)
     case ct_attack:
 
         if ((curplayer =
-                    (struct player *) find (data->name, player, symbols,
+                    (struct Player *) find (data->name, player, symbols,
                                             HASH_LENGTH)) == NULL)
         {
             strcpy (buffer, "BAD: Couldn't find player\n");
@@ -1176,11 +1176,11 @@ void builddescription (int sector, char *buffer, int playernum)
     {
         do
         {
-            if (((struct player *) element->item)->number != playernum)
+            if (((struct Player *) element->item)->number != playernum)
             {
                 if (p != 0)
                     addint (buffer, p, ',', BUFF_SIZE);
-                p = ((struct player *) element->item)->number;
+                p = ((struct Player *) element->item)->number;
             }
             element = element->listptr;
         }
@@ -1238,7 +1238,7 @@ void builddescription (int sector, char *buffer, int playernum)
         {
            if (p != 0)
               addint (buffer, p, ',', BUFF_SIZE);
-            p = ((struct player *) element->item)->number;
+            p = ((struct Player *) element->item)->number;
             element = element->listptr;
         }
         while (element != NULL);
@@ -1271,7 +1271,7 @@ void builddescription (int sector, char *buffer, int playernum)
     return;
 }
 
-void bank_deposit(char *buffer, struct player *curplayer)
+void bank_deposit(char *buffer, struct Player *curplayer)
 {
 	int request=0;
 
@@ -1292,7 +1292,7 @@ void bank_deposit(char *buffer, struct player *curplayer)
 	return;
 }
 
-void bank_balance(char *buffer, struct player *curplayer)
+void bank_balance(char *buffer, struct Player *curplayer)
 {
 	int balance;
 	strcpy(buffer, ":");
@@ -1300,7 +1300,7 @@ void bank_balance(char *buffer, struct player *curplayer)
 	return;
 }
 
-void bank_withdrawl(char *buffer, struct player *curplayer)
+void bank_withdrawl(char *buffer, struct Player *curplayer)
 {
 	int request=0;
 
@@ -1322,7 +1322,7 @@ void bank_withdrawl(char *buffer, struct player *curplayer)
 void whosonline (char *buffer)
 {
     int playernum = 1;
-    struct player *curplayer;
+    struct Player *curplayer;
 
     strcpy (buffer, ":\0");
     while (players[playernum - 1] != NULL)
@@ -1338,9 +1338,9 @@ void whosonline (char *buffer)
 
 int intransit (struct msgcommand *data)
 {
-    struct player *curplayer;
+    struct Player *curplayer;
     if ((curplayer =
-                (struct player *) find (data->name, player, symbols,
+                (struct Player *) find (data->name, player, symbols,
                                         HASH_LENGTH)) == NULL)
         return (-1);
     //fprintf(stderr,"\nintransit: Checking transit");
@@ -1406,9 +1406,9 @@ void findautoroute (int from, int to, char *buffer)
 	 {
 		if (configdata->numnodes != 1)
 		{
-			if (from != nodes[nodefrom-1]->portptr->location)
+			if (from != nodes[nodefrom-1]->portptr->sector)
 			{
-				findautoroute(from, nodes[nodefrom-1]->portptr->location, buffer);
+				findautoroute(from, nodes[nodefrom-1]->portptr->sector, buffer);
 			}
 			else
 			{
@@ -1687,7 +1687,7 @@ void saveallports (char *filename)
         sprintf (intptr, "%d", portnumb - 1);
         sprintf (stufftosave, "%d:", portnumb);
         addstring (stufftosave, ports[portnumb - 1]->name, ':', BUFF_SIZE);
-        addint (stufftosave, ports[portnumb - 1]->location, ':', BUFF_SIZE);
+        addint (stufftosave, ports[portnumb - 1]->sector, ':', BUFF_SIZE);
         addint (stufftosave, ports[portnumb - 1]->maxproduct[0], ':',
                 BUFF_SIZE);
         addint (stufftosave, ports[portnumb - 1]->maxproduct[1], ':',
@@ -1718,7 +1718,7 @@ void saveallports (char *filename)
 
 }
 
-void planettake(char *buffer, struct player *curplayer)
+void planettake(char *buffer, struct Player *curplayer)
 {
 	struct planet *curplanet;
 	struct ship *curship;
@@ -1890,7 +1890,7 @@ void planettake(char *buffer, struct player *curplayer)
 	strcpy(buffer, "OK: Taking stuff from the planet!");
 }
 
-void planetleave(char *buffer, struct player *curplayer)
+void planetleave(char *buffer, struct Player *curplayer)
 {
 	struct planet *curplanet;
 	struct ship *curship;
@@ -2227,7 +2227,7 @@ void buildallshipinfo(char *buffer)
 	}
 }
 
-void listplayerships(char *buffer, struct player *curplayer)
+void listplayerships(char *buffer, struct Player *curplayer)
 {
    int loop=0;
    strcpy(buffer, ":\0");
@@ -2278,7 +2278,7 @@ void buildgameinfo(char *buffer)
 			numports++;
 			portworth = portworth + ports[index]->credits;
 			if (ports[index]->type == 9)
-				stardocksector = ports[index]->location;
+				stardocksector = ports[index]->sector;
 		}
   }
   for (index=0; index < configdata->max_total_planets; index++)
@@ -2379,7 +2379,7 @@ void buildportinfo (int portnumb, char *buffer)
     addint (buffer, ports[portnumb - 1]->type, ':', BUFF_SIZE);
 }
 
-void sellship(char *buffer, struct player *curplayer, int port_location)
+void sellship(char *buffer, struct Player *curplayer, int port_location)
 {
 	const int price_per_fighter = 218;
 	const int price_per_shield = 131;
@@ -2473,7 +2473,7 @@ void listships(char *buffer)
 	}
 }
 
-void buyship(char *buffer, struct player *curplayer)
+void buyship(char *buffer, struct Player *curplayer)
 {
 	int type=0;
 	int manned=0;
@@ -2567,7 +2567,7 @@ void buyship(char *buffer, struct player *curplayer)
 }
 
 
-void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curship)
+void do_ship_upgrade(struct Player *curplayer, char *buffer, struct ship *curship)
 {
 	const int base_hold_price=249;
 	const int price_per_shield=131;
@@ -2702,7 +2702,7 @@ void do_ship_upgrade(struct player *curplayer, char *buffer, struct ship *curshi
 	}
 }
 
-void trading (struct player *curplayer, struct port *curport, char *buffer,
+void trading (struct Player *curplayer, struct Port *curport, char *buffer,
          struct ship *curship)
 {
     /*
@@ -3019,7 +3019,7 @@ void trading (struct player *curplayer, struct port *curport, char *buffer,
 }
 
 /**************** WORKING *************************/
-void buildnewplanet (struct player *curplayer, char *buffer, int sector)
+void buildnewplanet (struct Player *curplayer, char *buffer, int sector)
 {
     int i, p_num = 0, p_sec, p_type;
     char *p_name, *p_owner;
@@ -3107,7 +3107,7 @@ void buildnewplanet (struct player *curplayer, char *buffer, int sector)
 
 /*****************************************/
 
-void buildnewplayer (struct player *curplayer, char *shipname)
+void buildnewplayer (struct Player *curplayer, char *shipname)
 {
 
     int i;			//A counter
@@ -3173,14 +3173,14 @@ void buildnewplayer (struct player *curplayer, char *shipname)
     ships[i] = curship;
 }
 
-int move_player (struct player *p, struct msgcommand *data, char *buffer)
+int move_player (struct Player *p, struct msgcommand *data, char *buffer)
 {
     int linknum = 0;
 
     fprintf (stderr, "processcommand: Got a Move command\n");
 
     //I'm assuming that this will short circuit
-    if (((p = (struct player *) find (data->name, player, symbols, 
+    if (((p = (struct Player *) find (data->name, player, symbols, 
 								HASH_LENGTH)) == NULL)
             || ((p->sector != 0) ? p->sector : (ships[p->ship - 1]->location) ==
                 data->to) || data->to > sectorcount)
@@ -3233,7 +3233,7 @@ int move_player (struct player *p, struct msgcommand *data, char *buffer)
 void fedcommlink (int playernum, char *message)
 {
     char buffer[BUFF_SIZE];
-    struct player *curplayer;
+    struct Player *curplayer;
     int loop = 1;
 
     fprintf (stderr, "\nfedcommlink: Player # %d, sending '%s'", playernum,
@@ -3255,7 +3255,7 @@ void fedcommlink (int playernum, char *message)
 void sendtoallonline (char *message)
 {
     int loop = 1;
-    struct player *curplayer;
+    struct Player *curplayer;
 
     while (players[loop - 1] != NULL)
     {
@@ -3267,7 +3267,7 @@ void sendtoallonline (char *message)
 }
 
 void
-addmessage (struct player *curplayer, char *message)
+addmessage (struct Player *curplayer, char *message)
 {
     struct realtimemessage *curmessage = NULL, *newmessage = NULL;
 
@@ -3318,11 +3318,11 @@ void sendtosector (int sector, int playernum, int direction, int planetnum)
     {
         do
         {
-            if (((struct player *) element->item)->number != playernum)
+            if (((struct Player *) element->item)->number != playernum)
             {
                 if ((p != 0) && (players[p - 1]->loggedin))
                     addmessage (players[p - 1], buffer);
-                p = ((struct player *) element->item)->number;
+                p = ((struct Player *) element->item)->number;
             }
             element = element->listptr;
         }
@@ -3358,7 +3358,7 @@ int innode(int sector)
 	 return(-1);
 }
 
-void listnodes(char *buffer, struct port *curport)
+void listnodes(char *buffer, struct Port *curport)
 {
 	int curnode;
 	int counter;
@@ -3373,7 +3373,7 @@ void listnodes(char *buffer, struct port *curport)
 	}
 }
 
-void nodetravel(char *buffer, struct player *curplayer)
+void nodetravel(char *buffer, struct Player *curplayer)
 {
 	int nodeto=0;
 
@@ -3391,21 +3391,21 @@ void nodetravel(char *buffer, struct player *curplayer)
 	}
 	if (curplayer->sector == 0)
 	{
-		ships[curplayer->ship - 1]->location = nodes[nodeto-1]->portptr->location;
+		ships[curplayer->ship - 1]->location = nodes[nodeto-1]->portptr->sector;
 		
 	}
 	else
 	{
-		curplayer->sector = nodes[nodeto-1]->portptr->location;
+		curplayer->sector = nodes[nodeto-1]->portptr->sector;
 	}
 	curplayer->intransit = 1;
-	curplayer->movingto = nodes[nodeto-1]->portptr->location;
+	curplayer->movingto = nodes[nodeto-1]->portptr->sector;
 	curplayer->beginmove = begin.tv_sec;
 	strcpy(buffer, "OK: Moving to a new node!");
 	return;
 }
 
-void parse_attack(char *buffer, struct player *curplayer)
+void parse_attack(char *buffer, struct Player *curplayer)
 {
 	int to;
 	int num_figs;
@@ -3423,7 +3423,7 @@ void parse_attack(char *buffer, struct player *curplayer)
 	}
 }
 
-void attack(struct player *from, struct player *to, int num_figs, char *buffer)
+void attack(struct Player *from, struct Player *to, int num_figs, char *buffer)
 {
 	float attacker_lost;
 	float defender_lost;
