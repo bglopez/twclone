@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "universe.h"
 #include "common.h"
 #include "planet.h"
-#include "config.h"
+#include "baseconfig.h"
 
 extern struct list *symbols[HASH_LENGTH];
 extern struct player **players;

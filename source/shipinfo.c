@@ -3,7 +3,7 @@
 
 #include "shipinfo.h"
 #include "common.h"
-#include "config.h"
+#include "baseconfig.h"
 
 extern struct config *configdata;
 extern struct sp_shipinfo **shiptypes;

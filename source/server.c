@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "planet.h"
 #include "serveractions.h"
 #include "shipinfo.h"
-#include "config.h"
+#include "baseconfig.h"
 #include "maint.h"
 
 struct sector **sectors;

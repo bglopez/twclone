@@ -15,7 +15,7 @@
 #include "common.h"
 #include "portinfo.h"
 #include "boxmuller.h"
-#include "config.h"
+#include "baseconfig.h"
 #include "planet.h"
 
 extern struct sector **sectors;

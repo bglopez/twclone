@@ -8,17 +8,17 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#  include <autoconf.h>
-#endif /* HAVE_CONFIG_H */
+//#ifdef HAVE_CONFIG_H
+//#  include <autoconf.h>
+//#endif /* HAVE_CONFIG_H */
 
-#ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
+//#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+//#endif /* HAVE_STDLIB_H */
 
-#ifdef HAVE_MATH_H
-#  include <math.h>
-#endif /* HAVE_MATH_H */
+//#ifdef HAVE_MATH_H
+#include <math.h>
+//#endif /* HAVE_MATH_H */
 
 
 //extern float ranf();         /* ranf() is uniform in 0..1 */
