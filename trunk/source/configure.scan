@@ -7,6 +7,7 @@ AC_CONFIG_SRCDIR([ansi.h])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
+AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
@@ -15,6 +16,7 @@ AC_PROG_CC
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
@@ -22,4 +24,5 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([gethostbyname gettimeofday inet_ntoa memset pow select socket sqrt strcspn strdup strtol strtoul])
 
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

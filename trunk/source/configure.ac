@@ -9,6 +9,7 @@ AC_CONFIG_FILES([Makefile])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 # Checks for programs.
+AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
@@ -17,6 +18,7 @@ AC_PROG_CC
 AC_CHECK_HEADERS([netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
