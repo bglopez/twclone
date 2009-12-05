@@ -1,124 +1,52 @@
-/* config.h.  Generated from config.h.in by configure.  */
-/* config.h.in.  Generated from configure.ac by autoheader.  */
+/*
+Copyright (C) 2000 Jason C. Garcowski(jcg5@po.cwru.edu), 
+                   Ryan Glasnapp(rglasnap@nmt.edu)
 
-/* Define to 1 if you have the `gethostbyname' function. */
-#define HAVE_GETHOSTBYNAME 1
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
-/* Define to 1 if you have the `gettimeofday' function. */
-#define HAVE_GETTIMEOFDAY 1
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-/* Define to 1 if you have the `inet_ntoa' function. */
-#define HAVE_INET_NTOA 1
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
+*/
 
-/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
-   to 0 otherwise. */
-#define HAVE_MALLOC 1
+#ifndef CONFIG_H
+#define CONFIG_H
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
+#include "common.h"
 
-/* Define to 1 if you have the `memset' function. */
-#define HAVE_MEMSET 1
+struct config
+{
+  int turnsperday;		//In this order in config.data
+  int maxwarps;
+  int startingcredits;
+  int startingfighters;
+  int startingholds;
+  int processinterval;		//How often stuff is processed
+  int autosave;			//Save every some odd minutes
+  int max_players;
+  int max_ships;
+  int max_ports;
+  int max_planets;
+  int max_total_planets;
+  int max_safe_planets;
+  int max_citadel_level;
+  int number_of_planet_types;
+  int max_ship_name_length;
+  int ship_type_count;
+  unsigned long bangdate;
+  int numnodes;
+};
 
-/* Define to 1 if you have the <netdb.h> header file. */
-#define HAVE_NETDB_H 1
+int init_config (char *filename);
+int saveconfig(char *filename);
 
-/* Define to 1 if you have the <netinet/in.h> header file. */
-#define HAVE_NETINET_IN_H 1
-
-/* Define to 1 if you have the `pow' function. */
-#define HAVE_POW 1
-
-/* Define to 1 if your system has a GNU libc compatible `realloc' function,
-   and to 0 otherwise. */
-#define HAVE_REALLOC 1
-
-/* Define to 1 if you have the `select' function. */
-#define HAVE_SELECT 1
-
-/* Define to 1 if you have the `socket' function. */
-#define HAVE_SOCKET 1
-
-/* Define to 1 if you have the `sqrt' function. */
-#define HAVE_SQRT 1
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
-
-/* Define to 1 if you have the `strcspn' function. */
-#define HAVE_STRCSPN 1
-
-/* Define to 1 if you have the `strdup' function. */
-#define HAVE_STRDUP 1
-
-/* Define to 1 if you have the <strings.h> header file. */
-#define HAVE_STRINGS_H 1
-
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
-
-/* Define to 1 if you have the `strtol' function. */
-#define HAVE_STRTOL 1
-
-/* Define to 1 if you have the `strtoul' function. */
-#define HAVE_STRTOUL 1
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#define HAVE_SYS_SOCKET_H 1
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#define HAVE_SYS_TIME_H 1
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#define HAVE_SYS_TYPES_H 1
-
-/* Define to 1 if you have the <termios.h> header file. */
-#define HAVE_TERMIOS_H 1
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
-
-/* Name of package */
-#define PACKAGE "twclone"
-
-/* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "eryndil@users.sourceforge.net"
-
-/* Define to the full name of this package. */
-#define PACKAGE_NAME "twclone"
-
-/* Define to the full name and version of this package. */
-#define PACKAGE_STRING "twclone 0.1.15"
-
-/* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "twclone"
-
-/* Define to the home page for this package. */
-#define PACKAGE_URL ""
-
-/* Define to the version of this package. */
-#define PACKAGE_VERSION "0.1.15"
-
-/* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
-
-/* Version number of package */
-#define VERSION "0.1.15"
-
-/* Define to rpl_malloc if the replacement function should be used. */
-/* #undef malloc */
-
-/* Define to rpl_realloc if the replacement function should be used. */
-/* #undef realloc */
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-/* #undef size_t */
+#endif
