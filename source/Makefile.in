@@ -73,7 +73,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_bigbang_OBJECTS = bigbang.$(OBJEXT) config.$(OBJEXT) \
+am_bigbang_OBJECTS = bigbang.$(OBJEXT) baseconfig.$(OBJEXT) \
 	getopt.$(OBJEXT) namegen.$(OBJEXT) parse.$(OBJEXT) \
 	planet.$(OBJEXT)
 bigbang_OBJECTS = $(am_bigbang_OBJECTS)
@@ -82,7 +82,7 @@ am_client_OBJECTS = client.$(OBJEXT) common.$(OBJEXT) parse.$(OBJEXT)
 client_OBJECTS = $(am_client_OBJECTS)
 client_LDADD = $(LDADD)
 am_server_OBJECTS = boxmuller.$(OBJEXT) common.$(OBJEXT) \
-	config.$(OBJEXT) hashtable.$(OBJEXT) maint.$(OBJEXT) \
+	baseconfig.$(OBJEXT) hashtable.$(OBJEXT) maint.$(OBJEXT) \
 	msgqueue.$(OBJEXT) parse.$(OBJEXT) planet.$(OBJEXT) \
 	player_interaction.$(OBJEXT) server.$(OBJEXT) \
 	serveractions.$(OBJEXT) shipinfo.$(OBJEXT) \
@@ -229,19 +229,19 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = \
-	config.data \
+	baseconfig.data \
 	planettypes.data \
 	shiptypes.data
 
 pkgdata_DATA = \
-	config.data \
+	baseconfig.data \
 	planettypes.data \
 	shiptypes.data
 
 bigbang_SOURCES = \
 	bigbang.c \
-	config.c \
-	config.h \
+	baseconfig.c \
+	baseconfig.h \
 	getopt.c \
 	getopt.h \
 	namegen.c \
@@ -265,8 +265,8 @@ server_SOURCES = \
 	boxmuller.h \
 	common.c \
 	common.h \
-	config.c \
-	config.h \
+	baseconfig.c \
+	baseconfig.h \
 	hashtable.c \
 	hashtable.h \
 	maint.c \
@@ -415,11 +415,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/baseconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bigbang.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boxmuller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hashtable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/maint.Po@am__quote@
