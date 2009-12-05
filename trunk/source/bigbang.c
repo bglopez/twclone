@@ -53,7 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <getopt.h>
 #endif
 
-#include "config.h"
+#include "baseconfig.h"
 #include "universe.h"
 
 /*  This is the max length of tunnels and dead ends. */

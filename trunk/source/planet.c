@@ -3,7 +3,7 @@
 #include <string.h>
 #include "planet.h"
 #include "parse.h"
-#include "config.h"
+#include "baseconfig.h"
 #include "universe.h"
 
 extern struct config *configdata;

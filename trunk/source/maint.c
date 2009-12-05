@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "shipinfo.h"
 #include "hashtable.h"
 #include "maint.h"
-#include "config.h"
+#include "baseconfig.h"
 #include "msgqueue.h"
 #include "common.h"
 #include "serveractions.h"
