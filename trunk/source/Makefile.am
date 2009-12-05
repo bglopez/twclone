@@ -20,12 +20,12 @@
 # http://www.gnu.org/copyleft/gpl.html
 
 EXTRA_DIST = \
-	config.data \
+	baseconfig.data \
 	planettypes.data \
 	shiptypes.data
 
 pkgdata_DATA = \
-	config.data \
+	baseconfig.data \
 	planettypes.data \
 	shiptypes.data
 
@@ -38,8 +38,8 @@ bin_PROGRAMS = \
 
 bigbang_SOURCES = \
 	bigbang.c \
-	config.c \
-	config.h \
+	baseconfig.c \
+	baseconfig.h \
 	getopt.c \
 	getopt.h \
 	namegen.c \
@@ -63,8 +63,8 @@ server_SOURCES = \
 	boxmuller.h \
 	common.c \
 	common.h \
-	config.c \
-	config.h \
+	baseconfig.c \
+	baseconfig.h \
 	hashtable.c \
 	hashtable.h \
 	maint.c \
