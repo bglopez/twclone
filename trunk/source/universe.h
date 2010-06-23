@@ -58,7 +58,7 @@ class Port : public Entity
 {
 public:
 	Port();
-	Port(char *filename);
+	virtual Port(char *filename);
 	virtual ~Port();
 private:
 	int maxproduct[3]; //0 for ore, 1 organics, 2 for equipment
@@ -246,14 +246,14 @@ struct sector
 	char *nebulae; /* I guess this stores the name, I dont know */
 	struct list *playerlist[2]; /* The list of players in the sector */
 	struct list *shiplist[2]; /*The list of unmanned ships in the sector */
-	struct Port *portptr; /* Pointer to ports in the sector */
+	Port *portptr; /* Pointer to ports in the sector */
 	struct list *planets; /* Pointer to list of planets in sector */
 };
 
 struct node
 {
 	int number;
-	struct Port *portptr;
+	Port *portptr;
 	int min;
 	int max;
 };
@@ -267,11 +267,17 @@ void init_portinfo(char *filename);
 void init_planetClassification(void);
 void init_nodes(int numsectors);
 
+/* Base Inheritable class for ships, ports, planets, and players.
+ *
+ */
 class Entity
 {
 public:
 	Entity();
+	virtual Entity(const char *filename);
 	virtual ~Entity();
+	char *GetName() {return name;}
+private:
 	int number;
 	int sector;
 	char *name;
