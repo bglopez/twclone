@@ -66,7 +66,7 @@ int GAMEON = 1;
 
 int main (int argc, char *argv[])
 {
-    int c;
+    int c, counter;
     int sockid, port, msgidin, msgidout, senderid;
     pthread_t threadid;
     struct connectinfo *threadinfo =
@@ -153,7 +153,12 @@ int main (int argc, char *argv[])
 
     printf ("Reading in port information from 'ports.data'...");
     fflush (stdout);
-    ports = new Port("./ports.data", configdata);
+    ports = new Port[configdata->max_ports];
+    for (counter=0; counter<configdata->max_ports; counter++)
+    {
+    	ports[counter] = Port("./ports.data");
+    	//TODO Point sector->portptr to ports
+    }
     printf (" Done!\n");
 
 	 printf("Configuring node information...");
